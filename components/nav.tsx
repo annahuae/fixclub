@@ -10,10 +10,12 @@ async function signOut() {
 
 export async function Nav({
   query,
-  showSearch = true
+  showSearch = true,
+  searchAction = '/masters'
 }: {
   query?: string;
   showSearch?: boolean;
+  searchAction?: string;
 }) {
   const user = await getSessionUser();
   return (
@@ -31,17 +33,42 @@ export async function Nav({
           </span>
         </Link>
 
+        <nav className="hidden md:flex items-center gap-1 text-sm">
+          <Link
+            href="/masters"
+            className="px-3 py-1.5 rounded-md text-ink-mid hover:text-ink hover:bg-surface-2"
+          >
+            Мастера
+          </Link>
+          <Link
+            href="/shops"
+            className="px-3 py-1.5 rounded-md text-ink-mid hover:text-ink hover:bg-surface-2"
+          >
+            Магазины
+          </Link>
+        </nav>
+
         {showSearch && (
-          <form action="/masters" className="flex-1 max-w-xl">
+          <form action={searchAction} className="flex-1 max-w-md">
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-mid">
-                🔍
-              </span>
+              <svg
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-dim pointer-events-none"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden
+              >
+                <circle cx="11" cy="11" r="7" />
+                <path d="m21 21-4.3-4.3" />
+              </svg>
               <input
                 type="search"
                 name="q"
                 defaultValue={query || ''}
-                placeholder="Поиск мастера или компании..."
+                placeholder="Поиск"
                 className="input pl-9"
               />
             </div>
@@ -49,12 +76,8 @@ export async function Nav({
         )}
 
         <div className="ml-auto flex items-center gap-3">
-          <div className="hidden md:flex items-center gap-1.5 text-sm text-ink-mid border border-border rounded-lg px-3 py-2 bg-surface">
-            <span>📍</span>
-            <span>Dubai, UAE</span>
-          </div>
           <Link href="/masters/new" className="btn-outline">
-            <span className="hidden sm:inline">Оставить отзыв</span>
+            <span className="hidden sm:inline">Добавить</span>
             <span className="sm:hidden">+</span>
           </Link>
           {user && (

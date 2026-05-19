@@ -2,9 +2,10 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { requireUser } from '@/lib/auth';
 import { sql } from '@/lib/db';
-import { specialtyLabel, formatDate } from '@/lib/utils';
+import { specialtyLabel, emirateLabel, formatDate } from '@/lib/utils';
 import { StarRating, StarInput } from '@/components/star-rating';
 import { Avatar } from '@/components/avatar';
+import { MapEmbed } from '@/components/map-embed';
 import { Nav } from '@/components/nav';
 import { addReview, deleteMaster } from '../actions';
 
@@ -12,8 +13,10 @@ type Master = {
   id: string;
   name: string;
   specialty: string;
+  emirate: string | null;
   area: string | null;
   phone: string | null;
+  maps_url: string | null;
   description: string | null;
   added_by: string | null;
   added_by_name: string | null;
@@ -91,6 +94,12 @@ export default async function MasterPage({
               <h1 className="text-3xl font-bold text-ink">{master.name}</h1>
               <div className="text-sm text-ink-mid mt-1">
                 {specialtyLabel(master.specialty)}
+                {master.emirate && (
+                  <>
+                    {' '}
+                    · <span>{emirateLabel(master.emirate)}</span>
+                  </>
+                )}
                 {master.area && (
                   <>
                     {' '}
@@ -149,6 +158,10 @@ export default async function MasterPage({
               )}
             </div>
           </div>
+
+          {master.maps_url && (
+            <MapEmbed value={master.maps_url} className="mt-5" />
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_280px] gap-6 mt-6">

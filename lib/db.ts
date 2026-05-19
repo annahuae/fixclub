@@ -122,8 +122,42 @@ export async function initSchema() {
   await sql`ALTER TABLE invite_codes ADD COLUMN IF NOT EXISTS usage_limit INTEGER NOT NULL DEFAULT 100`;
   await sql`ALTER TABLE invite_codes ADD COLUMN IF NOT EXISTS usage_count INTEGER NOT NULL DEFAULT 0`;
   await sql`ALTER TABLE invite_codes ALTER COLUMN usage_limit SET DEFAULT 100`;
-  // backfill: codes already used by someone count as 1 use
   await sql`UPDATE invite_codes SET usage_count = 1 WHERE used_by IS NOT NULL AND usage_count = 0`;
-  // bump legacy single-use codes (created with the old default of 1) up to 100 if not exhausted
   await sql`UPDATE invite_codes SET usage_limit = 100 WHERE usage_limit < 100 AND usage_count < usage_limit`;
+
+  // v5: emirate + maps url on masters; shops + shop_reviews
+  await sql`ALTER TABLE masters ADD COLUMN IF NOT EXISTS emirate TEXT`;
+  await sql`ALTER TABLE masters ADD COLUMN IF NOT EXISTS maps_url TEXT`;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS shops (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      name TEXT NOT NULL,
+      category TEXT NOT NULL,
+      emirate TEXT,
+      area TEXT,
+      address TEXT,
+      phone TEXT,
+      maps_url TEXT,
+      description TEXT,
+      added_by UUID REFERENCES users(id) ON DELETE SET NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS shop_reviews (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      shop_id UUID NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
+      user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+      rating INTEGER NOT NULL CHECK (rating BETWEEN 1 AND 5),
+      comment TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `;
+
+  await sql`CREATE INDEX IF NOT EXISTS idx_shops_category ON shops(category)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_shops_emirate ON shops(emirate)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_shop_reviews_shop ON shop_reviews(shop_id)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_masters_emirate ON masters(emirate)`;
 }

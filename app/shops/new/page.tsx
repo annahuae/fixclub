@@ -1,41 +1,41 @@
 import Link from 'next/link';
 import { requireUser } from '@/lib/auth';
-import { SPECIALTIES, EMIRATES } from '@/lib/utils';
+import { SHOP_CATEGORIES, EMIRATES } from '@/lib/utils';
 import { Nav } from '@/components/nav';
-import { addMaster } from '../actions';
+import { addShop } from '../actions';
 
-export default async function NewMasterPage() {
+export default async function NewShopPage() {
   await requireUser();
   return (
     <>
       <Nav />
       <main className="max-w-2xl mx-auto px-6 py-8">
-        <Link href="/masters" className="text-sm text-ink-mid hover:text-accent">
-          ← Каталог
+        <Link href="/shops" className="text-sm text-ink-mid hover:text-accent">
+          ← К магазинам
         </Link>
-        <h1 className="text-3xl font-bold mt-4 mb-1">Добавить мастера</h1>
+        <h1 className="text-3xl font-bold mt-4 mb-1">Добавить магазин</h1>
         <p className="text-ink-mid text-sm mb-6">
-          Только те, с кем сам работал или кого тебе лично рекомендовали.
+          Где сам покупал стройматериалы, инструменты, бытовуху.
         </p>
 
-        <form action={addMaster} className="card space-y-4">
+        <form action={addShop} className="card space-y-4">
           <div>
-            <label className="label">Имя / название</label>
+            <label className="label">Название</label>
             <input
               name="name"
               required
-              placeholder="Ahmed / SwiftFix Plumbing"
+              placeholder="ACE Hardware / Pan Emirates"
               className="input"
             />
           </div>
 
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <label className="label">Специальность</label>
-              <select name="specialty" required className="input">
-                {SPECIALTIES.map((s) => (
-                  <option key={s.value} value={s.value}>
-                    {s.label}
+              <label className="label">Категория</label>
+              <select name="category" required className="input">
+                {SHOP_CATEGORIES.map((c) => (
+                  <option key={c.value} value={c.value}>
+                    {c.label}
                   </option>
                 ))}
               </select>
@@ -58,7 +58,7 @@ export default async function NewMasterPage() {
               <label className="label">Район</label>
               <input
                 name="area"
-                placeholder="Marina / JLT / Industrial 5"
+                placeholder="Industrial 5 / Naif / Al Quoz"
                 className="input"
               />
             </div>
@@ -66,29 +66,36 @@ export default async function NewMasterPage() {
               <label className="label">Телефон</label>
               <input
                 name="phone"
-                placeholder="+971 50 ..."
+                placeholder="+971 4 ..."
                 className="input font-mono"
               />
             </div>
           </div>
 
           <div>
-            <label className="label">
-              Ссылка на Google Maps (необязательно)
-            </label>
+            <label className="label">Адрес</label>
             <input
-              name="maps_url"
-              placeholder="https://maps.app.goo.gl/... или адрес"
+              name="address"
+              placeholder="Например: Shop 12, Al Mulla Plaza, Naif Rd, Deira"
               className="input"
             />
           </div>
 
           <div>
-            <label className="label">Описание / контекст</label>
+            <label className="label">Ссылка на Google Maps</label>
+            <input
+              name="maps_url"
+              placeholder="https://maps.app.goo.gl/..."
+              className="input"
+            />
+          </div>
+
+          <div>
+            <label className="label">Описание</label>
             <textarea
               name="description"
               rows={4}
-              placeholder="Что делает, в каких задачах хорош, есть ли язык, цены, нюансы"
+              placeholder="Что есть, цены, время работы, нюансы"
               className="input resize-none"
             />
           </div>
@@ -97,7 +104,7 @@ export default async function NewMasterPage() {
             <button type="submit" className="btn-primary">
               Сохранить
             </button>
-            <Link href="/masters" className="btn-ghost">
+            <Link href="/shops" className="btn-ghost">
               Отмена
             </Link>
           </div>

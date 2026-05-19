@@ -1,7 +1,13 @@
 import Link from 'next/link';
 import { requireUser } from '@/lib/auth';
 import { sql } from '@/lib/db';
-import { SPECIALTIES, specialtyLabel, formatDate } from '@/lib/utils';
+import {
+  SPECIALTIES,
+  EMIRATES,
+  specialtyLabel,
+  emirateLabel,
+  formatDate
+} from '@/lib/utils';
 import { StarRating } from '@/components/star-rating';
 import { Avatar } from '@/components/avatar';
 import { Nav } from '@/components/nav';
@@ -43,6 +49,7 @@ export default async function MastersPage({
 }: {
   searchParams: Promise<{
     specialty?: string;
+    emirate?: string;
     q?: string;
     sort?: string;
     rating?: string;
@@ -51,6 +58,7 @@ export default async function MastersPage({
   await requireUser();
   const params = await searchParams;
   const specialty = params.specialty || null;
+  const emirate = params.emirate || null;
   const q = params.q?.trim() || null;
   const minRating = params.rating ? parseFloat(params.rating) : null;
   const sort = (params.sort as (typeof SORTS)[number]['value']) || 'reviewed';
@@ -66,6 +74,7 @@ export default async function MastersPage({
     LEFT JOIN reviews r ON r.master_id = m.id
     WHERE
       (${specialty}::text IS NULL OR m.specialty = ${specialty})
+      AND (${emirate}::text IS NULL OR m.emirate = ${emirate})
       AND (${q}::text IS NULL OR m.name ILIKE ${'%' + (q || '') + '%'} OR m.area ILIKE ${'%' + (q || '') + '%'})
     GROUP BY m.id
     HAVING (${minRating}::numeric IS NULL OR AVG(r.rating) >= ${minRating})
@@ -152,6 +161,7 @@ export default async function MastersPage({
     const sp = new URLSearchParams();
     const merged: Record<string, string | null> = {
       specialty,
+      emirate,
       q,
       sort,
       rating: minRating ? String(minRating) : null,
@@ -187,6 +197,22 @@ export default async function MastersPage({
               ))}
             </FiltersBlock>
 
+            <FiltersBlock title="Эмират">
+              <FilterLink
+                active={!emirate}
+                href={buildHref({ emirate: null })}
+                label="Все"
+              />
+              {EMIRATES.map((e) => (
+                <FilterLink
+                  key={e.value}
+                  active={emirate === e.value}
+                  href={buildHref({ emirate: e.value })}
+                  label={e.label}
+                />
+              ))}
+            </FiltersBlock>
+
             <FiltersBlock title="Рейтинг">
               {RATING_FILTERS.map((r) => (
                 <FilterLink
@@ -213,7 +239,11 @@ export default async function MastersPage({
                   в{' '}
                 </span>
                 <span className="font-semibold text-accent">
-                  {specialty ? specialtyLabel(specialty) : 'Dubai'}
+                  {emirate
+                    ? emirateLabel(emirate)
+                    : specialty
+                      ? specialtyLabel(specialty)
+                      : 'UAE'}
                 </span>
               </h1>
             </div>
