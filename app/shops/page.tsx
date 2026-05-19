@@ -58,22 +58,46 @@ export default async function ShopsPage({
   const minRating = params.rating ? parseFloat(params.rating) : null;
   const sort = (params.sort as (typeof SORTS)[number]['value']) || 'reviewed';
 
-  const unsorted = (await sql`
-    SELECT
-      s.id, s.name, s.category, s.emirate, s.area, s.phone,
-      AVG(r.rating)::numeric(10,2) AS avg_rating,
-      COUNT(r.id) AS review_count,
-      MAX(r.created_at) AS last_review_at,
-      s.created_at AS shop_created_at
-    FROM shops s
-    LEFT JOIN shop_reviews r ON r.shop_id = s.id
-    WHERE
-      (${category}::text IS NULL OR s.category = ${category})
-      AND (${emirate}::text IS NULL OR s.emirate = ${emirate})
-      AND (${q}::text IS NULL OR s.name ILIKE ${'%' + (q || '') + '%'} OR s.area ILIKE ${'%' + (q || '') + '%'} OR s.address ILIKE ${'%' + (q || '') + '%'})
-    GROUP BY s.id
-    HAVING (${minRating}::numeric IS NULL OR AVG(r.rating) >= ${minRating})
-  `) as unknown as ShopRow[];
+  const likeQ = '%' + (q || '') + '%';
+
+  const [unsortedRaw, previewsRaw] = await Promise.all([
+    sql`
+      SELECT
+        s.id, s.name, s.category, s.emirate, s.area, s.phone,
+        AVG(r.rating)::numeric(10,2) AS avg_rating,
+        COUNT(r.id) AS review_count,
+        MAX(r.created_at) AS last_review_at,
+        s.created_at AS shop_created_at
+      FROM shops s
+      LEFT JOIN shop_reviews r ON r.shop_id = s.id
+      WHERE
+        (${category}::text IS NULL OR s.category = ${category})
+        AND (${emirate}::text IS NULL OR s.emirate = ${emirate})
+        AND (${q}::text IS NULL OR s.name ILIKE ${likeQ} OR s.area ILIKE ${likeQ} OR s.address ILIKE ${likeQ})
+      GROUP BY s.id
+      HAVING (${minRating}::numeric IS NULL OR AVG(r.rating) >= ${minRating})
+    `,
+    sql`
+      SELECT shop_id, rating, comment, created_at, user_name
+      FROM (
+        SELECT
+          r.shop_id, r.rating, r.comment, r.created_at, u.name AS user_name,
+          ROW_NUMBER() OVER (PARTITION BY r.shop_id ORDER BY r.created_at DESC) AS rn
+        FROM shop_reviews r
+        LEFT JOIN users u ON u.id = r.user_id
+        WHERE r.shop_id IN (
+          SELECT id FROM shops
+          WHERE
+            (${category}::text IS NULL OR category = ${category})
+            AND (${emirate}::text IS NULL OR emirate = ${emirate})
+            AND (${q}::text IS NULL OR name ILIKE ${likeQ} OR area ILIKE ${likeQ} OR address ILIKE ${likeQ})
+        )
+      ) t
+      WHERE rn <= 2
+    `
+  ]);
+
+  const unsorted = unsortedRaw as unknown as ShopRow[];
 
   const rows = [...unsorted].sort((a, b) => {
     if (sort === 'rated') {
@@ -99,21 +123,7 @@ export default async function ShopsPage({
     return br - ar;
   });
 
-  const shopIds = rows.map((s) => s.id);
-  const previews = (shopIds.length === 0
-    ? []
-    : ((await sql`
-        SELECT shop_id, rating, comment, created_at, user_name
-        FROM (
-          SELECT
-            r.shop_id, r.rating, r.comment, r.created_at, u.name AS user_name,
-            ROW_NUMBER() OVER (PARTITION BY r.shop_id ORDER BY r.created_at DESC) AS rn
-          FROM shop_reviews r
-          LEFT JOIN users u ON u.id = r.user_id
-          WHERE r.shop_id = ANY(${shopIds})
-        ) t
-        WHERE rn <= 2
-      `) as unknown as ReviewPreview[])) as ReviewPreview[];
+  const previews = previewsRaw as unknown as ReviewPreview[];
 
   const previewsByShop = new Map<string, ReviewPreview[]>();
   for (const p of previews) {

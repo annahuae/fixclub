@@ -43,24 +43,27 @@ export default async function ShopPage({
   const user = await requireUser();
   const { id } = await params;
 
-  const shopRows = (await sql`
-    SELECT s.*, u.name AS added_by_name
-    FROM shops s
-    LEFT JOIN users u ON u.id = s.added_by
-    WHERE s.id = ${id}
-    LIMIT 1
-  `) as unknown as Shop[];
+  const [shopRowsRaw, reviewRowsRaw] = await Promise.all([
+    sql`
+      SELECT s.*, u.name AS added_by_name
+      FROM shops s
+      LEFT JOIN users u ON u.id = s.added_by
+      WHERE s.id = ${id}
+      LIMIT 1
+    `,
+    sql`
+      SELECT r.id, r.rating, r.comment, r.created_at, r.user_id, u.name AS user_name
+      FROM shop_reviews r
+      LEFT JOIN users u ON u.id = r.user_id
+      WHERE r.shop_id = ${id}
+      ORDER BY r.created_at DESC
+    `
+  ]);
 
+  const shopRows = shopRowsRaw as unknown as Shop[];
   if (shopRows.length === 0) notFound();
   const shop = shopRows[0];
-
-  const reviewRows = (await sql`
-    SELECT r.id, r.rating, r.comment, r.created_at, r.user_id, u.name AS user_name
-    FROM shop_reviews r
-    LEFT JOIN users u ON u.id = r.user_id
-    WHERE r.shop_id = ${id}
-    ORDER BY r.created_at DESC
-  `) as unknown as Review[];
+  const reviewRows = reviewRowsRaw as unknown as Review[];
 
   const avg =
     reviewRows.length > 0

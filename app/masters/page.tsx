@@ -53,21 +53,45 @@ export default async function MastersPage({
   const q = params.q?.trim() || null;
   const sort = (params.sort as (typeof SORTS)[number]['value']) || 'reviewed';
 
-  const rowsUnsorted = (await sql`
-    SELECT
-      m.id, m.name, m.specialty, m.area, m.phone,
-      AVG(r.rating)::numeric(10,2) AS avg_rating,
-      COUNT(r.id) AS review_count,
-      MAX(r.created_at) AS last_review_at,
-      m.created_at AS master_created_at
-    FROM masters m
-    LEFT JOIN reviews r ON r.master_id = m.id
-    WHERE
-      (${specialty}::text IS NULL OR m.specialty = ${specialty})
-      AND (${emirate}::text IS NULL OR m.emirate = ${emirate})
-      AND (${q}::text IS NULL OR m.name ILIKE ${'%' + (q || '') + '%'} OR m.area ILIKE ${'%' + (q || '') + '%'})
-    GROUP BY m.id
-  `) as unknown as (MasterRow & {
+  const likeQ = '%' + (q || '') + '%';
+
+  const [rowsUnsortedRaw, previewsRaw] = await Promise.all([
+    sql`
+      SELECT
+        m.id, m.name, m.specialty, m.area, m.phone,
+        AVG(r.rating)::numeric(10,2) AS avg_rating,
+        COUNT(r.id) AS review_count,
+        MAX(r.created_at) AS last_review_at,
+        m.created_at AS master_created_at
+      FROM masters m
+      LEFT JOIN reviews r ON r.master_id = m.id
+      WHERE
+        (${specialty}::text IS NULL OR m.specialty = ${specialty})
+        AND (${emirate}::text IS NULL OR m.emirate = ${emirate})
+        AND (${q}::text IS NULL OR m.name ILIKE ${likeQ} OR m.area ILIKE ${likeQ})
+      GROUP BY m.id
+    `,
+    sql`
+      SELECT master_id, rating, comment, created_at, user_name
+      FROM (
+        SELECT
+          r.master_id, r.rating, r.comment, r.created_at, u.name AS user_name,
+          ROW_NUMBER() OVER (PARTITION BY r.master_id ORDER BY r.created_at DESC) AS rn
+        FROM reviews r
+        LEFT JOIN users u ON u.id = r.user_id
+        WHERE r.master_id IN (
+          SELECT id FROM masters
+          WHERE
+            (${specialty}::text IS NULL OR specialty = ${specialty})
+            AND (${emirate}::text IS NULL OR emirate = ${emirate})
+            AND (${q}::text IS NULL OR name ILIKE ${likeQ} OR area ILIKE ${likeQ})
+        )
+      ) t
+      WHERE rn <= 2
+    `
+  ]);
+
+  const rowsUnsorted = rowsUnsortedRaw as unknown as (MasterRow & {
     last_review_at: string | null;
     master_created_at: string;
   })[];
@@ -96,21 +120,7 @@ export default async function MastersPage({
     return br - ar;
   });
 
-  const masterIds = rows.map((m) => m.id);
-  const previews = (masterIds.length === 0
-    ? []
-    : ((await sql`
-        SELECT master_id, rating, comment, created_at, user_name
-        FROM (
-          SELECT
-            r.master_id, r.rating, r.comment, r.created_at, u.name AS user_name,
-            ROW_NUMBER() OVER (PARTITION BY r.master_id ORDER BY r.created_at DESC) AS rn
-          FROM reviews r
-          LEFT JOIN users u ON u.id = r.user_id
-          WHERE r.master_id = ANY(${masterIds})
-        ) t
-        WHERE rn <= 2
-      `) as unknown as ReviewPreview[])) as ReviewPreview[];
+  const previews = previewsRaw as unknown as ReviewPreview[];
 
   const previewsByMaster = new Map<string, ReviewPreview[]>();
   for (const p of previews) {

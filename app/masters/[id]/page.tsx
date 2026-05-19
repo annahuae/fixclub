@@ -42,24 +42,27 @@ export default async function MasterPage({
   const user = await requireUser();
   const { id } = await params;
 
-  const masterRows = (await sql`
-    SELECT m.*, u.name AS added_by_name
-    FROM masters m
-    LEFT JOIN users u ON u.id = m.added_by
-    WHERE m.id = ${id}
-    LIMIT 1
-  `) as unknown as Master[];
+  const [masterRowsRaw, reviewRowsRaw] = await Promise.all([
+    sql`
+      SELECT m.*, u.name AS added_by_name
+      FROM masters m
+      LEFT JOIN users u ON u.id = m.added_by
+      WHERE m.id = ${id}
+      LIMIT 1
+    `,
+    sql`
+      SELECT r.id, r.rating, r.comment, r.created_at, r.user_id, u.name AS user_name
+      FROM reviews r
+      LEFT JOIN users u ON u.id = r.user_id
+      WHERE r.master_id = ${id}
+      ORDER BY r.created_at DESC
+    `
+  ]);
 
+  const masterRows = masterRowsRaw as unknown as Master[];
   if (masterRows.length === 0) notFound();
   const master = masterRows[0];
-
-  const reviewRows = (await sql`
-    SELECT r.id, r.rating, r.comment, r.created_at, r.user_id, u.name AS user_name
-    FROM reviews r
-    LEFT JOIN users u ON u.id = r.user_id
-    WHERE r.master_id = ${id}
-    ORDER BY r.created_at DESC
-  `) as unknown as Review[];
+  const reviewRows = reviewRowsRaw as unknown as Review[];
 
   const avg =
     reviewRows.length > 0
