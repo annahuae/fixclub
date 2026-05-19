@@ -80,7 +80,7 @@ export default async function ShopPage({
 
         <div className="panel mt-4 p-6">
           <div className="flex items-start gap-5">
-            <Avatar name={shop.name} seed={shop.id} size="lg" />
+            <Avatar name={shop.name} seed={shop.id} size="lg" fallback="shop" />
             <div className="flex-1 min-w-0">
               <h1 className="text-3xl font-bold text-ink">{shop.name}</h1>
               <div className="text-sm text-ink-mid mt-1">

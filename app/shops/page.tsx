@@ -262,7 +262,7 @@ export default async function ShopsPage({
                       className="card block transition hover:border-accent/50 hover:shadow-lg"
                     >
                       <div className="flex gap-5">
-                        <Avatar name={shop.name} seed={shop.id} size="lg" />
+                        <Avatar name={shop.name} seed={shop.id} size="lg" fallback="shop" />
                         <div className="min-w-0 flex-1">
                           <h2 className="text-xl font-semibold tracking-tight">
                             {shop.name}

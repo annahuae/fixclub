@@ -33,7 +33,7 @@ export function Avatar({
   size?: keyof typeof SIZES;
   seed?: string;
   photoUrl?: string | null;
-  fallback?: 'initial' | 'master';
+  fallback?: 'initial' | 'master' | 'shop';
 }) {
   const { cls, px } = SIZES[size];
 
@@ -49,10 +49,11 @@ export function Avatar({
     );
   }
 
-  if (fallback === 'master') {
+  if (fallback === 'master' || fallback === 'shop') {
+    const src = fallback === 'shop' ? '/shop-default.png' : '/master-default.png';
     return (
       <Image
-        src="/master-default.png"
+        src={src}
         alt={name}
         width={px}
         height={px}
