@@ -80,7 +80,7 @@ export async function setAdminCookie() {
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     expires: expiresAt,
-    path: '/admin'
+    path: '/'
   });
 }
 
