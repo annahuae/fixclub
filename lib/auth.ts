@@ -10,7 +10,7 @@ const SESSION_DAYS = 60;
 export type SessionUser = {
   userId: string;
   name: string;
-  contact: string;
+  email: string;
 };
 
 export async function createSession(userId: string): Promise<string> {
@@ -41,18 +41,18 @@ export async function getSessionUser(): Promise<SessionUser | null> {
   if (!sessionId) return null;
 
   const rows = (await sql`
-    SELECT s.user_id, u.name, u.contact, s.expires_at
+    SELECT s.user_id, u.name, u.email, s.expires_at
     FROM sessions s
     JOIN users u ON u.id = s.user_id
     WHERE s.id = ${sessionId} AND s.expires_at > NOW()
     LIMIT 1
-  `) as { user_id: string; name: string; contact: string }[];
+  `) as { user_id: string; name: string; email: string }[];
 
   if (rows.length === 0) return null;
   return {
     userId: rows[0].user_id,
     name: rows[0].name,
-    contact: rows[0].contact
+    email: rows[0].email
   };
 }
 

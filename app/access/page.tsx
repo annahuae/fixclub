@@ -53,7 +53,7 @@ export default async function AccessPage({
         <p className="text-ink-mid text-sm mb-6">
           {mode === 'invite' &&
             'Есть код — введи, придумай пароль, и ты внутри.'}
-          {mode === 'login' && 'Введи свой контакт и пароль.'}
+          {mode === 'login' && 'Введи email и пароль.'}
           {mode === 'request' && 'Заявка попадёт админу.'}
         </p>
 
@@ -85,12 +85,14 @@ export default async function AccessPage({
               />
             </div>
             <div>
-              <label className="label">Контакт</label>
+              <label className="label">Email</label>
               <input
-                name="contact"
+                name="email"
+                type="email"
                 required
-                placeholder="Telegram / WhatsApp / email"
+                placeholder="you@example.com"
                 className="input"
+                autoComplete="email"
               />
             </div>
             <PasswordField hint="Это для повторного входа. Сохрани в менеджере паролей." />
@@ -103,13 +105,14 @@ export default async function AccessPage({
         {mode === 'login' && (
           <form action={submitLogin} className="space-y-4">
             <div>
-              <label className="label">Контакт</label>
+              <label className="label">Email</label>
               <input
-                name="contact"
+                name="email"
                 required
-                placeholder="Тот же, что при регистрации"
+                placeholder="you@example.com"
                 className="input"
-                autoComplete="username"
+                autoComplete="email"
+                type="email"
               />
             </div>
             <div>
@@ -148,12 +151,14 @@ export default async function AccessPage({
               />
             </div>
             <div>
-              <label className="label">Контакт</label>
+              <label className="label">Email</label>
               <input
-                name="contact"
+                name="email"
+                type="email"
                 required
-                placeholder="Telegram / WhatsApp / email"
+                placeholder="you@example.com"
                 className="input"
+                autoComplete="email"
               />
             </div>
             <div>

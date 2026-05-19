@@ -80,7 +80,7 @@ export default async function HomePage() {
                   </span>
                 </div>
                 <p className="text-sm text-ink-mid mt-0.5">
-                  Войти по контакту и паролю
+                  Войти по email и паролю
                 </p>
               </div>
             </div>

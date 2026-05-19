@@ -16,7 +16,7 @@ import {
 type RequestRow = {
   id: string;
   name: string;
-  contact: string;
+  email: string;
   reason: string | null;
   status: string;
   created_at: string;
@@ -34,7 +34,7 @@ type InviteRow = {
 type UserRow = {
   id: string;
   name: string;
-  contact: string;
+  email: string;
   created_at: string;
   master_count: string;
   review_count: string;
@@ -106,7 +106,7 @@ export default async function AdminPage({
     ` as unknown as Promise<InviteRow[]>,
     sql`
       SELECT
-        u.id, u.name, u.contact, u.created_at,
+        u.id, u.name, u.email, u.created_at,
         COUNT(DISTINCT m.id) AS master_count,
         COUNT(DISTINCT r.id) AS review_count
       FROM users u
@@ -160,7 +160,7 @@ export default async function AdminPage({
                       <div>
                         <span className="font-bold tracking-tight text-2xl">{r.name}</span>
                         <span className="ml-3 font-mono text-sm text-ink-mid">
-                          {r.contact}
+                          {r.email}
                         </span>
                       </div>
                       <span className="text-xs text-ink-mid font-mono">
@@ -200,7 +200,7 @@ export default async function AdminPage({
                     >
                       <span>
                         <span className="text-ink">{r.name}</span>
-                        <span className="text-ink-mid ml-2">{r.contact}</span>
+                        <span className="text-ink-mid ml-2">{r.email}</span>
                       </span>
                       <span
                         className={
@@ -289,7 +289,7 @@ export default async function AdminPage({
                     <div className="flex-1 min-w-0">
                       <div className="font-bold tracking-tight text-xl">{u.name}</div>
                       <div className="text-xs text-ink-mid font-mono">
-                        {u.contact}
+                        {u.email}
                       </div>
                       <div className="text-xs text-ink-mid mt-1">
                         {u.master_count} мастеров · {u.review_count} отзывов ·{' '}

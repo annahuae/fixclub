@@ -20,7 +20,7 @@ export async function initSchema() {
     CREATE TABLE IF NOT EXISTS users (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
       name TEXT NOT NULL,
-      contact TEXT NOT NULL,
+      email TEXT NOT NULL,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
   `;
@@ -29,12 +29,37 @@ export async function initSchema() {
     CREATE TABLE IF NOT EXISTS access_requests (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
       name TEXT NOT NULL,
-      contact TEXT NOT NULL,
+      email TEXT NOT NULL,
       reason TEXT,
       status TEXT NOT NULL DEFAULT 'pending',
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       reviewed_at TIMESTAMPTZ
     )
+  `;
+
+  // Migration: rename contact -> email if old schema exists
+  await sql`
+    DO $$
+    BEGIN
+      IF EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name='users' AND column_name='contact'
+      ) AND NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name='users' AND column_name='email'
+      ) THEN
+        ALTER TABLE users RENAME COLUMN contact TO email;
+      END IF;
+      IF EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name='access_requests' AND column_name='contact'
+      ) AND NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name='access_requests' AND column_name='email'
+      ) THEN
+        ALTER TABLE access_requests RENAME COLUMN contact TO email;
+      END IF;
+    END$$;
   `;
 
   await sql`
@@ -87,5 +112,6 @@ export async function initSchema() {
 
   // v2: passwords for re-login
   await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash TEXT`;
-  await sql`CREATE INDEX IF NOT EXISTS idx_users_contact ON users(LOWER(contact))`;
+  await sql`DROP INDEX IF EXISTS idx_users_contact`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_users_email ON users(LOWER(email))`;
 }
