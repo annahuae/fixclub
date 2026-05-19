@@ -8,7 +8,7 @@ export const SPECIALTY_GROUPS = [
       { value: 'handyman', label: 'Handyman' },
       { value: 'painter', label: 'Painting' },
       { value: 'carpenter', label: 'Carpenter' },
-      { value: 'tiler', label: 'Tiler' },
+      { value: 'tiler', label: 'Marble & tile works' },
       { value: 'locksmith', label: 'Locks / doors' },
       { value: 'windows', label: 'Windows / glass' }
     ]
