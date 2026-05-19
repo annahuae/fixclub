@@ -9,20 +9,20 @@ export function StarRating({
 }) {
   const sizes = {
     sm: 'text-xs',
-    md: 'text-base',
+    md: 'text-sm',
     lg: 'text-2xl'
   };
   const full = Math.round(rating);
   return (
     <span className={`inline-flex items-center gap-1.5 ${sizes[size]}`}>
-      <span className="text-accent tracking-tight">
+      <span className="tracking-tight" style={{ color: 'var(--star)' }}>
         {'★'.repeat(full)}
-        <span className="text-border">{'★'.repeat(5 - full)}</span>
+        <span style={{ color: 'var(--border-strong)' }}>
+          {'★'.repeat(5 - full)}
+        </span>
       </span>
       {showNumber && (
-        <span className="text-ink-dim font-mono text-xs">
-          {rating.toFixed(1)}
-        </span>
+        <span className="text-ink font-semibold">{rating.toFixed(1)}</span>
       )}
     </span>
   );
@@ -34,7 +34,8 @@ export function StarInput({ name = 'rating' }: { name?: string }) {
       {[1, 2, 3, 4, 5].map((n) => (
         <label
           key={n}
-          className="cursor-pointer text-border has-[input:checked]:text-accent peer-has-[input:checked]:text-accent hover:text-accent transition-colors"
+          className="cursor-pointer transition-colors"
+          style={{ color: 'var(--border-strong)' }}
         >
           <input
             type="radio"
@@ -44,7 +45,9 @@ export function StarInput({ name = 'rating' }: { name?: string }) {
             required={n === 1}
             defaultChecked={n === 5}
           />
-          ★
+          <span className="peer-checked:!text-[color:var(--star)] hover:!text-[color:var(--star)]">
+            ★
+          </span>
         </label>
       ))}
     </div>

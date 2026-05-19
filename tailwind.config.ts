@@ -12,17 +12,20 @@ const config: Config = {
         surface: 'var(--surface)',
         'surface-2': 'var(--surface-2)',
         border: 'var(--border)',
+        'border-strong': 'var(--border-strong)',
         ink: 'var(--ink)',
+        'ink-mid': 'var(--ink-mid)',
         'ink-dim': 'var(--ink-dim)',
         accent: 'var(--accent)',
-        'accent-dim': 'var(--accent-dim)',
+        'accent-soft': 'var(--accent-soft)',
+        'accent-strong': 'var(--accent-strong)',
+        star: 'var(--star)',
         danger: 'var(--danger)',
         success: 'var(--success)'
       },
       fontFamily: {
-        display: ['"Instrument Serif"', 'serif'],
-        sans: ['"Geist"', 'system-ui', 'sans-serif'],
-        mono: ['"Geist Mono"', 'ui-monospace', 'monospace']
+        sans: ['"Inter"', 'system-ui', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace']
       }
     }
   },

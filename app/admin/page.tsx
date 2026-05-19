@@ -54,14 +54,14 @@ export default async function AdminPage({
         <div className="max-w-sm w-full">
           <Link
             href="/"
-            className="text-xs uppercase tracking-widest text-ink-dim hover:text-accent"
+            className="text-xs uppercase tracking-widest text-ink-mid hover:text-accent"
           >
             ← На главную
           </Link>
-          <h1 className="font-display text-5xl mt-4 mb-2">
-            Админ <span className="italic text-accent">вход</span>
+          <h1 className="font-bold tracking-tight text-5xl mt-4 mb-2">
+            Админ <span className="text-accent">вход</span>
           </h1>
-          <p className="text-ink-dim text-sm mb-8">
+          <p className="text-ink-mid text-sm mb-8">
             Только для того, кто крутит этим всем.
           </p>
           {params.error && (
@@ -122,15 +122,15 @@ export default async function AdminPage({
       <header className="border-b border-border">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-baseline gap-3">
-            <Link href="/" className="font-display text-2xl">
-              Fix<span className="italic text-accent">club</span>
+            <Link href="/" className="font-bold tracking-tight text-2xl">
+              Fix<span className="text-accent">club</span>
             </Link>
             <span className="chip-accent">Admin</span>
           </div>
           <form action={adminLogout}>
             <button
               type="submit"
-              className="text-xs text-ink-dim hover:text-danger uppercase tracking-widest"
+              className="text-xs text-ink-mid hover:text-danger uppercase tracking-widest"
             >
               Выйти
             </button>
@@ -147,28 +147,28 @@ export default async function AdminPage({
 
         {tab === 'requests' && (
           <section>
-            <h2 className="font-display text-4xl mb-6">
-              Запросы на <span className="italic text-accent">доступ</span>
+            <h2 className="font-bold tracking-tight text-4xl mb-6">
+              Запросы на <span className="text-accent">доступ</span>
             </h2>
             {pendingRows.length === 0 ? (
-              <div className="card text-ink-dim text-sm">Нет ожидающих заявок.</div>
+              <div className="card text-ink-mid text-sm">Нет ожидающих заявок.</div>
             ) : (
               <div className="space-y-3 mb-12">
                 {pendingRows.map((r) => (
                   <div key={r.id} className="card">
                     <div className="flex items-baseline justify-between mb-2">
                       <div>
-                        <span className="font-display text-2xl">{r.name}</span>
-                        <span className="ml-3 font-mono text-sm text-ink-dim">
+                        <span className="font-bold tracking-tight text-2xl">{r.name}</span>
+                        <span className="ml-3 font-mono text-sm text-ink-mid">
                           {r.contact}
                         </span>
                       </div>
-                      <span className="text-xs text-ink-dim font-mono">
+                      <span className="text-xs text-ink-mid font-mono">
                         {formatDate(r.created_at)}
                       </span>
                     </div>
                     {r.reason && (
-                      <p className="text-sm text-ink-dim mb-4 whitespace-pre-wrap">
+                      <p className="text-sm text-ink-mid mb-4 whitespace-pre-wrap">
                         {r.reason}
                       </p>
                     )}
@@ -200,7 +200,7 @@ export default async function AdminPage({
                     >
                       <span>
                         <span className="text-ink">{r.name}</span>
-                        <span className="text-ink-dim ml-2">{r.contact}</span>
+                        <span className="text-ink-mid ml-2">{r.contact}</span>
                       </span>
                       <span
                         className={
@@ -222,8 +222,8 @@ export default async function AdminPage({
         {tab === 'invites' && (
           <section>
             <div className="flex items-baseline justify-between mb-6">
-              <h2 className="font-display text-4xl">
-                Инвайт-<span className="italic text-accent">коды</span>
+              <h2 className="font-bold tracking-tight text-4xl">
+                Инвайт-<span className="text-accent">коды</span>
               </h2>
               <form action={generateInvite} className="flex gap-2">
                 <input
@@ -235,7 +235,7 @@ export default async function AdminPage({
               </form>
             </div>
             {inviteRows.length === 0 ? (
-              <div className="card text-ink-dim text-sm">
+              <div className="card text-ink-mid text-sm">
                 Пока нет кодов. Сгенерируй первый.
               </div>
             ) : (
@@ -249,7 +249,7 @@ export default async function AdminPage({
                       <div className="font-mono text-lg tracking-wider">
                         {i.code}
                       </div>
-                      <div className="text-xs text-ink-dim mt-1">
+                      <div className="text-xs text-ink-mid mt-1">
                         {i.note && <span>«{i.note}» · </span>}
                         {formatDate(i.created_at)}
                         {i.used_by_name && (
@@ -274,11 +274,11 @@ export default async function AdminPage({
 
         {tab === 'users' && (
           <section>
-            <h2 className="font-display text-4xl mb-6">
-              Участники <span className="italic text-accent">круга</span>
+            <h2 className="font-bold tracking-tight text-4xl mb-6">
+              Участники <span className="text-accent">круга</span>
             </h2>
             {userRows.length === 0 ? (
-              <div className="card text-ink-dim text-sm">Пока никого.</div>
+              <div className="card text-ink-mid text-sm">Пока никого.</div>
             ) : (
               <div className="space-y-2">
                 {userRows.map((u) => (
@@ -287,11 +287,11 @@ export default async function AdminPage({
                     className="card flex items-center justify-between gap-4"
                   >
                     <div className="flex-1 min-w-0">
-                      <div className="font-display text-xl">{u.name}</div>
-                      <div className="text-xs text-ink-dim font-mono">
+                      <div className="font-bold tracking-tight text-xl">{u.name}</div>
+                      <div className="text-xs text-ink-mid font-mono">
                         {u.contact}
                       </div>
-                      <div className="text-xs text-ink-dim mt-1">
+                      <div className="text-xs text-ink-mid mt-1">
                         {u.master_count} мастеров · {u.review_count} отзывов ·{' '}
                         {formatDate(u.created_at)}
                       </div>
@@ -327,7 +327,7 @@ function TabLink({
       className={`px-4 py-2 text-sm border-b-2 -mb-px transition-colors ${
         active
           ? 'border-accent text-accent'
-          : 'border-transparent text-ink-dim hover:text-ink'
+          : 'border-transparent text-ink-mid hover:text-ink'
       }`}
     >
       {label}

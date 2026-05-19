@@ -12,14 +12,14 @@ export default async function NewMasterPage() {
       <main className="max-w-2xl mx-auto px-6 py-10">
         <Link
           href="/masters"
-          className="text-xs uppercase tracking-widest text-ink-dim hover:text-accent"
+          className="text-xs uppercase tracking-widest text-ink-mid hover:text-accent"
         >
           ← Каталог
         </Link>
-        <h1 className="font-display text-5xl mt-4 mb-2">
-          Новый <span className="italic text-accent">мастер</span>
+        <h1 className="font-bold tracking-tight text-5xl mt-4 mb-2">
+          Новый <span className="text-accent">мастер</span>
         </h1>
-        <p className="text-ink-dim text-sm mb-8">
+        <p className="text-ink-mid text-sm mb-8">
           Добавляй только тех, с кем сам работал или кого тебе рекомендовали
           лично.
         </p>

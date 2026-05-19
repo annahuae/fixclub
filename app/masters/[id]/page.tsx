@@ -4,6 +4,7 @@ import { requireUser } from '@/lib/auth';
 import { sql } from '@/lib/db';
 import { specialtyLabel, formatDate } from '@/lib/utils';
 import { StarRating, StarInput } from '@/components/star-rating';
+import { Avatar } from '@/components/avatar';
 import { Nav } from '@/components/nav';
 import { addReview, deleteMaster } from '../actions';
 
@@ -42,7 +43,7 @@ export default async function MasterPage({
     LEFT JOIN users u ON u.id = m.added_by
     WHERE m.id = ${id}
     LIMIT 1
-  `) as Master[];
+  `) as unknown as Master[];
 
   if (masterRows.length === 0) notFound();
   const master = masterRows[0];
@@ -53,7 +54,7 @@ export default async function MasterPage({
     LEFT JOIN users u ON u.id = r.user_id
     WHERE r.master_id = ${id}
     ORDER BY r.created_at DESC
-  `) as Review[];
+  `) as unknown as Review[];
 
   const avg =
     reviewRows.length > 0
@@ -63,142 +64,214 @@ export default async function MasterPage({
   const userHasReviewed = reviewRows.some((r) => r.user_id === user.userId);
   const userAddedMaster = master.added_by === user.userId;
 
+  const distribution = [5, 4, 3, 2, 1].map((stars) => {
+    const count = reviewRows.filter((r) => r.rating === stars).length;
+    return {
+      stars,
+      count,
+      pct:
+        reviewRows.length > 0
+          ? Math.round((count / reviewRows.length) * 100)
+          : 0
+    };
+  });
+
   return (
     <>
       <Nav />
-      <main className="max-w-3xl mx-auto px-6 py-10">
-        <Link
-          href="/masters"
-          className="text-xs uppercase tracking-widest text-ink-dim hover:text-accent"
-        >
-          ← Каталог
+      <main className="max-w-5xl mx-auto px-6 py-8">
+        <Link href="/masters" className="text-sm text-ink-mid hover:text-accent">
+          ← К каталогу
         </Link>
 
-        <div className="mt-4 mb-8">
-          <div className="flex items-baseline gap-3 flex-wrap mb-3">
-            <span className="chip-accent">
-              {specialtyLabel(master.specialty)}
-            </span>
-            {master.area && <span className="chip">{master.area}</span>}
-          </div>
-          <h1 className="font-display text-6xl mb-4">{master.name}</h1>
-
-          <div className="flex items-center gap-6 flex-wrap">
-            {reviewRows.length > 0 ? (
-              <div className="flex items-center gap-3">
-                <StarRating rating={avg} size="lg" />
-                <div>
-                  <div className="font-mono text-xl">{avg.toFixed(1)}</div>
-                  <div className="text-xs text-ink-dim uppercase tracking-widest">
-                    {reviewRows.length}{' '}
-                    {reviewRows.length === 1 ? 'отзыв' : 'отзывов'}
-                  </div>
-                </div>
+        <div className="card mt-4">
+          <div className="flex items-start gap-5">
+            <Avatar name={master.name} seed={master.id} size="lg" />
+            <div className="flex-1 min-w-0">
+              <h1 className="text-3xl font-bold text-ink">{master.name}</h1>
+              <div className="text-sm text-ink-mid mt-1">
+                {specialtyLabel(master.specialty)}
+                {master.area && (
+                  <>
+                    {' '}
+                    · <span>{master.area}</span>
+                  </>
+                )}
               </div>
-            ) : (
-              <div className="text-ink-dim text-sm">
-                Пока без отзывов — будь первым.
-              </div>
-            )}
-            {master.phone && (
-              <a
-                href={`tel:${master.phone}`}
-                className="font-mono text-lg text-accent hover:underline"
-              >
-                {master.phone}
-              </a>
-            )}
-          </div>
-
-          {master.description && (
-            <p className="mt-6 text-ink leading-relaxed whitespace-pre-wrap">
-              {master.description}
-            </p>
-          )}
-
-          <div className="mt-6 text-xs text-ink-dim">
-            Добавил{' '}
-            <span className="text-ink">
-              {master.added_by_name || 'участник круга'}
-            </span>{' '}
-            · {formatDate(master.created_at)}
-          </div>
-
-          {userAddedMaster && (
-            <form action={deleteMaster} className="mt-4">
-              <input type="hidden" name="id" value={master.id} />
-              <button
-                type="submit"
-                className="btn-danger text-xs"
-              >
-                Удалить мастера
-              </button>
-            </form>
-          )}
-        </div>
-
-        <div className="divider" />
-
-        {!userHasReviewed ? (
-          <div className="card mb-10">
-            <h2 className="font-display text-3xl mb-1">Оставить отзыв</h2>
-            <p className="text-ink-dim text-sm mb-5">
-              Один отзыв на мастера. Пиши по делу.
-            </p>
-            <form action={addReview} className="space-y-5">
-              <input type="hidden" name="master_id" value={master.id} />
-              <div>
-                <label className="label">Оценка</label>
-                <StarInput />
-              </div>
-              <div>
-                <label className="label">Комментарий</label>
-                <textarea
-                  name="comment"
-                  rows={4}
-                  placeholder="Что делал, как сработал, есть ли нюансы"
-                  className="input resize-none"
-                />
-              </div>
-              <button type="submit" className="btn-primary">
-                Опубликовать отзыв
-              </button>
-            </form>
-          </div>
-        ) : (
-          <div className="mb-10 p-4 border border-border rounded-md text-sm text-ink-dim">
-            Ты уже оставлял отзыв этому мастеру.
-          </div>
-        )}
-
-        {reviewRows.length > 0 && (
-          <div>
-            <h2 className="font-display text-3xl mb-5">Отзывы</h2>
-            <div className="space-y-4">
-              {reviewRows.map((r) => (
-                <div key={r.id} className="card">
-                  <div className="flex items-baseline justify-between mb-2">
-                    <div className="flex items-center gap-3">
-                      <StarRating rating={r.rating} size="sm" />
-                      <span className="text-sm text-ink">
-                        {r.user_name || '—'}
-                      </span>
-                    </div>
-                    <span className="text-xs text-ink-dim font-mono">
-                      {formatDate(r.created_at)}
+              <div className="flex items-center gap-3 mt-3 flex-wrap">
+                {reviewRows.length > 0 ? (
+                  <>
+                    <StarRating rating={avg} size="lg" showNumber />
+                    <span className="text-ink-mid text-sm">
+                      ({reviewRows.length}{' '}
+                      {labelCount(reviewRows.length, [
+                        'отзыв',
+                        'отзыва',
+                        'отзывов'
+                      ])}
+                      )
                     </span>
-                  </div>
-                  {r.comment && (
-                    <p className="text-sm text-ink-dim leading-relaxed whitespace-pre-wrap">
-                      {r.comment}
-                    </p>
-                  )}
-                </div>
-              ))}
+                  </>
+                ) : (
+                  <span className="text-ink-mid text-sm">Пока без отзывов</span>
+                )}
+                {master.phone && (
+                  <a
+                    href={`tel:${master.phone}`}
+                    className="font-mono text-sm text-accent hover:underline ml-auto"
+                  >
+                    {master.phone}
+                  </a>
+                )}
+              </div>
+
+              {master.description && (
+                <p className="mt-4 text-ink leading-relaxed whitespace-pre-wrap text-sm">
+                  {master.description}
+                </p>
+              )}
+
+              <div className="mt-4 text-xs text-ink-dim">
+                Добавил{' '}
+                <span className="text-ink">
+                  {master.added_by_name || 'участник'}
+                </span>{' '}
+                · {formatDate(master.created_at)}
+              </div>
+
+              {userAddedMaster && (
+                <form action={deleteMaster} className="mt-3">
+                  <input type="hidden" name="id" value={master.id} />
+                  <button type="submit" className="btn-danger text-xs">
+                    Удалить мастера
+                  </button>
+                </form>
+              )}
             </div>
           </div>
-        )}
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_280px] gap-6 mt-6">
+          <section className="min-w-0">
+            {!userHasReviewed ? (
+              <div className="card mb-6">
+                <h2 className="text-xl font-bold mb-1">Оставить отзыв</h2>
+                <p className="text-ink-mid text-sm mb-4">
+                  Один отзыв на мастера. Пиши по делу.
+                </p>
+                <form action={addReview} className="space-y-4">
+                  <input type="hidden" name="master_id" value={master.id} />
+                  <div>
+                    <label className="label">Оценка</label>
+                    <StarInput />
+                  </div>
+                  <div>
+                    <label className="label">Комментарий</label>
+                    <textarea
+                      name="comment"
+                      rows={4}
+                      placeholder="Что делал, как сработал, есть ли нюансы"
+                      className="input resize-none"
+                    />
+                  </div>
+                  <button type="submit" className="btn-primary">
+                    Опубликовать
+                  </button>
+                </form>
+              </div>
+            ) : (
+              <div className="mb-6 p-4 bg-accent-soft border border-transparent rounded-xl text-sm text-accent-strong">
+                Ты уже оставлял отзыв этому мастеру.
+              </div>
+            )}
+
+            {reviewRows.length > 0 && (
+              <div>
+                <h2 className="text-xl font-bold mb-4">
+                  Отзывы ({reviewRows.length})
+                </h2>
+                <div className="space-y-3">
+                  {reviewRows.map((r) => (
+                    <div key={r.id} className="card">
+                      <div className="flex items-start gap-3">
+                        <Avatar
+                          name={r.user_name || '?'}
+                          size="sm"
+                          seed={r.user_name || ''}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2 flex-wrap">
+                            <span className="font-semibold text-ink text-sm">
+                              {r.user_name || '—'}
+                            </span>
+                            <span className="text-xs text-ink-dim">
+                              {formatDate(r.created_at)}
+                            </span>
+                          </div>
+                          <StarRating rating={r.rating} size="sm" />
+                          {r.comment && (
+                            <p className="text-sm text-ink-mid leading-relaxed whitespace-pre-wrap mt-2">
+                              {r.comment}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </section>
+
+          {reviewRows.length > 0 && (
+            <aside className="card lg:sticky lg:top-[88px] lg:self-start h-fit">
+              <div className="text-sm font-semibold text-ink mb-2">
+                Распределение
+              </div>
+              <div className="flex items-baseline gap-2 mb-4">
+                <span className="text-3xl font-bold">{avg.toFixed(1)}</span>
+                <StarRating rating={avg} />
+              </div>
+              <div className="space-y-1.5">
+                {distribution.map((d) => (
+                  <div
+                    key={d.stars}
+                    className="flex items-center gap-2 text-xs"
+                  >
+                    <span className="w-3 text-ink-mid">{d.stars}</span>
+                    <span style={{ color: 'var(--star)' }}>★</span>
+                    <div className="flex-1 h-2 bg-surface-2 rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full"
+                        style={{
+                          width: `${d.pct}%`,
+                          background:
+                            d.stars >= 4
+                              ? 'var(--accent)'
+                              : d.stars === 3
+                                ? 'var(--star)'
+                                : 'var(--danger)'
+                        }}
+                      />
+                    </div>
+                    <span className="w-9 text-right text-ink-mid">
+                      {d.pct}%
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </aside>
+          )}
+        </div>
       </main>
     </>
   );
+}
+
+function labelCount(n: number, forms: [string, string, string]): string {
+  const mod10 = n % 10;
+  const mod100 = n % 100;
+  if (mod10 === 1 && mod100 !== 11) return forms[0];
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return forms[1];
+  return forms[2];
 }

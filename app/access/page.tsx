@@ -15,23 +15,23 @@ export default async function AccessPage({
       <div className="max-w-md w-full">
         <Link
           href="/"
-          className="text-xs uppercase tracking-widest text-ink-dim hover:text-accent"
+          className="text-xs uppercase tracking-widest text-ink-mid hover:text-accent"
         >
           ← Назад
         </Link>
 
-        <h1 className="font-display text-5xl mt-6 mb-2">
+        <h1 className="font-bold tracking-tight text-5xl mt-6 mb-2">
           {mode === 'invite' ? (
             <>
-              Вход по <span className="italic text-accent">инвайту</span>
+              Вход по <span className="text-accent">инвайту</span>
             </>
           ) : (
             <>
-              Запрос на <span className="italic text-accent">доступ</span>
+              Запрос на <span className="text-accent">доступ</span>
             </>
           )}
         </h1>
-        <p className="text-ink-dim text-sm mb-8">
+        <p className="text-ink-mid text-sm mb-8">
           {mode === 'invite'
             ? 'Если у тебя есть код, добро пожаловать.'
             : 'Заявка попадёт админу. Решение придёт через того, кто тебя пригласил.'}
@@ -79,7 +79,7 @@ export default async function AccessPage({
             <div className="text-center pt-2">
               <Link
                 href="/access?mode=request"
-                className="text-xs text-ink-dim hover:text-accent uppercase tracking-widest"
+                className="text-xs text-ink-mid hover:text-accent uppercase tracking-widest"
               >
                 Нет инвайта? Запросить доступ →
               </Link>
@@ -120,7 +120,7 @@ export default async function AccessPage({
             <div className="text-center pt-2">
               <Link
                 href="/access?mode=invite"
-                className="text-xs text-ink-dim hover:text-accent uppercase tracking-widest"
+                className="text-xs text-ink-mid hover:text-accent uppercase tracking-widest"
               >
                 ← Есть инвайт-код
               </Link>
