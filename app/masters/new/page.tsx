@@ -100,22 +100,24 @@ export default async function NewMasterPage() {
                 className="input"
               />
             </div>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <label className="label">Phone</label>
+              <label className="label">WhatsApp number</label>
+              <input
+                name="whatsapp_phone"
+                placeholder="+971 50 ..."
+                className="input font-mono"
+              />
+            </div>
+            <div>
+              <label className="label">Phone (for calls)</label>
               <input
                 name="phone"
                 placeholder="+971 50 ..."
                 className="input font-mono"
               />
-              <label className="mt-2 flex cursor-pointer items-center gap-2 text-sm text-ink-mid">
-                <input
-                  type="checkbox"
-                  name="phone_is_whatsapp"
-                  value="1"
-                  className="h-4 w-4 accent-accent"
-                />
-                This is a WhatsApp number
-              </label>
             </div>
           </div>
 

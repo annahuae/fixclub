@@ -18,7 +18,7 @@ type Master = {
   emirate: string | null;
   area: string | null;
   phone: string | null;
-  phone_is_whatsapp: boolean | null;
+  whatsapp_phone: string | null;
   maps_url: string | null;
   description: string | null;
   added_by: string | null;
@@ -143,12 +143,14 @@ export default async function MasterPage({
                 )}
               </div>
 
-              {master.phone && (
+              {(master.whatsapp_phone || master.phone) && (
                 <div className="mt-3 flex flex-wrap items-center gap-2">
-                  <PhoneLink
-                    phone={master.phone}
-                    kind={master.phone_is_whatsapp ? 'whatsapp' : 'call'}
-                  />
+                  {master.whatsapp_phone && (
+                    <PhoneLink phone={master.whatsapp_phone} kind="whatsapp" />
+                  )}
+                  {master.phone && (
+                    <PhoneLink phone={master.phone} kind="call" />
+                  )}
                 </div>
               )}
 
