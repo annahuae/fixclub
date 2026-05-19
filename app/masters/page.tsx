@@ -168,11 +168,34 @@ export default async function MastersPage({
   return (
     <>
       <Nav query={q || undefined} emirate={emirate || undefined} />
-      <main className="max-w-6xl mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-[220px_minmax(0,1fr)_280px] gap-6">
+      <main className="shell py-8">
+        <section className="mb-7 panel-subtle p-6 sm:p-8">
+          <div className="grid gap-6 lg:grid-cols-[1fr_340px] lg:items-end">
+            <div>
+              <div className="eyebrow mb-3">Trusted services directory</div>
+              <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-ink max-w-3xl">
+                Проверенные мастера, которых советуют свои
+              </h1>
+              <p className="mt-4 max-w-2xl text-ink-mid leading-relaxed">
+                Каталог закрытого круга: реальные контакты, районы, отзывы и
+                свежие рекомендации без случайной выдачи из поиска.
+              </p>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              <Metric value={rows.length} label="мастеров" />
+              <Metric value={totalReviews} label="отзывов" />
+              <Metric value={aggregateAvg.toFixed(1)} label="рейтинг" />
+            </div>
+          </div>
+        </section>
+
+        <div className="grid grid-cols-1 lg:grid-cols-[250px_minmax(0,1fr)_300px] gap-6">
           {/* Sidebar: filters */}
           <aside className="lg:sticky lg:top-[72px] lg:self-start">
-            <div className="bg-surface border border-border rounded-2xl p-3">
+            <div className="panel p-3">
+              <div className="px-2 pt-2 pb-3">
+                <div className="eyebrow">Специальности</div>
+              </div>
               <FilterLink
                 active={!specialty}
                 href={buildHref({ specialty: null })}
@@ -184,7 +207,7 @@ export default async function MastersPage({
                   className={
                     idx === 0
                       ? 'mt-4 pt-1'
-                      : 'mt-4 pt-4 border-t border-border'
+                      : 'mt-4 pt-4 border-t border-border/80'
                   }
                 >
                   <div className="text-[11px] font-bold text-ink-dim uppercase tracking-widest mb-2 px-2">
@@ -205,37 +228,37 @@ export default async function MastersPage({
 
           {/* Main column: results */}
           <section className="min-w-0">
-            <div className="flex items-baseline justify-between flex-wrap gap-3 mb-5">
-              <h1 className="text-xl">
-                <span className="font-bold">{rows.length}</span>{' '}
-                <span className="text-ink-mid">
-                  {labelCount(rows.length, [
-                    'мастер найден',
-                    'мастера найдено',
-                    'мастеров найдено'
-                  ])}{' '}
-                  в{' '}
-                </span>
-                <span className="font-semibold text-accent">
+            <div className="flex items-end justify-between flex-wrap gap-3 mb-4">
+              <div>
+                <div className="text-sm text-ink-mid mb-1">
                   {emirate
                     ? emirateLabel(emirate)
                     : specialty
                       ? specialtyLabel(specialty)
-                      : 'UAE'}
-                </span>
-              </h1>
+                      : 'Все эмираты'}
+                </div>
+                <h2 className="text-2xl font-bold tracking-tight">
+                  <span>{rows.length}</span>{' '}
+                  {labelCount(rows.length, [
+                    'мастер найден',
+                    'мастера найдено',
+                    'мастеров найдено'
+                  ])}
+                </h2>
+              </div>
             </div>
 
-            <div className="flex gap-1 mb-5 border-b border-border">
+            <div className="panel-subtle p-1 flex gap-1 mb-5 overflow-x-auto">
               {SORTS.map((s) => (
                 <Link
                   key={s.value}
                   href={buildHref({ sort: s.value })}
-                  className={`px-4 py-2 text-sm rounded-t-lg -mb-px border-b-2 transition ${
+                  className={`px-4 py-2 text-sm transition whitespace-nowrap ${
                     sort === s.value
-                      ? 'border-accent text-accent font-semibold bg-accent-soft'
-                      : 'border-transparent text-ink-mid hover:text-ink'
+                      ? 'text-ink font-semibold bg-surface shadow-sm'
+                      : 'text-ink-mid hover:text-ink'
                   }`}
+                  style={{ borderRadius: 7 }}
                 >
                   {s.label}
                 </Link>
@@ -243,16 +266,23 @@ export default async function MastersPage({
             </div>
 
             {rows.length === 0 ? (
-              <div className="card text-center py-16">
-                <p className="text-ink-mid mb-4">
-                  Никого не нашли. Будь первым — добавь мастера.
+              <div className="panel text-center py-16 px-6">
+                <div className="mx-auto mb-5 h-14 w-14 rounded-lg bg-surface-2 border border-border flex items-center justify-center text-2xl text-accent">
+                  +
+                </div>
+                <h3 className="text-2xl font-bold tracking-tight mb-2">
+                  Пока пусто в этой категории
+                </h3>
+                <p className="text-ink-mid mb-6 max-w-md mx-auto">
+                  Добавь первого проверенного мастера, чтобы следующий человек
+                  не начинал поиск с нуля.
                 </p>
                 <Link href="/masters/new" className="btn-primary">
-                  + Добавить мастера
+                  Добавить мастера
                 </Link>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="grid gap-4">
                 {rows.map((m) => {
                   const avg = m.avg_rating ? parseFloat(m.avg_rating) : 0;
                   const count = parseInt(m.review_count);
@@ -261,13 +291,13 @@ export default async function MastersPage({
                     <Link
                       key={m.id}
                       href={`/masters/${m.id}`}
-                      className="block card hover:border-accent transition-colors"
+                      className="block card hover:border-accent hover:-translate-y-0.5 transition-all"
                     >
                       <div className="flex items-start gap-4">
                         <Avatar name={m.name} seed={m.id} size="lg" />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-baseline justify-between gap-3 flex-wrap">
-                            <h2 className="font-bold text-lg text-ink">
+                            <h2 className="font-bold text-xl tracking-tight text-ink">
                               {m.name}
                             </h2>
                           </div>
@@ -345,7 +375,7 @@ export default async function MastersPage({
           {/* Right rail: rating summary + CTA */}
           <aside className="space-y-4 lg:sticky lg:top-[72px] lg:self-start">
             <div className="card">
-              <div className="text-sm font-semibold text-ink mb-2">
+              <div className="eyebrow mb-3">
                 Сводный рейтинг
               </div>
               <div className="flex items-baseline gap-2">
@@ -383,27 +413,33 @@ export default async function MastersPage({
               </div>
             </div>
 
-            <div
-              className="rounded-xl p-5 text-center"
-              style={{ background: 'var(--accent-soft)' }}
-            >
-              <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-surface mb-2">
-                ✏️
+            <div className="panel p-5 text-center bg-ink text-white">
+              <div className="inline-flex items-center justify-center w-10 h-10 bg-white/10 mb-3 text-accent">
+                +
               </div>
-              <div className="font-semibold text-ink mb-1">
+              <div className="font-semibold mb-1">
                 Поделись опытом
               </div>
-              <p className="text-xs text-ink-mid mb-3">
+              <p className="text-xs text-white/68 mb-4">
                 Помоги другим найти проверенных мастеров.
               </p>
-              <Link href="/masters/new" className="btn-outline w-full">
-                Оставить отзыв
+              <Link href="/masters/new" className="btn-primary w-full bg-white text-ink hover:bg-accent hover:text-white">
+                Добавить контакт
               </Link>
             </div>
           </aside>
         </div>
       </main>
     </>
+  );
+}
+
+function Metric({ value, label }: { value: string | number; label: string }) {
+  return (
+    <div className="bg-surface border border-border p-4" style={{ borderRadius: 8 }}>
+      <div className="text-2xl font-bold tracking-tight">{value}</div>
+      <div className="text-xs text-ink-mid mt-1">{label}</div>
+    </div>
   );
 }
 
@@ -419,11 +455,12 @@ function FilterLink({
   return (
     <Link
       href={href}
-      className={`block text-sm px-2 py-1.5 rounded-md transition ${
+      className={`block text-sm px-2 py-2 transition ${
         active
-          ? 'bg-accent-soft text-accent-strong font-semibold'
+          ? 'bg-ink text-white font-semibold'
           : 'text-ink-mid hover:bg-surface-2 hover:text-ink'
       }`}
+      style={{ borderRadius: 7 }}
     >
       {label}
     </Link>

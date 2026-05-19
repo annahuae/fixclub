@@ -3,20 +3,22 @@
 @tailwind utilities;
 
 :root {
-  --bg: #f7f8f9;
+  --bg: #f5f3ef;
   --surface: #ffffff;
-  --surface-2: #f1f3f5;
-  --border: #e4e7eb;
-  --border-strong: #cbd1d8;
-  --ink: #1a1f24;
-  --ink-mid: #4b5563;
-  --ink-dim: #6b7280;
-  --accent: #22a565;
-  --accent-soft: #e6f6ee;
-  --accent-strong: #178a52;
-  --star: #f5b400;
-  --danger: #d4574a;
-  --success: #22a565;
+  --surface-2: #f0eee9;
+  --surface-3: #e7e3dc;
+  --border: #ddd8cf;
+  --border-strong: #c5beb1;
+  --ink: #171717;
+  --ink-mid: #555b61;
+  --ink-dim: #7b817f;
+  --accent: #1f8a70;
+  --accent-soft: #e3f2ed;
+  --accent-strong: #116955;
+  --warm: #b98845;
+  --star: #c58a2a;
+  --danger: #b84d42;
+  --success: #1f8a70;
 }
 
 html,
@@ -30,6 +32,14 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 18% -12%, rgba(31, 138, 112, 0.14), transparent 32rem),
+    radial-gradient(circle at 92% 0%, rgba(185, 136, 69, 0.12), transparent 30rem),
+    linear-gradient(180deg, #faf8f3 0%, var(--bg) 42%, #efebe3 100%);
+}
+
 ::selection {
   background: var(--accent);
   color: #fff;
@@ -41,8 +51,9 @@ body {
 
 /* Inputs */
 .input {
-  @apply w-full bg-surface border border-border rounded-lg px-3 py-2 text-ink placeholder:text-ink-dim text-sm;
+  @apply w-full bg-surface border border-border px-3 py-2 text-ink placeholder:text-ink-dim text-sm;
   @apply focus:outline-none focus:border-accent transition;
+  border-radius: 8px;
 }
 
 .input:focus {
@@ -50,12 +61,14 @@ body {
 }
 
 .btn {
-  @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-all;
+  @apply inline-flex items-center justify-center gap-2 px-4 py-2 font-semibold transition-all;
   @apply text-sm border border-transparent;
+  border-radius: 8px;
 }
 
 .btn-primary {
-  @apply btn bg-accent text-white hover:bg-accent-strong;
+  @apply btn bg-ink text-white hover:bg-accent-strong;
+  box-shadow: 0 14px 28px rgba(23, 23, 23, 0.14);
 }
 
 .btn-ghost {
@@ -63,7 +76,7 @@ body {
 }
 
 .btn-outline {
-  @apply btn bg-surface border-accent text-accent hover:bg-accent-soft;
+  @apply btn bg-surface border-border text-ink hover:border-accent hover:text-accent;
 }
 
 .btn-danger {
@@ -71,7 +84,9 @@ body {
 }
 
 .card {
-  @apply bg-surface border border-border rounded-xl p-5;
+  @apply bg-surface border border-border p-5;
+  border-radius: 8px;
+  box-shadow: 0 18px 44px rgba(35, 31, 25, 0.06);
 }
 
 .label {
@@ -83,10 +98,33 @@ body {
 }
 
 .chip {
-  @apply inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium;
+  @apply inline-flex items-center px-2 py-0.5 text-xs font-medium;
   @apply bg-surface-2 border border-border text-ink-mid;
+  border-radius: 6px;
 }
 
 .chip-accent {
   @apply chip bg-accent-soft border-transparent text-accent-strong;
+}
+
+.shell {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+.panel {
+  @apply bg-surface border border-border;
+  border-radius: 8px;
+  box-shadow: 0 20px 60px rgba(35, 31, 25, 0.07);
+}
+
+.panel-subtle {
+  @apply border border-border;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.58);
+  box-shadow: 0 12px 34px rgba(35, 31, 25, 0.05);
+  backdrop-filter: blur(18px);
+}
+
+.eyebrow {
+  @apply text-[11px] font-bold uppercase tracking-[0.24em] text-ink-dim;
 }
