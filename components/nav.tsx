@@ -80,10 +80,10 @@ export async function Nav({
           )}
           <Link
             href="/masters/new"
-            className="btn-outline h-11"
+            className="inline-flex h-11 items-center gap-2 rounded-xl border-2 border-accent bg-surface px-5 text-sm font-semibold text-accent transition hover:bg-accent-soft"
           >
             <svg
-              className="w-4 h-4"
+              className="w-[18px] h-[18px]"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
