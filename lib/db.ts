@@ -84,4 +84,8 @@ export async function initSchema() {
   await sql`CREATE INDEX IF NOT EXISTS idx_masters_specialty ON masters(specialty)`;
   await sql`CREATE INDEX IF NOT EXISTS idx_masters_area ON masters(area)`;
   await sql`CREATE INDEX IF NOT EXISTS idx_reviews_master ON reviews(master_id)`;
+
+  // v2: passwords for re-login
+  await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash TEXT`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_users_contact ON users(LOWER(contact))`;
 }

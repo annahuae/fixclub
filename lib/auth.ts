@@ -1,4 +1,5 @@
 import { cookies } from 'next/headers';
+import { scryptSync, randomBytes, timingSafeEqual } from 'crypto';
 import { sql } from './db';
 import { redirect } from 'next/navigation';
 
@@ -92,6 +93,22 @@ export async function isAdmin(): Promise<boolean> {
 export async function destroyAdminCookie() {
   const cookieStore = await cookies();
   cookieStore.delete(ADMIN_COOKIE);
+}
+
+// User password hashing (scrypt). Stored format: "salt:hashHex"
+export function hashPassword(plain: string): string {
+  const salt = randomBytes(16).toString('hex');
+  const hash = scryptSync(plain, salt, 64).toString('hex');
+  return `${salt}:${hash}`;
+}
+
+export function verifyPassword(plain: string, stored: string): boolean {
+  const [salt, hashHex] = stored.split(':');
+  if (!salt || !hashHex) return false;
+  const expected = Buffer.from(hashHex, 'hex');
+  const actual = scryptSync(plain, salt, 64);
+  if (expected.length !== actual.length) return false;
+  return timingSafeEqual(expected, actual);
 }
 
 export function checkAdminPassword(password: string): boolean {

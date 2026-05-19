@@ -62,6 +62,31 @@ export default async function HomePage() {
           </Link>
 
           <Link
+            href="/access?mode=login"
+            className="block bg-surface border border-border rounded-2xl p-5 hover:border-accent hover:shadow-lg transition-all group"
+          >
+            <div className="flex items-center gap-4">
+              <div
+                className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl shrink-0 group-hover:scale-110 transition-transform"
+                style={{ background: '#e0f2fe' }}
+              >
+                👋
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-ink">Я уже свой</span>
+                  <span className="text-ink-dim group-hover:text-accent group-hover:translate-x-0.5 transition-all">
+                    →
+                  </span>
+                </div>
+                <p className="text-sm text-ink-mid mt-0.5">
+                  Войти по контакту и паролю
+                </p>
+              </div>
+            </div>
+          </Link>
+
+          <Link
             href="/access?mode=request"
             className="block bg-surface border border-border rounded-2xl p-5 hover:border-accent hover:shadow-lg transition-all group"
           >

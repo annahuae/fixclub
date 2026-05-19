@@ -2,7 +2,7 @@
 
 import { redirect } from 'next/navigation';
 import { sql } from '@/lib/db';
-import { createSession } from '@/lib/auth';
+import { createSession, hashPassword, verifyPassword } from '@/lib/auth';
 
 export async function submitInvite(formData: FormData) {
   const code = String(formData.get('code') || '')
@@ -10,9 +10,12 @@ export async function submitInvite(formData: FormData) {
     .toUpperCase();
   const name = String(formData.get('name') || '').trim();
   const contact = String(formData.get('contact') || '').trim();
+  const password = String(formData.get('password') || '');
 
-  if (!code || !name || !contact) {
-    redirect('/access?mode=invite&error=Заполни+все+поля');
+  if (!code || !name || !contact || password.length < 6) {
+    redirect(
+      '/access?mode=invite&error=Заполни+все+поля+(пароль+минимум+6+символов)'
+    );
   }
 
   const codeRows = (await sql`
@@ -26,9 +29,11 @@ export async function submitInvite(formData: FormData) {
     redirect('/access?mode=invite&error=Этот+код+уже+использован');
   }
 
+  const passwordHash = hashPassword(password);
+
   const userRows = (await sql`
-    INSERT INTO users (name, contact)
-    VALUES (${name}, ${contact})
+    INSERT INTO users (name, contact, password_hash)
+    VALUES (${name}, ${contact}, ${passwordHash})
     RETURNING id
   `) as { id: string }[];
   const userId = userRows[0].id;
@@ -40,6 +45,33 @@ export async function submitInvite(formData: FormData) {
   `;
 
   await createSession(userId);
+  redirect('/masters');
+}
+
+export async function submitLogin(formData: FormData) {
+  const contact = String(formData.get('contact') || '').trim();
+  const password = String(formData.get('password') || '');
+
+  if (!contact || !password) {
+    redirect('/access?mode=login&error=Заполни+оба+поля');
+  }
+
+  const rows = (await sql`
+    SELECT id, password_hash FROM users
+    WHERE LOWER(contact) = LOWER(${contact})
+    ORDER BY created_at DESC
+    LIMIT 1
+  `) as { id: string; password_hash: string | null }[];
+
+  if (rows.length === 0 || !rows[0].password_hash) {
+    redirect('/access?mode=login&error=Неверный+контакт+или+пароль');
+  }
+
+  if (!verifyPassword(password, rows[0].password_hash)) {
+    redirect('/access?mode=login&error=Неверный+контакт+или+пароль');
+  }
+
+  await createSession(rows[0].id);
   redirect('/masters');
 }
 
