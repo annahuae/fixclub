@@ -10,6 +10,7 @@ import {
 import { StarRating } from '@/components/star-rating';
 import { Avatar } from '@/components/avatar';
 import { Nav } from '@/components/nav';
+import { EmirateSelect } from '@/components/emirate-select';
 
 type MasterRow = {
   id: string;
@@ -122,32 +123,6 @@ export default async function MastersPage({
     previewsByMaster.set(p.master_id, list);
   }
 
-  // Aggregate stats across filtered masters
-  const totalReviews = rows.reduce(
-    (acc, m) => acc + parseInt(m.review_count),
-    0
-  );
-  const weightedSum = rows.reduce(
-    (acc, m) =>
-      acc +
-      (m.avg_rating ? parseFloat(m.avg_rating) * parseInt(m.review_count) : 0),
-    0
-  );
-  const aggregateAvg = totalReviews > 0 ? weightedSum / totalReviews : 0;
-
-  const distribution = [5, 4, 3, 2, 1].map((stars) => {
-    const count = rows.reduce((acc, m) => {
-      // approximate: distribute count by avg rounding
-      const mAvg = m.avg_rating ? Math.round(parseFloat(m.avg_rating)) : 0;
-      return acc + (mAvg === stars ? parseInt(m.review_count) : 0);
-    }, 0);
-    return {
-      stars,
-      count,
-      pct: totalReviews > 0 ? Math.round((count / totalReviews) * 100) : 0
-    };
-  });
-
   function buildHref(over: Record<string, string | null>) {
     const sp = new URLSearchParams();
     const merged: Record<string, string | null> = {
@@ -167,29 +142,57 @@ export default async function MastersPage({
 
   return (
     <>
-      <Nav query={q || undefined} emirate={emirate || undefined} />
-      <main className="shell py-8">
-        <section className="mb-7 panel-subtle p-6 sm:p-8">
-          <div className="grid gap-6 lg:grid-cols-[1fr_340px] lg:items-end">
+      <Nav
+        query={q || undefined}
+        emirate={emirate || undefined}
+        showSearch={false}
+      />
+      <main className="shell py-8 sm:py-10">
+        <section className="mb-6 flex flex-col gap-5">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <div className="eyebrow mb-3">Trusted services directory</div>
-              <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-ink max-w-3xl">
-                Проверенные мастера, которых советуют свои
+              <div className="eyebrow mb-2">Мастера</div>
+              <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-ink">
+                Проверенные контакты
               </h1>
-              <p className="mt-4 max-w-2xl text-ink-mid leading-relaxed">
-                Каталог закрытого круга: реальные контакты, районы, отзывы и
-                свежие рекомендации без случайной выдачи из поиска.
+              <p className="mt-2 text-sm text-ink-mid max-w-xl">
+                {rows.length}{' '}
+                {labelCount(rows.length, [
+                  'мастер найден',
+                  'мастера найдено',
+                  'мастеров найдено'
+                ])}{' '}
+                {emirate ? `в ${emirateLabel(emirate)}` : 'по всем эмиратам'}
               </p>
             </div>
-            <div className="grid grid-cols-3 gap-3">
-              <Metric value={rows.length} label="мастеров" />
-              <Metric value={totalReviews} label="отзывов" />
-              <Metric value={aggregateAvg.toFixed(1)} label="рейтинг" />
-            </div>
+            <Link href="/masters/new" className="btn-primary">
+              Добавить мастера
+            </Link>
           </div>
+
+          <form className="panel p-2 grid gap-2 md:grid-cols-[minmax(0,1fr)_190px_auto]">
+            {specialty && (
+              <input type="hidden" name="specialty" value={specialty} />
+            )}
+            {emirate && <input type="hidden" name="emirate" value={emirate} />}
+            {sort && <input type="hidden" name="sort" value={sort} />}
+            <input
+              type="search"
+              name="q"
+              defaultValue={q || ''}
+              placeholder="Имя, район или компания"
+              className="input h-11"
+            />
+            <div className="md:hidden">
+              <EmirateSelect value={emirate || undefined} />
+            </div>
+            <button type="submit" className="btn-outline h-11">
+              Найти
+            </button>
+          </form>
         </section>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[250px_minmax(0,1fr)_300px] gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-[250px_minmax(0,1fr)] gap-6">
           {/* Sidebar: filters */}
           <aside className="lg:sticky lg:top-[72px] lg:self-start">
             <div className="panel p-3">
@@ -228,41 +231,26 @@ export default async function MastersPage({
 
           {/* Main column: results */}
           <section className="min-w-0">
-            <div className="flex items-end justify-between flex-wrap gap-3 mb-4">
-              <div>
-                <div className="text-sm text-ink-mid mb-1">
-                  {emirate
-                    ? emirateLabel(emirate)
-                    : specialty
-                      ? specialtyLabel(specialty)
-                      : 'Все эмираты'}
-                </div>
-                <h2 className="text-2xl font-bold tracking-tight">
-                  <span>{rows.length}</span>{' '}
-                  {labelCount(rows.length, [
-                    'мастер найден',
-                    'мастера найдено',
-                    'мастеров найдено'
-                  ])}
-                </h2>
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex gap-1 overflow-x-auto">
+                {SORTS.map((s) => (
+                  <Link
+                    key={s.value}
+                    href={buildHref({ sort: s.value })}
+                    className={`px-3 py-2 text-sm transition whitespace-nowrap ${
+                      sort === s.value
+                        ? 'text-ink font-semibold bg-surface border-border'
+                        : 'text-ink-mid hover:text-ink border-transparent'
+                    } border`}
+                    style={{ borderRadius: 7 }}
+                  >
+                    {s.label}
+                  </Link>
+                ))}
               </div>
-            </div>
-
-            <div className="panel-subtle p-1 flex gap-1 mb-5 overflow-x-auto">
-              {SORTS.map((s) => (
-                <Link
-                  key={s.value}
-                  href={buildHref({ sort: s.value })}
-                  className={`px-4 py-2 text-sm transition whitespace-nowrap ${
-                    sort === s.value
-                      ? 'text-ink font-semibold bg-surface shadow-sm'
-                      : 'text-ink-mid hover:text-ink'
-                  }`}
-                  style={{ borderRadius: 7 }}
-                >
-                  {s.label}
-                </Link>
-              ))}
+              <div className="hidden md:block">
+                <EmirateSelect value={emirate || undefined} />
+              </div>
             </div>
 
             {rows.length === 0 ? (
@@ -372,74 +360,9 @@ export default async function MastersPage({
             )}
           </section>
 
-          {/* Right rail: rating summary + CTA */}
-          <aside className="space-y-4 lg:sticky lg:top-[72px] lg:self-start">
-            <div className="card">
-              <div className="eyebrow mb-3">
-                Сводный рейтинг
-              </div>
-              <div className="flex items-baseline gap-2">
-                <span className="text-4xl font-bold text-ink">
-                  {aggregateAvg.toFixed(1)}
-                </span>
-                <StarRating rating={aggregateAvg} size="md" />
-              </div>
-              <div className="text-xs text-ink-mid mt-1">
-                По {totalReviews}{' '}
-                {labelCount(totalReviews, ['отзыву', 'отзывам', 'отзывам'])}
-              </div>
-              <div className="mt-4 space-y-1.5">
-                {distribution.map((d) => (
-                  <div key={d.stars} className="flex items-center gap-2 text-xs">
-                    <span className="w-3 text-ink-mid">{d.stars}</span>
-                    <span style={{ color: 'var(--star)' }}>★</span>
-                    <div className="flex-1 h-2 bg-surface-2 rounded-full overflow-hidden">
-                      <div
-                        className="h-full rounded-full"
-                        style={{
-                          width: `${d.pct}%`,
-                          background:
-                            d.stars >= 4
-                              ? 'var(--accent)'
-                              : d.stars === 3
-                                ? 'var(--star)'
-                                : 'var(--danger)'
-                        }}
-                      />
-                    </div>
-                    <span className="w-9 text-right text-ink-mid">{d.pct}%</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="panel p-5 text-center bg-ink text-white">
-              <div className="inline-flex items-center justify-center w-10 h-10 bg-white/10 mb-3 text-accent">
-                +
-              </div>
-              <div className="font-semibold mb-1">
-                Поделись опытом
-              </div>
-              <p className="text-xs text-white/68 mb-4">
-                Помоги другим найти проверенных мастеров.
-              </p>
-              <Link href="/masters/new" className="btn-primary w-full bg-white text-ink hover:bg-accent hover:text-white">
-                Добавить контакт
-              </Link>
-            </div>
-          </aside>
         </div>
       </main>
     </>
-  );
-}
-
-function Metric({ value, label }: { value: string | number; label: string }) {
-  return (
-    <div className="bg-surface border border-border p-4" style={{ borderRadius: 8 }}>
-      <div className="text-2xl font-bold tracking-tight">{value}</div>
-      <div className="text-xs text-ink-mid mt-1">{label}</div>
-    </div>
   );
 }
 
