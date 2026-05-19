@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { getSessionUser } from '@/lib/auth';
+import { getSessionUser, isAdmin } from '@/lib/auth';
 
 export default async function HomePage({
   searchParams
@@ -9,6 +9,7 @@ export default async function HomePage({
   const params = await searchParams;
   const user = await getSessionUser();
   if (user) redirect('/masters');
+  if (await isAdmin()) redirect('/masters');
   if (params.invite) {
     redirect(`/access?mode=signup&invite=${encodeURIComponent(params.invite)}`);
   }
