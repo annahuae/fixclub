@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { destroySession, getSessionUser } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { EmirateSelect } from './emirate-select';
+import { UserMenu } from './user-menu';
 
 async function signOut() {
   'use server';
@@ -96,17 +97,7 @@ export async function Nav({
             </svg>
             <span className="hidden sm:inline">Write a review</span>
           </Link>
-          {user && (
-            <form action={signOut}>
-              <button
-                type="submit"
-                className="text-xs text-ink-mid hover:text-danger"
-                title={`${user.name} — sign out`}
-              >
-                Sign out
-              </button>
-            </form>
-          )}
+          {user && <UserMenu name={user.name} signOutAction={signOut} />}
         </div>
       </div>
     </header>
