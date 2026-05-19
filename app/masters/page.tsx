@@ -8,7 +8,6 @@ import {
   formatDate
 } from '@/lib/utils';
 import { StarRating } from '@/components/star-rating';
-import { Avatar } from '@/components/avatar';
 import { Nav } from '@/components/nav';
 import { EmirateSelect } from '@/components/emirate-select';
 
@@ -100,7 +99,6 @@ export default async function MastersPage({
         : new Date(b.master_created_at).getTime();
       return bd - ad;
     }
-    // reviewed (default)
     const ac = parseInt(a.review_count);
     const bc = parseInt(b.review_count);
     if (ac !== bc) return bc - ac;
@@ -156,232 +154,193 @@ export default async function MastersPage({
         emirate={emirate || undefined}
         showSearch={false}
       />
-      <main className="shell py-8 sm:py-10">
-        <section className="mb-6 flex flex-col gap-5">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <div className="eyebrow mb-2">Мастера</div>
-              <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-ink">
-                Проверенные контакты
-              </h1>
-              <p className="mt-2 text-sm text-ink-mid max-w-xl">
-                {rows.length}{' '}
-                {labelCount(rows.length, [
-                  'мастер найден',
-                  'мастера найдено',
-                  'мастеров найдено'
-                ])}{' '}
-                {emirate ? `в ${emirateLabel(emirate)}` : 'по всем эмиратам'}
-              </p>
-            </div>
-            <Link href="/masters/new" className="btn-primary">
-              Добавить мастера
-            </Link>
+      <main className="shell py-10 sm:py-12">
+        <section className="mb-10 grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-end">
+          <div>
+            <div className="eyebrow mb-4">Fixclub directory</div>
+            <h1 className="max-w-3xl text-5xl sm:text-6xl font-bold tracking-[-0.04em] leading-[0.95] text-ink">
+              Домашние мастера, которых не стыдно передать своим.
+            </h1>
           </div>
-
-          <form className="panel p-2 grid gap-2 md:grid-cols-[minmax(0,1fr)_190px_auto]">
-            {specialty && (
-              <input type="hidden" name="specialty" value={specialty} />
-            )}
-            {emirate && <input type="hidden" name="emirate" value={emirate} />}
-            {sort && <input type="hidden" name="sort" value={sort} />}
-            <input
-              type="search"
-              name="q"
-              defaultValue={q || ''}
-              placeholder="Имя, район или компания"
-              className="input h-11"
-            />
-            <div className="md:hidden">
-              <EmirateSelect value={emirate || undefined} />
+          <div className="lg:text-right">
+            <div className="text-sm text-ink-mid">
+              {rows.length}{' '}
+              {labelCount(rows.length, [
+                'проверенный контакт',
+                'проверенных контакта',
+                'проверенных контактов'
+              ])}
             </div>
-            <button type="submit" className="btn-outline h-11">
-              Найти
-            </button>
-          </form>
+            <div className="mt-2 text-sm text-ink-dim">
+              {emirate ? emirateLabel(emirate) : 'Все эмираты'}
+            </div>
+          </div>
         </section>
 
-        <div className="grid grid-cols-1 gap-5">
-          <section className="min-w-0">
-            <div className="mb-4 panel p-3 space-y-3">
-              <div className="flex gap-2 overflow-x-auto pb-1">
-                <FilterLink
-                  active={!specialty}
-                  href={buildHref({ specialty: null })}
-                  label="Все"
-                />
-                {FEATURED_SPECIALTIES.map((value) => (
-                  <FilterLink
-                    key={value}
-                    active={specialty === value}
-                    href={buildHref({ specialty: value })}
-                    label={specialtyLabel(value)}
-                  />
-                ))}
-                {specialty && !FEATURED_SPECIALTIES.includes(specialty) && (
-                  <FilterLink
-                    active
-                    href={buildHref({ specialty })}
-                    label={specialtyLabel(specialty)}
-                  />
-                )}
-              </div>
+        <section className="mb-8 border-y border-border py-4">
+          <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_220px_120px]">
+            <form className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_112px]">
+              {specialty && (
+                <input type="hidden" name="specialty" value={specialty} />
+              )}
+              {emirate && <input type="hidden" name="emirate" value={emirate} />}
+              {sort && <input type="hidden" name="sort" value={sort} />}
+              <input
+                type="search"
+                name="q"
+                defaultValue={q || ''}
+                placeholder="Поиск по имени, району или компании"
+                className="input h-11 bg-transparent"
+              />
+              <button type="submit" className="btn-primary h-11">
+                Найти
+              </button>
+            </form>
+            <EmirateSelect value={emirate || undefined} />
+            <Link href="/masters/new" className="btn-outline h-11">
+              Добавить
+            </Link>
+          </div>
+        </section>
 
-              <div className="flex flex-col gap-3 border-t border-border pt-3 sm:flex-row sm:items-center sm:justify-between">
-                <details className="group">
-                  <summary className="btn-outline h-10 cursor-pointer list-none">
-                    Ещё категории
-                  </summary>
-                  <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2 rounded-lg border border-border bg-surface p-2">
-                    {SPECIALTIES.filter(
-                      (s) => !FEATURED_SPECIALTIES.includes(s.value)
-                    ).map((s) => (
-                      <Link
-                        key={s.value}
-                        href={buildHref({ specialty: s.value })}
-                        className={`px-2.5 py-2 text-sm transition ${
-                          specialty === s.value
-                            ? 'bg-ink text-white font-semibold'
-                            : 'text-ink-mid hover:bg-surface-2 hover:text-ink'
-                        }`}
-                        style={{ borderRadius: 7 }}
-                      >
-                        {s.label}
-                      </Link>
-                    ))}
-                  </div>
-                </details>
+        <section className="mb-8 space-y-4">
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            <FilterLink
+              active={!specialty}
+              href={buildHref({ specialty: null })}
+              label="Все"
+            />
+            {FEATURED_SPECIALTIES.map((value) => (
+              <FilterLink
+                key={value}
+                active={specialty === value}
+                href={buildHref({ specialty: value })}
+                label={specialtyLabel(value)}
+              />
+            ))}
+            {specialty && !FEATURED_SPECIALTIES.includes(specialty) && (
+              <FilterLink
+                active
+                href={buildHref({ specialty })}
+                label={specialtyLabel(specialty)}
+              />
+            )}
+          </div>
 
-                <div className="flex gap-1 overflow-x-auto">
-                {SORTS.map((s) => (
+          <div className="flex flex-col gap-3 border-t border-border pt-4 sm:flex-row sm:items-start sm:justify-between">
+            <details>
+              <summary className="inline-flex cursor-pointer list-none items-center gap-2 text-sm font-semibold text-ink hover:text-accent">
+                Ещё категории
+                <span className="text-ink-dim">↓</span>
+              </summary>
+              <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+                {SPECIALTIES.filter(
+                  (s) => !FEATURED_SPECIALTIES.includes(s.value)
+                ).map((s) => (
                   <Link
                     key={s.value}
-                    href={buildHref({ sort: s.value })}
-                    className={`px-3 py-2 text-sm transition whitespace-nowrap ${
-                      sort === s.value
-                        ? 'text-ink font-semibold bg-surface border-border'
-                        : 'text-ink-mid hover:text-ink border-transparent'
-                    } border`}
-                    style={{ borderRadius: 7 }}
+                    href={buildHref({ specialty: s.value })}
+                    className={`rounded-full border px-3 py-2 text-sm transition ${
+                      specialty === s.value
+                        ? 'border-ink bg-ink text-white'
+                        : 'border-border text-ink-mid hover:border-accent hover:text-ink'
+                    }`}
                   >
                     {s.label}
                   </Link>
                 ))}
-                </div>
-
-                <div className="hidden md:block shrink-0">
-                  <EmirateSelect value={emirate || undefined} />
-                </div>
               </div>
-            </div>
+            </details>
 
-            {rows.length === 0 ? (
-              <div className="panel text-center py-16 px-6">
-                <div className="mx-auto mb-5 h-14 w-14 rounded-lg bg-surface-2 border border-border flex items-center justify-center text-2xl text-accent">
-                  +
-                </div>
-                <h3 className="text-2xl font-bold tracking-tight mb-2">
-                  Пока пусто в этой категории
-                </h3>
-                <p className="text-ink-mid mb-6 max-w-md mx-auto">
-                  Добавь первого проверенного мастера, чтобы следующий человек
-                  не начинал поиск с нуля.
-                </p>
-                <Link href="/masters/new" className="btn-primary">
-                  Добавить мастера
+            <div className="flex gap-1 overflow-x-auto">
+              {SORTS.map((s) => (
+                <Link
+                  key={s.value}
+                  href={buildHref({ sort: s.value })}
+                  className={`rounded-full px-3 py-1.5 text-sm transition whitespace-nowrap ${
+                    sort === s.value
+                      ? 'bg-ink text-white'
+                      : 'text-ink-mid hover:bg-surface-2 hover:text-ink'
+                  }`}
+                >
+                  {s.label}
                 </Link>
-              </div>
-            ) : (
-              <div className="grid gap-4">
-                {rows.map((m) => {
-                  const avg = m.avg_rating ? parseFloat(m.avg_rating) : 0;
-                  const count = parseInt(m.review_count);
-                  const list = previewsByMaster.get(m.id) || [];
-                  return (
-                    <Link
-                      key={m.id}
-                      href={`/masters/${m.id}`}
-                      className="block card hover:border-accent hover:-translate-y-0.5 transition-all"
-                    >
-                      <div className="flex items-start gap-4">
-                        <Avatar name={m.name} seed={m.id} size="lg" />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-baseline justify-between gap-3 flex-wrap">
-                            <h2 className="font-bold text-xl tracking-tight text-ink">
-                              {m.name}
-                            </h2>
-                          </div>
-                          <div className="text-sm text-ink-mid mt-0.5">
-                            {specialtyLabel(m.specialty)}
-                            {m.area && (
-                              <>
-                                {' '}
-                                · <span>{m.area}</span>
-                              </>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2 mt-2">
-                            {count > 0 ? (
-                              <>
-                                <StarRating rating={avg} showNumber />
-                                <span className="text-accent text-sm hover:underline">
-                                  ({count}{' '}
-                                  {labelCount(count, [
-                                    'отзыв',
-                                    'отзыва',
-                                    'отзывов'
-                                  ])}
-                                  )
-                                </span>
-                              </>
-                            ) : (
-                              <span className="text-sm text-ink-mid">
-                                Без отзывов
-                              </span>
-                            )}
-                          </div>
+              ))}
+            </div>
+          </div>
+        </section>
 
-                          {list.length > 0 && (
-                            <div className="mt-4 space-y-3 border-t border-border pt-3">
-                              {list.map((p, i) => (
-                                <div
-                                  key={`${m.id}-${i}`}
-                                  className="flex items-start gap-2"
-                                >
-                                  <Avatar
-                                    name={p.user_name || '?'}
-                                    size="sm"
-                                    seed={p.user_name || ''}
-                                  />
-                                  <div className="min-w-0 flex-1">
-                                    <div className="flex items-center gap-2 text-sm">
-                                      <span className="font-semibold text-ink">
-                                        {p.user_name || '—'}
-                                      </span>
-                                      <StarRating rating={p.rating} size="sm" />
-                                      <span className="text-xs text-ink-mid">
-                                        {formatDate(p.created_at)}
-                                      </span>
-                                    </div>
-                                    {p.comment && (
-                                      <p className="text-sm text-ink-mid mt-0.5 line-clamp-2">
-                                        {p.comment}
-                                      </p>
-                                    )}
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          )}
+        {rows.length === 0 ? (
+          <section className="border border-border bg-surface px-6 py-16 text-center">
+            <h2 className="text-3xl font-bold tracking-tight">
+              Здесь пока пусто
+            </h2>
+            <p className="mx-auto mt-3 max-w-md text-ink-mid">
+              Добавь первого проверенного мастера в эту категорию.
+            </p>
+            <Link href="/masters/new" className="btn-primary mt-6">
+              Добавить мастера
+            </Link>
+          </section>
+        ) : (
+          <section className="divide-y divide-border border-t border-border">
+            {rows.map((m) => {
+              const avg = m.avg_rating ? parseFloat(m.avg_rating) : 0;
+              const count = parseInt(m.review_count);
+              const list = previewsByMaster.get(m.id) || [];
+              const latest = list[0];
+              return (
+                <Link
+                  key={m.id}
+                  href={`/masters/${m.id}`}
+                  className="group grid gap-5 py-7 transition hover:bg-surface/60 sm:grid-cols-[minmax(0,1fr)_220px] sm:px-3"
+                >
+                  <div className="min-w-0">
+                    <div className="mb-3 flex flex-wrap items-center gap-2">
+                      <span className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
+                        {specialtyLabel(m.specialty)}
+                      </span>
+                      {m.area && (
+                        <span className="text-xs text-ink-dim">{m.area}</span>
+                      )}
+                    </div>
+                    <h2 className="text-2xl font-bold tracking-tight text-ink group-hover:text-accent">
+                      {m.name}
+                    </h2>
+                    {latest?.comment && (
+                      <p className="mt-3 max-w-2xl text-sm leading-6 text-ink-mid line-clamp-2">
+                        “{latest.comment}”
+                      </p>
+                    )}
+                    {latest && (
+                      <div className="mt-3 text-xs text-ink-dim">
+                        {latest.user_name || 'Участник'} ·{' '}
+                        {formatDate(latest.created_at)}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex items-start justify-between gap-4 sm:flex-col sm:items-end sm:text-right">
+                    {count > 0 ? (
+                      <div>
+                        <StarRating rating={avg} showNumber />
+                        <div className="mt-1 text-xs text-ink-dim">
+                          {count}{' '}
+                          {labelCount(count, ['отзыв', 'отзыва', 'отзывов'])}
                         </div>
                       </div>
-                    </Link>
-                  );
-                })}
-              </div>
-            )}
+                    ) : (
+                      <div className="text-sm text-ink-dim">Без отзывов</div>
+                    )}
+                    <span className="text-sm font-semibold text-ink opacity-50 transition group-hover:opacity-100">
+                      Открыть →
+                    </span>
+                  </div>
+                </Link>
+              );
+            })}
           </section>
-        </div>
+        )}
       </main>
     </>
   );
@@ -399,12 +358,11 @@ function FilterLink({
   return (
     <Link
       href={href}
-      className={`block text-sm px-2 py-2 transition ${
+      className={`shrink-0 rounded-full border px-3.5 py-2 text-sm transition ${
         active
-          ? 'bg-ink text-white font-semibold'
-          : 'text-ink-mid hover:bg-surface-2 hover:text-ink'
+          ? 'border-ink bg-ink text-white'
+          : 'border-border text-ink-mid hover:border-accent hover:text-ink'
       }`}
-      style={{ borderRadius: 7 }}
     >
       {label}
     </Link>
