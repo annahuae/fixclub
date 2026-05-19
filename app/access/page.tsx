@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { submitLogin, submitSignup } from './actions';
 import { PasswordField } from '@/components/password-field';
 
@@ -29,12 +30,14 @@ export default async function AccessPage({
 
       <div className="max-w-md w-full relative">
         <Link href="/" className="inline-flex items-center gap-2 mb-6">
-          <span
-            className="inline-flex items-center justify-center w-8 h-8 rounded-md text-white font-bold"
-            style={{ background: 'var(--accent)' }}
-          >
-            F
-          </span>
+          <Image
+            src="/logo.png"
+            alt="Fixclub UAE"
+            width={36}
+            height={36}
+            priority
+            className="w-9 h-9 object-contain"
+          />
           <span className="font-bold text-lg text-ink">
             Fixclub <span className="text-ink-mid font-medium">UAE</span>
           </span>

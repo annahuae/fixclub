@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { destroySession, getSessionUser } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { EmirateSelect } from './emirate-select';
@@ -25,12 +26,14 @@ export async function Nav({
     <header className="sticky top-0 z-50 border-b border-border bg-white/95 backdrop-blur-xl">
       <div className="shell h-20 flex items-center gap-5">
         <Link href="/masters" className="flex items-center gap-3 shrink-0">
-          <span
-            className="inline-flex items-center justify-center w-9 h-9 border border-accent/20 bg-accent-soft text-accent font-bold text-sm"
-            style={{ borderRadius: 10 }}
-          >
-            F
-          </span>
+          <Image
+            src="/logo.png"
+            alt="Fixclub UAE"
+            width={40}
+            height={40}
+            priority
+            className="w-10 h-10 object-contain"
+          />
           <span className="font-bold text-xl tracking-tight text-ink hidden sm:inline">
             Fixclub <span className="text-accent font-bold">UAE</span>
           </span>
