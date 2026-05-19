@@ -19,6 +19,8 @@ type Shop = {
   address: string | null;
   phone: string | null;
   phone_is_whatsapp: boolean | null;
+  phone2: string | null;
+  phone2_is_whatsapp: boolean | null;
   maps_url: string | null;
   description: string | null;
   added_by: string | null;
@@ -116,12 +118,16 @@ export default async function ShopPage({
                 )}
               </div>
 
-              {shop.phone && (
+              {(shop.phone || shop.phone2) && (
                 <div className="mt-3 flex flex-wrap items-center gap-2">
-                  {shop.phone_is_whatsapp && (
+                  {shop.phone && shop.phone_is_whatsapp && (
                     <PhoneLink phone={shop.phone} kind="whatsapp" />
                   )}
-                  <PhoneLink phone={shop.phone} kind="call" />
+                  {shop.phone2 && shop.phone2_is_whatsapp && (
+                    <PhoneLink phone={shop.phone2} kind="whatsapp" />
+                  )}
+                  {shop.phone && <PhoneLink phone={shop.phone} kind="call" />}
+                  {shop.phone2 && <PhoneLink phone={shop.phone2} kind="call" />}
                 </div>
               )}
 

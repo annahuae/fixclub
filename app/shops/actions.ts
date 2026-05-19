@@ -14,6 +14,8 @@ export async function addShop(formData: FormData) {
   const address = String(formData.get('address') || '').trim() || null;
   const phone = String(formData.get('phone') || '').trim() || null;
   const phoneIsWhatsapp = !!formData.get('phone_is_whatsapp') && !!phone;
+  const phone2 = String(formData.get('phone2') || '').trim() || null;
+  const phone2IsWhatsapp = !!formData.get('phone2_is_whatsapp') && !!phone2;
   const mapsUrl = String(formData.get('maps_url') || '').trim() || null;
   const description =
     String(formData.get('description') || '').trim() || null;
@@ -23,8 +25,8 @@ export async function addShop(formData: FormData) {
   }
 
   const rows = (await sql`
-    INSERT INTO shops (name, category, emirate, area, address, phone, phone_is_whatsapp, maps_url, description, added_by)
-    VALUES (${name}, ${category}, ${emirate}, ${area}, ${address}, ${phone}, ${phoneIsWhatsapp}, ${mapsUrl}, ${description}, ${user.userId})
+    INSERT INTO shops (name, category, emirate, area, address, phone, phone_is_whatsapp, phone2, phone2_is_whatsapp, maps_url, description, added_by)
+    VALUES (${name}, ${category}, ${emirate}, ${area}, ${address}, ${phone}, ${phoneIsWhatsapp}, ${phone2}, ${phone2IsWhatsapp}, ${mapsUrl}, ${description}, ${user.userId})
     RETURNING id
   `) as { id: string }[];
 

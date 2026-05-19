@@ -88,6 +88,24 @@ export default async function NewShopPage() {
           </div>
 
           <div>
+            <label className="label">Second phone (optional)</label>
+            <input
+              name="phone2"
+              placeholder="+971 50 ..."
+              className="input font-mono"
+            />
+            <label className="mt-2 flex cursor-pointer items-center gap-2 text-sm text-ink-mid">
+              <input
+                type="checkbox"
+                name="phone2_is_whatsapp"
+                value="1"
+                className="h-4 w-4 accent-accent"
+              />
+              This is a WhatsApp number
+            </label>
+          </div>
+
+          <div>
             <label className="label">Address</label>
             <input
               name="address"

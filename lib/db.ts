@@ -164,4 +164,8 @@ export async function initSchema() {
   // v6: mark whether phone is a WhatsApp number
   await sql`ALTER TABLE masters ADD COLUMN IF NOT EXISTS phone_is_whatsapp BOOLEAN NOT NULL DEFAULT FALSE`;
   await sql`ALTER TABLE shops ADD COLUMN IF NOT EXISTS phone_is_whatsapp BOOLEAN NOT NULL DEFAULT FALSE`;
+
+  // v7: second phone number on shops
+  await sql`ALTER TABLE shops ADD COLUMN IF NOT EXISTS phone2 TEXT`;
+  await sql`ALTER TABLE shops ADD COLUMN IF NOT EXISTS phone2_is_whatsapp BOOLEAN NOT NULL DEFAULT FALSE`;
 }
