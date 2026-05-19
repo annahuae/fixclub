@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { requireUser } from '@/lib/auth';
 import { sql } from '@/lib/db';
 import {
-  SPECIALTIES,
+  SPECIALTY_GROUPS,
   specialtyLabel,
   emirateLabel,
   formatDate
@@ -177,13 +177,22 @@ export default async function MastersPage({
                   active={!specialty}
                   label="All specialties"
                 />
-                {SPECIALTIES.map((s) => (
-                  <CheckLink
-                    key={s.value}
-                    href={buildHref({ specialty: s.value })}
-                    active={specialty === s.value}
-                    label={s.label}
-                  />
+                {SPECIALTY_GROUPS.map((group) => (
+                  <div key={group.title} className="mt-4 first:mt-3">
+                    <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-ink-dim">
+                      {group.title}
+                    </div>
+                    <div className="space-y-2">
+                      {group.items.map((s) => (
+                        <CheckLink
+                          key={s.value}
+                          href={buildHref({ specialty: s.value })}
+                          active={specialty === s.value}
+                          label={s.label}
+                        />
+                      ))}
+                    </div>
+                  </div>
                 ))}
               </FilterSection>
             </div>
