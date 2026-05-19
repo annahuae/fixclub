@@ -57,25 +57,12 @@ export async function Nav({
         {showSearch && (
           <form action={searchAction} className="flex-1 max-w-md flex gap-2">
             <div className="relative flex-1">
-              <svg
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-dim pointer-events-none"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden
-              >
-                <circle cx="11" cy="11" r="7" />
-                <path d="m21 21-4.3-4.3" />
-              </svg>
               <input
                 type="search"
                 name="q"
                 defaultValue={query || ''}
                 placeholder="Search for a specialist or company..."
-                className="input h-11 pl-10"
+                className="input h-11"
               />
               {emirate && (
                 <input type="hidden" name="emirate" value={emirate} />

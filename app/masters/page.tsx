@@ -175,7 +175,7 @@ export default async function MastersPage({
       <main className="shell py-8">
         <div className="grid gap-8 lg:grid-cols-[250px_minmax(0,1fr)_260px]">
           <aside className="hidden lg:block">
-            <div className="panel sticky top-28 p-5">
+            <div className="panel sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto p-5">
               <div className="mb-5 flex items-center justify-between">
                 <h2 className="font-semibold text-ink">Filters</h2>
                 <Link href="/masters" className="text-sm text-accent">
@@ -363,7 +363,8 @@ export default async function MastersPage({
           </section>
 
           <aside className="hidden lg:block">
-            <div className="panel sticky top-28 p-6">
+            <div className="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto pr-1">
+              <div className="panel p-6">
               <h2 className="font-semibold">Rating summary</h2>
               <div className="mt-6 text-6xl font-semibold tracking-tight">
                 {aggregateAvg.toFixed(1)}
@@ -407,6 +408,7 @@ export default async function MastersPage({
               <Link href="/masters/new" className="btn-outline mt-5 w-full">
                 Write a review
               </Link>
+            </div>
             </div>
           </aside>
         </div>
