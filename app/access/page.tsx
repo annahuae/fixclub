@@ -148,12 +148,7 @@ function SignupView({
         </div>
         <PasswordField hint="Сохрани — это твой пароль для входа." />
         <div>
-          <label className="label">
-            Инвайт-код{' '}
-            <span className="text-ink-dim font-normal normal-case">
-              {hasInvite ? '(подставлен из ссылки)' : '(если есть — вход моментальный)'}
-            </span>
-          </label>
+          <label className="label">Инвайт-код</label>
           <input
             name="code"
             defaultValue={prefilledInvite}
