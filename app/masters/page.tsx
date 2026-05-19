@@ -55,19 +55,13 @@ export default async function MastersPage({
   const minRating = params.rating ? parseFloat(params.rating) : null;
   const sort = (params.sort as (typeof SORTS)[number]['value']) || 'reviewed';
 
-  const orderBy =
-    sort === 'rated'
-      ? sql`ORDER BY avg_rating DESC NULLS LAST, review_count DESC`
-      : sort === 'newest'
-        ? sql`ORDER BY last_review_at DESC NULLS LAST, m.created_at DESC`
-        : sql`ORDER BY review_count DESC, avg_rating DESC NULLS LAST`;
-
-  const rows = (await sql`
+  const rowsUnsorted = (await sql`
     SELECT
       m.id, m.name, m.specialty, m.area, m.phone,
       AVG(r.rating)::numeric(10,2) AS avg_rating,
       COUNT(r.id) AS review_count,
-      MAX(r.created_at) AS last_review_at
+      MAX(r.created_at) AS last_review_at,
+      m.created_at AS master_created_at
     FROM masters m
     LEFT JOIN reviews r ON r.master_id = m.id
     WHERE
@@ -75,8 +69,35 @@ export default async function MastersPage({
       AND (${q}::text IS NULL OR m.name ILIKE ${'%' + (q || '') + '%'} OR m.area ILIKE ${'%' + (q || '') + '%'})
     GROUP BY m.id
     HAVING (${minRating}::numeric IS NULL OR AVG(r.rating) >= ${minRating})
-    ${orderBy}
-  `) as unknown as MasterRow[];
+  `) as unknown as (MasterRow & {
+    last_review_at: string | null;
+    master_created_at: string;
+  })[];
+
+  const rows = [...rowsUnsorted].sort((a, b) => {
+    if (sort === 'rated') {
+      const ar = a.avg_rating ? parseFloat(a.avg_rating) : -1;
+      const br = b.avg_rating ? parseFloat(b.avg_rating) : -1;
+      if (ar !== br) return br - ar;
+      return parseInt(b.review_count) - parseInt(a.review_count);
+    }
+    if (sort === 'newest') {
+      const ad = a.last_review_at
+        ? new Date(a.last_review_at).getTime()
+        : new Date(a.master_created_at).getTime();
+      const bd = b.last_review_at
+        ? new Date(b.last_review_at).getTime()
+        : new Date(b.master_created_at).getTime();
+      return bd - ad;
+    }
+    // reviewed (default)
+    const ac = parseInt(a.review_count);
+    const bc = parseInt(b.review_count);
+    if (ac !== bc) return bc - ac;
+    const ar = a.avg_rating ? parseFloat(a.avg_rating) : -1;
+    const br = b.avg_rating ? parseFloat(b.avg_rating) : -1;
+    return br - ar;
+  });
 
   const masterIds = rows.map((m) => m.id);
   const previews = (masterIds.length === 0
