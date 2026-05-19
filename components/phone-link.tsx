@@ -2,18 +2,18 @@ import { whatsappLink } from '@/lib/utils';
 
 export function PhoneLink({
   phone,
-  isWhatsapp
+  kind
 }: {
   phone: string;
-  isWhatsapp?: boolean | null;
+  kind: 'whatsapp' | 'call';
 }) {
-  if (isWhatsapp) {
+  if (kind === 'whatsapp') {
     return (
       <a
         href={whatsappLink(phone)}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-2 text-sm font-medium text-[#25D366] hover:underline"
+        className="inline-flex items-center gap-2 rounded-lg border border-[#25D366]/30 bg-[#25D366]/10 px-3 py-1.5 text-sm font-medium text-[#128C7E] hover:bg-[#25D366]/20"
         title="Open WhatsApp chat"
       >
         <svg
@@ -32,7 +32,7 @@ export function PhoneLink({
   return (
     <a
       href={`tel:${phone}`}
-      className="inline-flex items-center gap-2 text-sm font-medium text-accent hover:underline"
+      className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-3 py-1.5 text-sm font-medium text-ink hover:border-accent hover:text-accent"
     >
       <svg
         className="h-4 w-4"

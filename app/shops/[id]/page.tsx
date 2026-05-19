@@ -111,15 +111,16 @@ export default async function ShopPage({
                 ) : (
                   <span className="text-ink-mid text-sm">No reviews yet</span>
                 )}
-                {shop.phone && (
-                  <span className="ml-auto">
-                    <PhoneLink
-                      phone={shop.phone}
-                      isWhatsapp={shop.phone_is_whatsapp}
-                    />
-                  </span>
-                )}
               </div>
+
+              {shop.phone && (
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  {shop.phone_is_whatsapp && (
+                    <PhoneLink phone={shop.phone} kind="whatsapp" />
+                  )}
+                  <PhoneLink phone={shop.phone} kind="call" />
+                </div>
+              )}
 
               {shop.address && (
                 <div className="mt-3 text-sm text-ink">📍 {shop.address}</div>

@@ -126,15 +126,16 @@ export default async function MasterPage({
                 ) : (
                   <span className="text-ink-mid text-sm">No reviews yet</span>
                 )}
-                {master.phone && (
-                  <span className="ml-auto">
-                    <PhoneLink
-                      phone={master.phone}
-                      isWhatsapp={master.phone_is_whatsapp}
-                    />
-                  </span>
-                )}
               </div>
+
+              {master.phone && (
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  {master.phone_is_whatsapp && (
+                    <PhoneLink phone={master.phone} kind="whatsapp" />
+                  )}
+                  <PhoneLink phone={master.phone} kind="call" />
+                </div>
+              )}
 
               {master.description && (
                 <p className="mt-4 text-ink leading-relaxed whitespace-pre-wrap text-sm">

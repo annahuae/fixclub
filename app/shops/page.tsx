@@ -39,14 +39,6 @@ const SORTS = [
   { value: 'newest', label: 'Newest reviews' }
 ] as const;
 
-const FILTER_CATEGORIES = [
-  'hardware',
-  'tools',
-  'plumbing_parts',
-  'electrical_parts',
-  'tiles'
-];
-
 export default async function ShopsPage({
   searchParams
 }: {
@@ -183,31 +175,14 @@ export default async function ShopsPage({
                   active={!category}
                   label="All categories"
                 />
-                {FILTER_CATEGORIES.map((value) => (
+                {SHOP_CATEGORIES.map((c) => (
                   <CheckLink
-                    key={value}
-                    href={buildHref({ category: value })}
-                    active={category === value}
-                    label={shopCategoryLabel(value)}
+                    key={c.value}
+                    href={buildHref({ category: c.value })}
+                    active={category === c.value}
+                    label={c.label}
                   />
                 ))}
-                <details>
-                  <summary className="mt-2 cursor-pointer list-none text-sm font-medium text-accent">
-                    Show more
-                  </summary>
-                  <div className="mt-2 space-y-2">
-                    {SHOP_CATEGORIES.filter(
-                      (c) => !FILTER_CATEGORIES.includes(c.value)
-                    ).map((c) => (
-                      <CheckLink
-                        key={c.value}
-                        href={buildHref({ category: c.value })}
-                        active={category === c.value}
-                        label={c.label}
-                      />
-                    ))}
-                  </div>
-                </details>
               </FilterSection>
             </div>
           </aside>
