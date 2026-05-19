@@ -92,10 +92,10 @@ export default async function AdminPage({
   const tab = params.tab || 'requests';
 
   const [pendingRows, allRequestRows, inviteRows, userRows] = await Promise.all([
-    sql`SELECT * FROM access_requests WHERE status = 'pending' ORDER BY created_at DESC` as Promise<
+    sql`SELECT * FROM access_requests WHERE status = 'pending' ORDER BY created_at DESC` as unknown as Promise<
       RequestRow[]
     >,
-    sql`SELECT * FROM access_requests WHERE status != 'pending' ORDER BY created_at DESC LIMIT 20` as Promise<
+    sql`SELECT * FROM access_requests WHERE status != 'pending' ORDER BY created_at DESC LIMIT 20` as unknown as Promise<
       RequestRow[]
     >,
     sql`
@@ -103,7 +103,7 @@ export default async function AdminPage({
       FROM invite_codes i
       LEFT JOIN users u ON u.id = i.used_by
       ORDER BY i.created_at DESC
-    ` as Promise<InviteRow[]>,
+    ` as unknown as Promise<InviteRow[]>,
     sql`
       SELECT
         u.id, u.name, u.contact, u.created_at,
@@ -114,7 +114,7 @@ export default async function AdminPage({
       LEFT JOIN reviews r ON r.user_id = u.id
       GROUP BY u.id
       ORDER BY u.created_at DESC
-    ` as Promise<UserRow[]>
+    ` as unknown as Promise<UserRow[]>
   ]);
 
   return (
