@@ -22,30 +22,30 @@ export async function Nav({
 }) {
   const user = await getSessionUser();
   return (
-    <header className="bg-ink text-white sticky top-0 z-50">
-      <div className="shell h-16 flex items-center gap-5">
+    <header className="sticky top-0 z-50 border-b border-border bg-white/95 backdrop-blur-xl">
+      <div className="shell h-20 flex items-center gap-5">
         <Link href="/masters" className="flex items-center gap-3 shrink-0">
           <span
-            className="inline-flex items-center justify-center w-8 h-8 border border-white/20 text-white font-bold text-sm"
-            style={{ borderRadius: 6 }}
+            className="inline-flex items-center justify-center w-9 h-9 border border-accent/20 bg-accent-soft text-accent font-bold text-sm"
+            style={{ borderRadius: 10 }}
           >
             F
           </span>
-          <span className="font-bold text-lg tracking-tight hidden sm:inline">
-            Fixclub <span className="text-white/48 font-medium">UAE</span>
+          <span className="font-bold text-xl tracking-tight text-ink hidden sm:inline">
+            Fixclub <span className="text-accent font-bold">UAE</span>
           </span>
         </Link>
 
         <nav className="hidden md:flex items-center gap-1 text-sm">
           <Link
             href="/masters"
-            className="px-3 py-2 text-white/68 hover:text-white"
+            className="px-3 py-2 text-ink-mid hover:text-ink"
           >
             Мастера
           </Link>
           <Link
             href="/shops"
-            className="px-3 py-2 text-white/68 hover:text-white"
+            className="px-3 py-2 text-ink-mid hover:text-ink"
           >
             Магазины
           </Link>
@@ -55,7 +55,7 @@ export async function Nav({
           <form action={searchAction} className="flex-1 max-w-md flex gap-2">
             <div className="relative flex-1">
               <svg
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/36 pointer-events-none"
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-dim pointer-events-none"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -71,8 +71,8 @@ export async function Nav({
                 type="search"
                 name="q"
                 defaultValue={query || ''}
-                placeholder="Поиск"
-                className="w-full h-10 rounded-md border border-white/12 bg-white/8 pl-10 pr-3 text-sm text-white placeholder:text-white/36 focus:outline-none focus:border-white/30"
+                placeholder="Поиск мастера или компании..."
+                className="input h-11 pl-10"
               />
               {emirate && (
                 <input type="hidden" name="emirate" value={emirate} />
@@ -83,22 +83,22 @@ export async function Nav({
 
         <div className="ml-auto flex items-center gap-3">
           {showSearch && (
-          <div className="hidden md:block">
-            <EmirateSelect value={emirate} />
-          </div>
+            <div className="hidden md:block">
+              <EmirateSelect value={emirate} />
+            </div>
           )}
           <Link
             href="/masters/new"
-            className="inline-flex items-center justify-center rounded-md bg-white px-3.5 py-2 text-sm font-semibold text-ink hover:bg-accent hover:text-white transition"
+            className="btn-outline h-11"
           >
-            <span className="hidden sm:inline">Добавить</span>
+            <span className="hidden sm:inline">Оставить отзыв</span>
             <span className="sm:hidden">+</span>
           </Link>
           {user && (
             <form action={signOut}>
               <button
                 type="submit"
-                className="text-xs text-white/52 hover:text-white"
+                className="text-xs text-ink-mid hover:text-danger"
                 title={`${user.name} — выйти`}
               >
                 Выйти
