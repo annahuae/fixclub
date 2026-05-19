@@ -10,6 +10,7 @@ import {
 import { StarRating } from '@/components/star-rating';
 import { Nav } from '@/components/nav';
 import { EmirateSelect } from '@/components/emirate-select';
+import { InstantLink } from '@/components/instant-link';
 
 type MasterRow = {
   id: string;
@@ -237,34 +238,30 @@ export default async function MastersPage({
                 {SPECIALTIES.filter(
                   (s) => !FEATURED_SPECIALTIES.includes(s.value)
                 ).map((s) => (
-                  <Link
+                  <InstantLink
                     key={s.value}
                     href={buildHref({ specialty: s.value })}
-                    className={`rounded-full border px-3 py-2 text-sm transition ${
-                      specialty === s.value
-                        ? 'border-ink bg-ink text-white'
-                        : 'border-border text-ink-mid hover:border-accent hover:text-ink'
-                    }`}
+                    active={specialty === s.value}
+                    className="rounded-full border border-border px-3 py-2 text-sm text-ink-mid transition hover:border-accent hover:text-ink"
+                    activeClassName="rounded-full border border-ink bg-ink px-3 py-2 text-sm text-white transition"
                   >
                     {s.label}
-                  </Link>
+                  </InstantLink>
                 ))}
               </div>
             </details>
 
             <div className="flex gap-1 overflow-x-auto">
               {SORTS.map((s) => (
-                <Link
+                <InstantLink
                   key={s.value}
                   href={buildHref({ sort: s.value })}
-                  className={`rounded-full px-3 py-1.5 text-sm transition whitespace-nowrap ${
-                    sort === s.value
-                      ? 'bg-ink text-white'
-                      : 'text-ink-mid hover:bg-surface-2 hover:text-ink'
-                  }`}
+                  active={sort === s.value}
+                  className="rounded-full px-3 py-1.5 text-sm text-ink-mid transition whitespace-nowrap hover:bg-surface-2 hover:text-ink"
+                  activeClassName="rounded-full bg-ink px-3 py-1.5 text-sm text-white transition whitespace-nowrap"
                 >
                   {s.label}
-                </Link>
+                </InstantLink>
               ))}
             </div>
           </div>
@@ -356,16 +353,14 @@ function FilterLink({
   label: string;
 }) {
   return (
-    <Link
+    <InstantLink
       href={href}
-      className={`shrink-0 rounded-full border px-3.5 py-2 text-sm transition ${
-        active
-          ? 'border-ink bg-ink text-white'
-          : 'border-border text-ink-mid hover:border-accent hover:text-ink'
-      }`}
+      active={active}
+      className="shrink-0 rounded-full border border-border px-3.5 py-2 text-sm text-ink-mid transition hover:border-accent hover:text-ink"
+      activeClassName="shrink-0 rounded-full border border-ink bg-ink px-3.5 py-2 text-sm text-white transition"
     >
       {label}
-    </Link>
+    </InstantLink>
   );
 }
 
