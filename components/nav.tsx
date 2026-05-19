@@ -56,8 +56,8 @@ export async function Nav({
         </nav>
 
         {showSearch && (
-          <>
-            <form action={searchAction} className="flex-1 max-w-md">
+          <div className="flex flex-1 max-w-2xl items-center gap-2">
+            <form action={searchAction} className="flex-1">
               <div className="relative">
                 <input
                   type="search"
@@ -74,7 +74,7 @@ export async function Nav({
             <div className="hidden md:block">
               <EmirateSelect value={emirate} />
             </div>
-          </>
+          </div>
         )}
 
         <div className="ml-auto flex items-center gap-3">
