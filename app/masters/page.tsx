@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { requireUser } from '@/lib/auth';
 import { sql } from '@/lib/db';
 import {
-  SPECIALTY_GROUPS,
+  SPECIALTIES,
   specialtyLabel,
   emirateLabel,
   formatDate
@@ -35,6 +35,15 @@ const SORTS = [
   { value: 'rated', label: 'Выше рейтинг' },
   { value: 'newest', label: 'Свежие отзывы' }
 ] as const;
+
+const FEATURED_SPECIALTIES = [
+  'plumber',
+  'electrician',
+  'ac',
+  'handyman',
+  'cleaner',
+  'mover'
+];
 
 export default async function MastersPage({
   searchParams
@@ -192,47 +201,58 @@ export default async function MastersPage({
           </form>
         </section>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[250px_minmax(0,1fr)] gap-6">
-          {/* Sidebar: filters */}
-          <aside className="lg:sticky lg:top-[72px] lg:self-start">
-            <div className="panel p-3">
-              <div className="px-2 pt-2 pb-3">
-                <div className="eyebrow">Специальности</div>
-              </div>
-              <FilterLink
-                active={!specialty}
-                href={buildHref({ specialty: null })}
-                label="Все специальности"
-              />
-              {SPECIALTY_GROUPS.map((group, idx) => (
-                <div
-                  key={group.title}
-                  className={
-                    idx === 0
-                      ? 'mt-4 pt-1'
-                      : 'mt-4 pt-4 border-t border-border/80'
-                  }
-                >
-                  <div className="text-[11px] font-bold text-ink-dim uppercase tracking-widest mb-2 px-2">
-                    {group.title}
-                  </div>
-                  {group.items.map((s) => (
-                    <FilterLink
-                      key={s.value}
-                      active={specialty === s.value}
-                      href={buildHref({ specialty: s.value })}
-                      label={s.label}
-                    />
-                  ))}
-                </div>
-              ))}
-            </div>
-          </aside>
-
-          {/* Main column: results */}
+        <div className="grid grid-cols-1 gap-5">
           <section className="min-w-0">
-            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex gap-1 overflow-x-auto">
+            <div className="mb-4 panel p-3 space-y-3">
+              <div className="flex gap-2 overflow-x-auto pb-1">
+                <FilterLink
+                  active={!specialty}
+                  href={buildHref({ specialty: null })}
+                  label="Все"
+                />
+                {FEATURED_SPECIALTIES.map((value) => (
+                  <FilterLink
+                    key={value}
+                    active={specialty === value}
+                    href={buildHref({ specialty: value })}
+                    label={specialtyLabel(value)}
+                  />
+                ))}
+                {specialty && !FEATURED_SPECIALTIES.includes(specialty) && (
+                  <FilterLink
+                    active
+                    href={buildHref({ specialty })}
+                    label={specialtyLabel(specialty)}
+                  />
+                )}
+              </div>
+
+              <div className="flex flex-col gap-3 border-t border-border pt-3 sm:flex-row sm:items-center sm:justify-between">
+                <details className="group">
+                  <summary className="btn-outline h-10 cursor-pointer list-none">
+                    Ещё категории
+                  </summary>
+                  <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2 rounded-lg border border-border bg-surface p-2">
+                    {SPECIALTIES.filter(
+                      (s) => !FEATURED_SPECIALTIES.includes(s.value)
+                    ).map((s) => (
+                      <Link
+                        key={s.value}
+                        href={buildHref({ specialty: s.value })}
+                        className={`px-2.5 py-2 text-sm transition ${
+                          specialty === s.value
+                            ? 'bg-ink text-white font-semibold'
+                            : 'text-ink-mid hover:bg-surface-2 hover:text-ink'
+                        }`}
+                        style={{ borderRadius: 7 }}
+                      >
+                        {s.label}
+                      </Link>
+                    ))}
+                  </div>
+                </details>
+
+                <div className="flex gap-1 overflow-x-auto">
                 {SORTS.map((s) => (
                   <Link
                     key={s.value}
@@ -247,9 +267,11 @@ export default async function MastersPage({
                     {s.label}
                   </Link>
                 ))}
-              </div>
-              <div className="hidden md:block">
-                <EmirateSelect value={emirate || undefined} />
+                </div>
+
+                <div className="hidden md:block shrink-0">
+                  <EmirateSelect value={emirate || undefined} />
+                </div>
               </div>
             </div>
 
@@ -359,7 +381,6 @@ export default async function MastersPage({
               </div>
             )}
           </section>
-
         </div>
       </main>
     </>
