@@ -146,12 +146,20 @@ export default async function ShopPage({
               </div>
 
               {userAdded && (
-                <form action={deleteShop} className="mt-3">
-                  <input type="hidden" name="id" value={shop.id} />
-                  <button type="submit" className="btn-danger text-xs">
-                    Delete shop
-                  </button>
-                </form>
+                <div className="mt-3 flex flex-wrap gap-3">
+                  <Link
+                    href={`/shops/${shop.id}/edit`}
+                    className="btn-ghost text-xs"
+                  >
+                    Edit shop
+                  </Link>
+                  <form action={deleteShop}>
+                    <input type="hidden" name="id" value={shop.id} />
+                    <button type="submit" className="btn-danger text-xs">
+                      Delete shop
+                    </button>
+                  </form>
+                </div>
               )}
             </div>
           </div>

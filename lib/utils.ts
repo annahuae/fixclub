@@ -56,6 +56,7 @@ export const SHOP_CATEGORIES = [
   { value: 'hardware', label: 'Hardware' },
   { value: 'tiles', label: 'Tiles / finishes' },
   { value: 'plumbing_parts', label: 'Plumbing parts' },
+  { value: 'sanitary', label: 'Sanitary ware' },
   { value: 'electrical_parts', label: 'Electrical parts' },
   { value: 'tools', label: 'Tools' },
   { value: 'paint', label: 'Paint' },

@@ -60,6 +60,50 @@ export async function addShopReview(formData: FormData) {
   redirect(`/shops/${shopId}`);
 }
 
+export async function updateShop(formData: FormData) {
+  const user = await requireUser();
+  const id = String(formData.get('id') || '');
+  if (!id) redirect('/shops');
+
+  const name = String(formData.get('name') || '').trim();
+  const category = String(formData.get('category') || '').trim();
+  const emirate = String(formData.get('emirate') || '').trim() || null;
+  const area = String(formData.get('area') || '').trim() || null;
+  const address = String(formData.get('address') || '').trim() || null;
+  const phone = String(formData.get('phone') || '').trim() || null;
+  const whatsappPhone =
+    String(formData.get('whatsapp_phone') || '').trim() || null;
+  const mapsUrl = String(formData.get('maps_url') || '').trim() || null;
+  const description =
+    String(formData.get('description') || '').trim() || null;
+
+  if (!name || !category) {
+    redirect(`/shops/${id}/edit`);
+  }
+
+  // Only creator can edit (admin path can be added later via separate endpoint).
+  const result = (await sql`
+    UPDATE shops SET
+      name = ${name},
+      category = ${category},
+      emirate = ${emirate},
+      area = ${area},
+      address = ${address},
+      phone = ${phone},
+      whatsapp_phone = ${whatsappPhone},
+      maps_url = ${mapsUrl},
+      description = ${description}
+    WHERE id = ${id} AND added_by = ${user.userId}
+    RETURNING id
+  `) as { id: string }[];
+
+  if (result.length === 0) redirect(`/shops/${id}`);
+
+  revalidatePath('/shops');
+  revalidatePath(`/shops/${id}`);
+  redirect(`/shops/${id}`);
+}
+
 export async function deleteShop(formData: FormData) {
   const user = await requireUser();
   const id = String(formData.get('id') || '');

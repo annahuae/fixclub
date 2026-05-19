@@ -40,7 +40,7 @@ export function UserMenu({
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
-        className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-surface text-sm font-semibold text-ink hover:border-accent hover:text-accent"
+        className="flex h-9 w-9 items-center justify-center rounded-full bg-surface-2 text-sm font-medium text-ink-mid hover:bg-border hover:text-ink"
       >
         {initial}
       </button>
