@@ -73,12 +73,12 @@ export default async function ShopPage({
   return (
     <>
       <Nav searchAction="/shops" />
-      <main className="max-w-5xl mx-auto px-6 py-8">
+      <main className="shell py-8">
         <Link href="/shops" className="text-sm text-ink-mid hover:text-accent">
           ← К магазинам
         </Link>
 
-        <div className="card mt-4">
+        <div className="panel mt-4 p-6">
           <div className="flex items-start gap-5">
             <Avatar name={shop.name} seed={shop.id} size="lg" />
             <div className="flex-1 min-w-0">
@@ -153,7 +153,7 @@ export default async function ShopPage({
 
         <section className="mt-6">
           {!userHasReviewed ? (
-            <div className="card mb-6">
+            <div className="panel mb-6 p-6">
               <h2 className="text-xl font-bold mb-1">Оставить отзыв</h2>
               <p className="text-ink-mid text-sm mb-4">
                 Один отзыв на магазин. Пиши по делу.
@@ -179,7 +179,7 @@ export default async function ShopPage({
               </form>
             </div>
           ) : (
-            <div className="mb-6 p-4 bg-accent-soft border border-transparent rounded-xl text-sm text-accent-strong">
+            <div className="mb-6 rounded-xl border border-transparent bg-accent-soft p-4 text-sm text-accent-strong">
               Ты уже оставлял отзыв этому магазину.
             </div>
           )}

@@ -9,16 +9,25 @@ export default async function NewMasterPage() {
   return (
     <>
       <Nav />
-      <main className="max-w-2xl mx-auto px-6 py-8">
-        <Link href="/masters" className="text-sm text-ink-mid hover:text-accent">
-          ← Каталог
-        </Link>
-        <h1 className="text-3xl font-bold mt-4 mb-1">Добавить мастера</h1>
-        <p className="text-ink-mid text-sm mb-6">
-          Только те, с кем сам работал или кого тебе лично рекомендовали.
-        </p>
+      <main className="shell py-8">
+        <div className="mx-auto max-w-3xl">
+          <Link
+            href="/masters"
+            className="text-sm text-ink-mid hover:text-accent"
+          >
+            ← Каталог
+          </Link>
+          <div className="mt-5 mb-6">
+            <div className="eyebrow mb-3">Write a review</div>
+            <h1 className="text-4xl font-bold tracking-tight">
+              Добавить мастера
+            </h1>
+            <p className="mt-2 text-ink-mid">
+              Только те, с кем сам работал или кого тебе лично рекомендовали.
+            </p>
+          </div>
 
-        <form action={addMaster} className="card space-y-4">
+        <form action={addMaster} className="panel space-y-5 p-6">
           <div>
             <label className="label">Имя / название</label>
             <input
@@ -97,7 +106,7 @@ export default async function NewMasterPage() {
             />
           </div>
 
-          <div className="flex gap-3 pt-1">
+          <div className="flex gap-3 border-t border-border pt-5">
             <button type="submit" className="btn-primary">
               Сохранить
             </button>
@@ -106,6 +115,7 @@ export default async function NewMasterPage() {
             </Link>
           </div>
         </form>
+        </div>
       </main>
     </>
   );

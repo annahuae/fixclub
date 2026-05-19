@@ -4,11 +4,13 @@ import { sql } from '@/lib/db';
 import {
   SHOP_CATEGORIES,
   shopCategoryLabel,
-  emirateLabel
+  emirateLabel,
+  formatDate
 } from '@/lib/utils';
 import { StarRating } from '@/components/star-rating';
 import { Avatar } from '@/components/avatar';
 import { Nav } from '@/components/nav';
+import { InstantLink } from '@/components/instant-link';
 
 type ShopRow = {
   id: string;
@@ -23,11 +25,27 @@ type ShopRow = {
   shop_created_at: string;
 };
 
+type ReviewPreview = {
+  shop_id: string;
+  rating: number;
+  comment: string | null;
+  created_at: string;
+  user_name: string | null;
+};
+
 const SORTS = [
   { value: 'reviewed', label: 'Больше отзывов' },
   { value: 'rated', label: 'Выше рейтинг' },
   { value: 'newest', label: 'Свежие отзывы' }
 ] as const;
+
+const FILTER_CATEGORIES = [
+  'hardware',
+  'tools',
+  'plumbing_parts',
+  'electrical_parts',
+  'tiles'
+];
 
 export default async function ShopsPage({
   searchParams
@@ -89,6 +107,41 @@ export default async function ShopsPage({
     return br - ar;
   });
 
+  const shopIds = rows.map((s) => s.id);
+  const previews = (shopIds.length === 0
+    ? []
+    : ((await sql`
+        SELECT shop_id, rating, comment, created_at, user_name
+        FROM (
+          SELECT
+            r.shop_id, r.rating, r.comment, r.created_at, u.name AS user_name,
+            ROW_NUMBER() OVER (PARTITION BY r.shop_id ORDER BY r.created_at DESC) AS rn
+          FROM shop_reviews r
+          LEFT JOIN users u ON u.id = r.user_id
+          WHERE r.shop_id = ANY(${shopIds})
+        ) t
+        WHERE rn <= 2
+      `) as unknown as ReviewPreview[])) as ReviewPreview[];
+
+  const previewsByShop = new Map<string, ReviewPreview[]>();
+  for (const p of previews) {
+    const list = previewsByShop.get(p.shop_id) || [];
+    list.push(p);
+    previewsByShop.set(p.shop_id, list);
+  }
+
+  const totalReviews = rows.reduce(
+    (acc, s) => acc + parseInt(s.review_count),
+    0
+  );
+  const weightedSum = rows.reduce(
+    (acc, s) =>
+      acc +
+      (s.avg_rating ? parseFloat(s.avg_rating) * parseInt(s.review_count) : 0),
+    0
+  );
+  const aggregateAvg = totalReviews > 0 ? weightedSum / totalReviews : 0;
+
   function buildHref(over: Record<string, string | null>) {
     const sp = new URLSearchParams();
     const merged: Record<string, string | null> = {
@@ -113,116 +166,119 @@ export default async function ShopsPage({
         emirate={emirate || undefined}
         searchAction="/shops"
       />
-      <main className="max-w-6xl mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-[220px_minmax(0,1fr)] gap-6">
-          <aside className="lg:sticky lg:top-[72px] lg:self-start">
-            <div className="bg-surface border border-border rounded-2xl p-3">
-              <div className="text-[11px] font-bold text-ink-dim uppercase tracking-widest mb-2 px-2">
-                Категория
+      <main className="shell py-8">
+        <div className="grid gap-8 lg:grid-cols-[250px_minmax(0,1fr)_260px]">
+          <aside className="hidden lg:block">
+            <div className="panel sticky top-28 p-5">
+              <div className="mb-5 flex items-center justify-between">
+                <h2 className="font-semibold text-ink">Фильтры</h2>
+                <Link href="/shops" className="text-sm text-accent">
+                  Сбросить
+                </Link>
               </div>
-              <FilterLink
-                active={!category}
-                href={buildHref({ category: null })}
-                label="Все"
-              />
-              {SHOP_CATEGORIES.map((c) => (
-                <FilterLink
-                  key={c.value}
-                  active={category === c.value}
-                  href={buildHref({ category: c.value })}
-                  label={c.label}
+
+              <FilterSection title="Категория">
+                <CheckLink
+                  href={buildHref({ category: null })}
+                  active={!category}
+                  label="Все категории"
                 />
-              ))}
+                {FILTER_CATEGORIES.map((value) => (
+                  <CheckLink
+                    key={value}
+                    href={buildHref({ category: value })}
+                    active={category === value}
+                    label={shopCategoryLabel(value)}
+                  />
+                ))}
+                <details>
+                  <summary className="mt-2 cursor-pointer list-none text-sm font-medium text-accent">
+                    Показать ещё
+                  </summary>
+                  <div className="mt-2 space-y-2">
+                    {SHOP_CATEGORIES.filter(
+                      (c) => !FILTER_CATEGORIES.includes(c.value)
+                    ).map((c) => (
+                      <CheckLink
+                        key={c.value}
+                        href={buildHref({ category: c.value })}
+                        active={category === c.value}
+                        label={c.label}
+                      />
+                    ))}
+                  </div>
+                </details>
+              </FilterSection>
             </div>
           </aside>
 
           <section className="min-w-0">
-            <div className="flex items-baseline justify-between flex-wrap gap-3 mb-5">
-              <h1 className="text-xl">
-                <span className="font-bold">{rows.length}</span>{' '}
-                <span className="text-ink-mid">
-                  {labelCount(rows.length, [
-                    'магазин',
-                    'магазина',
-                    'магазинов'
-                  ])}{' '}
-                  в{' '}
-                </span>
-                <span className="font-semibold text-accent">
-                  {emirate
-                    ? emirateLabel(emirate)
-                    : category
-                      ? shopCategoryLabel(category)
-                      : 'UAE'}
+            <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <h1 className="font-semibold text-ink">
+                {rows.length}{' '}
+                {labelCount(rows.length, ['магазин', 'магазина', 'магазинов'])}{' '}
+                <span className="text-accent">
+                  {emirate ? `в ${emirateLabel(emirate)}` : 'в UAE'}
                 </span>
               </h1>
-              <Link href="/shops/new" className="btn-primary text-sm">
-                + Магазин
+              <Link href="/shops/new" className="btn-outline lg:hidden">
+                Добавить магазин
               </Link>
             </div>
 
-            <div className="flex gap-1 mb-5 border-b border-border">
+            <div className="mb-5 inline-flex max-w-full overflow-hidden rounded-lg border border-border bg-surface">
               {SORTS.map((s) => (
-                <Link
+                <InstantLink
                   key={s.value}
                   href={buildHref({ sort: s.value })}
-                  className={`px-4 py-2 text-sm rounded-t-lg -mb-px border-b-2 transition ${
-                    sort === s.value
-                      ? 'border-accent text-accent font-semibold bg-accent-soft'
-                      : 'border-transparent text-ink-mid hover:text-ink'
-                  }`}
+                  active={sort === s.value}
+                  className="border-r border-border px-5 py-3 text-sm text-ink-mid last:border-r-0 hover:text-ink"
+                  activeClassName="border-r border-accent/30 bg-accent-soft px-5 py-3 text-sm font-semibold text-accent last:border-r-0"
                 >
                   {s.label}
-                </Link>
+                </InstantLink>
               ))}
             </div>
 
             {rows.length === 0 ? (
-              <div className="card text-center py-16">
-                <p className="text-ink-mid mb-4">
-                  Никого не нашли. Добавь первым.
+              <div className="card py-16 text-center">
+                <h2 className="text-2xl font-semibold">Ничего не найдено</h2>
+                <p className="mt-2 text-ink-mid">
+                  Попробуй убрать часть фильтров или добавить магазин.
                 </p>
-                <Link href="/shops/new" className="btn-primary">
-                  + Добавить магазин
-                </Link>
               </div>
             ) : (
-              <div className="space-y-3">
-                {rows.map((s) => {
-                  const avg = s.avg_rating ? parseFloat(s.avg_rating) : 0;
-                  const count = parseInt(s.review_count);
+              <div className="space-y-4">
+                {rows.map((shop) => {
+                  const avg = shop.avg_rating
+                    ? parseFloat(shop.avg_rating)
+                    : 0;
+                  const count = parseInt(shop.review_count);
+                  const list = previewsByShop.get(shop.id) || [];
                   return (
                     <Link
-                      key={s.id}
-                      href={`/shops/${s.id}`}
-                      className="block card hover:border-accent transition-colors"
+                      key={shop.id}
+                      href={`/shops/${shop.id}`}
+                      className="card block transition hover:border-accent/50 hover:shadow-lg"
                     >
-                      <div className="flex items-start gap-4">
-                        <Avatar name={s.name} seed={s.id} size="lg" />
-                        <div className="flex-1 min-w-0">
-                          <h2 className="font-bold text-lg text-ink">
-                            {s.name}
+                      <div className="flex gap-5">
+                        <Avatar name={shop.name} seed={shop.id} size="lg" />
+                        <div className="min-w-0 flex-1">
+                          <h2 className="text-xl font-semibold tracking-tight">
+                            {shop.name}
                           </h2>
-                          <div className="text-sm text-ink-mid mt-0.5">
-                            {shopCategoryLabel(s.category)}
-                            {s.emirate && (
-                              <>
-                                {' '}
-                                · <span>{emirateLabel(s.emirate)}</span>
-                              </>
+                          <div className="mt-1 text-sm text-ink-mid">
+                            {shopCategoryLabel(shop.category)}
+                            {shop.emirate && (
+                              <> · {emirateLabel(shop.emirate)}</>
                             )}
-                            {s.area && (
-                              <>
-                                {' '}
-                                · <span>{s.area}</span>
-                              </>
-                            )}
+                            {shop.area && <> · {shop.area}</>}
                           </div>
-                          <div className="flex items-center gap-2 mt-2">
+                          <div className="mt-3 flex items-center gap-2">
                             {count > 0 ? (
                               <>
                                 <StarRating rating={avg} showNumber />
-                                <span className="text-accent text-sm">
+                                <span className="text-sm text-accent">
                                   ({count}{' '}
                                   {labelCount(count, [
                                     'отзыв',
@@ -233,11 +289,47 @@ export default async function ShopsPage({
                                 </span>
                               </>
                             ) : (
-                              <span className="text-sm text-ink-dim">
+                              <span className="text-sm text-ink-mid">
                                 Без отзывов
                               </span>
                             )}
                           </div>
+
+                          {list.length > 0 && (
+                            <div className="mt-5 space-y-4 border-t border-border pt-4">
+                              {list.map((review) => (
+                                <div
+                                  key={`${review.shop_id}-${review.created_at}-${review.user_name}`}
+                                  className="flex gap-3"
+                                >
+                                  <Avatar
+                                    name={review.user_name || '?'}
+                                    seed={review.user_name || review.created_at}
+                                    size="sm"
+                                  />
+                                  <div className="min-w-0">
+                                    <div className="flex flex-wrap items-center gap-2 text-sm">
+                                      <span className="font-semibold">
+                                        {review.user_name || 'Участник'}
+                                      </span>
+                                      <StarRating
+                                        rating={review.rating}
+                                        size="sm"
+                                      />
+                                      <span className="text-xs text-ink-dim">
+                                        {formatDate(review.created_at)}
+                                      </span>
+                                    </div>
+                                    {review.comment && (
+                                      <p className="mt-1 line-clamp-2 text-sm leading-6 text-ink-mid">
+                                        {review.comment}
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       </div>
                     </Link>
@@ -246,32 +338,83 @@ export default async function ShopsPage({
               </div>
             )}
           </section>
+
+          <aside className="hidden lg:block">
+            <div className="panel sticky top-28 p-6">
+              <h2 className="font-semibold">Сводный рейтинг</h2>
+              <div className="mt-6 text-6xl font-semibold tracking-tight">
+                {aggregateAvg.toFixed(1)}
+              </div>
+              <div className="mt-3">
+                <StarRating rating={aggregateAvg} size="lg" />
+              </div>
+              <div className="mt-3 text-sm text-ink-mid">
+                По {totalReviews}{' '}
+                {labelCount(totalReviews, ['отзыву', 'отзывам', 'отзывам'])}
+              </div>
+            </div>
+
+            <div className="panel mt-6 bg-accent-soft p-6 text-center">
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-accent text-accent">
+                ✎
+              </div>
+              <h2 className="font-semibold">Поделись магазином</h2>
+              <p className="mt-2 text-sm leading-6 text-ink-mid">
+                Добавь место, где реально удобно покупать материалы.
+              </p>
+              <Link href="/shops/new" className="btn-outline mt-5 w-full">
+                Добавить магазин
+              </Link>
+            </div>
+          </aside>
         </div>
       </main>
     </>
   );
 }
 
-function FilterLink({
-  active,
+function FilterSection({
+  title,
+  children
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="border-t border-border py-5 first:border-t-0 first:pt-0">
+      <h3 className="mb-4 font-semibold text-ink">{title}</h3>
+      <div className="space-y-2">{children}</div>
+    </section>
+  );
+}
+
+function CheckLink({
   href,
+  active,
   label
 }: {
-  active: boolean;
   href: string;
+  active: boolean;
   label: string;
 }) {
   return (
-    <Link
+    <InstantLink
       href={href}
-      className={`block text-sm px-2 py-1.5 rounded-md transition ${
-        active
-          ? 'bg-accent-soft text-accent-strong font-semibold'
-          : 'text-ink-mid hover:bg-surface-2 hover:text-ink'
-      }`}
+      active={active}
+      className="flex items-center gap-3 text-sm text-ink-mid hover:text-ink"
+      activeClassName="flex items-center gap-3 text-sm font-medium text-ink"
     >
-      {label}
-    </Link>
+      <span
+        className={`flex h-4 w-4 items-center justify-center rounded border ${
+          active
+            ? 'border-accent bg-accent text-white'
+            : 'border-border-strong bg-white'
+        }`}
+      >
+        {active && <span className="text-[10px] leading-none">✓</span>}
+      </span>
+      <span>{label}</span>
+    </InstantLink>
   );
 }
 

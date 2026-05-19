@@ -9,16 +9,22 @@ export default async function NewShopPage() {
   return (
     <>
       <Nav />
-      <main className="max-w-2xl mx-auto px-6 py-8">
-        <Link href="/shops" className="text-sm text-ink-mid hover:text-accent">
-          ← К магазинам
-        </Link>
-        <h1 className="text-3xl font-bold mt-4 mb-1">Добавить магазин</h1>
-        <p className="text-ink-mid text-sm mb-6">
-          Где сам покупал стройматериалы, инструменты, бытовуху.
-        </p>
+      <main className="shell py-8">
+        <div className="mx-auto max-w-3xl">
+          <Link href="/shops" className="text-sm text-ink-mid hover:text-accent">
+            ← К магазинам
+          </Link>
+          <div className="mt-5 mb-6">
+            <div className="eyebrow mb-3">Share a place</div>
+            <h1 className="text-4xl font-bold tracking-tight">
+              Добавить магазин
+            </h1>
+            <p className="mt-2 text-ink-mid">
+              Где сам покупал стройматериалы, инструменты или бытовые вещи.
+            </p>
+          </div>
 
-        <form action={addShop} className="card space-y-4">
+        <form action={addShop} className="panel space-y-5 p-6">
           <div>
             <label className="label">Название</label>
             <input
@@ -100,7 +106,7 @@ export default async function NewShopPage() {
             />
           </div>
 
-          <div className="flex gap-3 pt-1">
+          <div className="flex gap-3 border-t border-border pt-5">
             <button type="submit" className="btn-primary">
               Сохранить
             </button>
@@ -109,6 +115,7 @@ export default async function NewShopPage() {
             </Link>
           </div>
         </form>
+        </div>
       </main>
     </>
   );

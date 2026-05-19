@@ -82,12 +82,12 @@ export default async function MasterPage({
   return (
     <>
       <Nav />
-      <main className="max-w-5xl mx-auto px-6 py-8">
+      <main className="shell py-8">
         <Link href="/masters" className="text-sm text-ink-mid hover:text-accent">
           ← К каталогу
         </Link>
 
-        <div className="card mt-4">
+        <div className="panel mt-4 p-6">
           <div className="flex items-start gap-5">
             <Avatar name={master.name} seed={master.id} size="lg" />
             <div className="flex-1 min-w-0">
@@ -164,10 +164,10 @@ export default async function MasterPage({
           )}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_280px] gap-6 mt-6">
+        <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
           <section className="min-w-0">
             {!userHasReviewed ? (
-              <div className="card mb-6">
+              <div className="panel mb-6 p-6">
                 <h2 className="text-xl font-bold mb-1">Оставить отзыв</h2>
                 <p className="text-ink-mid text-sm mb-4">
                   Один отзыв на мастера. Пиши по делу.
@@ -193,7 +193,7 @@ export default async function MasterPage({
                 </form>
               </div>
             ) : (
-              <div className="mb-6 p-4 bg-accent-soft border border-transparent rounded-xl text-sm text-accent-strong">
+              <div className="mb-6 rounded-xl border border-transparent bg-accent-soft p-4 text-sm text-accent-strong">
                 Ты уже оставлял отзыв этому мастеру.
               </div>
             )}
@@ -237,7 +237,7 @@ export default async function MasterPage({
           </section>
 
           {reviewRows.length > 0 && (
-            <aside className="card lg:sticky lg:top-[88px] lg:self-start h-fit">
+            <aside className="card h-fit lg:sticky lg:top-28 lg:self-start">
               <div className="text-sm font-semibold text-ink mb-2">
                 Распределение
               </div>
