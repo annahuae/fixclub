@@ -37,7 +37,10 @@ export const SPECIALTY_GROUPS = [
   }
 ] as const;
 
-export const SPECIALTIES = SPECIALTY_GROUPS.flatMap((g) => g.items);
+type Specialty = { value: string; label: string };
+export const SPECIALTIES: Specialty[] = SPECIALTY_GROUPS.flatMap(
+  (g) => g.items as readonly Specialty[]
+);
 
 export const EMIRATES = [
   { value: 'dubai', label: 'Dubai' },
