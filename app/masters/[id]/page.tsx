@@ -145,10 +145,10 @@ export default async function MasterPage({
 
               {master.phone && (
                 <div className="mt-3 flex flex-wrap items-center gap-2">
-                  {master.phone_is_whatsapp && (
-                    <PhoneLink phone={master.phone} kind="whatsapp" />
-                  )}
-                  <PhoneLink phone={master.phone} kind="call" />
+                  <PhoneLink
+                    phone={master.phone}
+                    kind={master.phone_is_whatsapp ? 'whatsapp' : 'call'}
+                  />
                 </div>
               )}
 

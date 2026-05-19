@@ -120,14 +120,18 @@ export default async function ShopPage({
 
               {(shop.phone || shop.phone2) && (
                 <div className="mt-3 flex flex-wrap items-center gap-2">
-                  {shop.phone && shop.phone_is_whatsapp && (
-                    <PhoneLink phone={shop.phone} kind="whatsapp" />
+                  {shop.phone && (
+                    <PhoneLink
+                      phone={shop.phone}
+                      kind={shop.phone_is_whatsapp ? 'whatsapp' : 'call'}
+                    />
                   )}
-                  {shop.phone2 && shop.phone2_is_whatsapp && (
-                    <PhoneLink phone={shop.phone2} kind="whatsapp" />
+                  {shop.phone2 && (
+                    <PhoneLink
+                      phone={shop.phone2}
+                      kind={shop.phone2_is_whatsapp ? 'whatsapp' : 'call'}
+                    />
                   )}
-                  {shop.phone && <PhoneLink phone={shop.phone} kind="call" />}
-                  {shop.phone2 && <PhoneLink phone={shop.phone2} kind="call" />}
                 </div>
               )}
 
