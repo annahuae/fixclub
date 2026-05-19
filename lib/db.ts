@@ -168,4 +168,7 @@ export async function initSchema() {
   // v7: second phone number on shops
   await sql`ALTER TABLE shops ADD COLUMN IF NOT EXISTS phone2 TEXT`;
   await sql`ALTER TABLE shops ADD COLUMN IF NOT EXISTS phone2_is_whatsapp BOOLEAN NOT NULL DEFAULT FALSE`;
+
+  // v8: distinguish individual specialist from company on masters
+  await sql`ALTER TABLE masters ADD COLUMN IF NOT EXISTS kind TEXT NOT NULL DEFAULT 'individual'`;
 }

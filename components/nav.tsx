@@ -40,21 +40,6 @@ export async function Nav({
           </span>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-1 text-sm">
-          <Link
-            href="/masters"
-            className="px-3 py-2 text-ink-mid hover:text-ink"
-          >
-            Specialists
-          </Link>
-          <Link
-            href="/shops"
-            className="px-3 py-2 text-ink-mid hover:text-ink"
-          >
-            Shops
-          </Link>
-        </nav>
-
         {showSearch && (
           <div className="flex flex-1 max-w-2xl items-center gap-2">
             <form action={searchAction} className="flex-1">

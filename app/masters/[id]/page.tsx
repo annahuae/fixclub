@@ -14,6 +14,7 @@ type Master = {
   id: string;
   name: string;
   specialty: string;
+  kind: string;
   emirate: string | null;
   area: string | null;
   phone: string | null;
@@ -96,7 +97,18 @@ export default async function MasterPage({
           <div className="flex items-start gap-5">
             <Avatar name={master.name} seed={master.id} size="lg" fallback="master" />
             <div className="flex-1 min-w-0">
-              <h1 className="text-3xl font-bold text-ink">{master.name}</h1>
+              <div className="flex flex-wrap items-center gap-3">
+                <h1 className="text-3xl font-bold text-ink">{master.name}</h1>
+                <span
+                  className={
+                    master.kind === 'company'
+                      ? 'inline-flex items-center rounded-full bg-[#e8f0fe] px-2.5 py-0.5 text-xs font-medium text-[#1967d2]'
+                      : 'inline-flex items-center rounded-full bg-surface-2 px-2.5 py-0.5 text-xs font-medium text-ink-mid'
+                  }
+                >
+                  {master.kind === 'company' ? 'Company' : 'Individual'}
+                </span>
+              </div>
               <div className="text-sm text-ink-mid mt-1">
                 {specialtyLabel(master.specialty)}
                 {master.emirate && (

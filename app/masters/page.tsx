@@ -11,11 +11,13 @@ import { StarRating } from '@/components/star-rating';
 import { Avatar } from '@/components/avatar';
 import { Nav } from '@/components/nav';
 import { InstantLink } from '@/components/instant-link';
+import { CatalogTabs } from '@/components/catalog-tabs';
 
 type MasterRow = {
   id: string;
   name: string;
   specialty: string;
+  kind: string;
   area: string | null;
   phone: string | null;
   avg_rating: string | null;
@@ -44,6 +46,7 @@ export default async function MastersPage({
     emirate?: string;
     q?: string;
     sort?: string;
+    kind?: string;
   }>;
 }) {
   await requireUser();
@@ -51,6 +54,10 @@ export default async function MastersPage({
   const specialty = params.specialty || null;
   const emirate = params.emirate || null;
   const q = params.q?.trim() || null;
+  const kind =
+    params.kind === 'individual' || params.kind === 'company'
+      ? params.kind
+      : null;
   const sort = (params.sort as (typeof SORTS)[number]['value']) || 'reviewed';
 
   const likeQ = '%' + (q || '') + '%';
@@ -58,7 +65,7 @@ export default async function MastersPage({
   const [rowsUnsortedRaw, previewsRaw] = await Promise.all([
     sql`
       SELECT
-        m.id, m.name, m.specialty, m.area, m.phone,
+        m.id, m.name, m.specialty, m.kind, m.area, m.phone,
         AVG(r.rating)::numeric(10,2) AS avg_rating,
         COUNT(r.id) AS review_count,
         MAX(r.created_at) AS last_review_at,
@@ -68,6 +75,7 @@ export default async function MastersPage({
       WHERE
         (${specialty}::text IS NULL OR m.specialty = ${specialty})
         AND (${emirate}::text IS NULL OR m.emirate = ${emirate})
+        AND (${kind}::text IS NULL OR m.kind = ${kind})
         AND (${q}::text IS NULL OR m.name ILIKE ${likeQ} OR m.area ILIKE ${likeQ})
       GROUP BY m.id
     `,
@@ -84,6 +92,7 @@ export default async function MastersPage({
           WHERE
             (${specialty}::text IS NULL OR specialty = ${specialty})
             AND (${emirate}::text IS NULL OR emirate = ${emirate})
+            AND (${kind}::text IS NULL OR kind = ${kind})
             AND (${q}::text IS NULL OR name ILIKE ${likeQ} OR area ILIKE ${likeQ})
         )
       ) t
@@ -158,6 +167,7 @@ export default async function MastersPage({
       emirate,
       q,
       sort,
+      kind,
       ...over
     };
     Object.entries(merged).forEach(([k, v]) => {
@@ -180,6 +190,27 @@ export default async function MastersPage({
                   Clear all
                 </Link>
               </div>
+
+              <FilterSection title="Type">
+                <CheckLink
+                  href={buildHref({ kind: null })}
+                  active={!kind}
+                  label="Anyone"
+                  radio
+                />
+                <CheckLink
+                  href={buildHref({ kind: 'individual' })}
+                  active={kind === 'individual'}
+                  label="Individuals"
+                  radio
+                />
+                <CheckLink
+                  href={buildHref({ kind: 'company' })}
+                  active={kind === 'company'}
+                  label="Companies"
+                  radio
+                />
+              </FilterSection>
 
               <FilterSection title="Specialty">
                 <CheckLink
@@ -209,6 +240,7 @@ export default async function MastersPage({
           </aside>
 
           <section className="min-w-0">
+            <CatalogTabs active="masters" />
             <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <h1 className="font-semibold text-ink">
                 {rows.length}{' '}
@@ -262,9 +294,20 @@ export default async function MastersPage({
                       <div className="flex gap-5">
                         <Avatar name={m.name} seed={m.id} size="lg" fallback="master" />
                         <div className="min-w-0 flex-1">
-                          <h2 className="text-xl font-semibold tracking-tight">
-                            {m.name}
-                          </h2>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h2 className="text-xl font-semibold tracking-tight">
+                              {m.name}
+                            </h2>
+                            <span
+                              className={
+                                m.kind === 'company'
+                                  ? 'inline-flex items-center rounded-full bg-[#e8f0fe] px-2 py-0.5 text-[11px] font-medium text-[#1967d2]'
+                                  : 'inline-flex items-center rounded-full bg-surface-2 px-2 py-0.5 text-[11px] font-medium text-ink-mid'
+                              }
+                            >
+                              {m.kind === 'company' ? 'Company' : 'Individual'}
+                            </span>
+                          </div>
                           <div className="mt-1 text-sm text-ink-mid">
                             {specialtyLabel(m.specialty)}
                             {m.area && <> · {m.area}</>}

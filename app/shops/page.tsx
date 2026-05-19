@@ -10,6 +10,7 @@ import {
 import { StarRating } from '@/components/star-rating';
 import { Avatar } from '@/components/avatar';
 import { Nav } from '@/components/nav';
+import { CatalogTabs } from '@/components/catalog-tabs';
 import { InstantLink } from '@/components/instant-link';
 
 type ShopRow = {
@@ -198,6 +199,7 @@ export default async function ShopsPage({
           </aside>
 
           <section className="min-w-0">
+            <CatalogTabs active="shops" />
             <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <h1 className="font-semibold text-ink">
                 {rows.length}{' '}

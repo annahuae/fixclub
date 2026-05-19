@@ -38,6 +38,31 @@ export default async function NewMasterPage() {
             />
           </div>
 
+          <div>
+            <label className="label">This is…</label>
+            <div className="flex gap-3">
+              <label className="flex flex-1 cursor-pointer items-center gap-2 rounded-xl border border-border px-3 py-2.5 text-sm hover:border-accent has-[:checked]:border-accent has-[:checked]:bg-accent-soft">
+                <input
+                  type="radio"
+                  name="kind"
+                  value="individual"
+                  defaultChecked
+                  className="h-4 w-4 accent-accent"
+                />
+                An individual
+              </label>
+              <label className="flex flex-1 cursor-pointer items-center gap-2 rounded-xl border border-border px-3 py-2.5 text-sm hover:border-accent has-[:checked]:border-accent has-[:checked]:bg-accent-soft">
+                <input
+                  type="radio"
+                  name="kind"
+                  value="company"
+                  className="h-4 w-4 accent-accent"
+                />
+                A company
+              </label>
+            </div>
+          </div>
+
           <div className="grid md:grid-cols-2 gap-4">
             <div>
               <label className="label">Specialty</label>
