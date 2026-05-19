@@ -7,11 +7,14 @@ type Mode = 'login' | 'signup';
 export default async function AccessPage({
   searchParams
 }: {
-  searchParams: Promise<{ mode?: string; error?: string }>;
+  searchParams: Promise<{ mode?: string; error?: string; invite?: string }>;
 }) {
   const params = await searchParams;
-  const mode: Mode = params.mode === 'signup' ? 'signup' : 'login';
+  // If an invite is in the URL, default to signup mode
+  const mode: Mode =
+    params.mode === 'signup' || params.invite ? 'signup' : 'login';
   const error = params.error;
+  const invite = params.invite?.trim().toUpperCase() || '';
 
   return (
     <main className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
@@ -41,7 +44,7 @@ export default async function AccessPage({
           {mode === 'login' ? (
             <LoginView error={error} />
           ) : (
-            <SignupView error={error} />
+            <SignupView error={error} prefilledInvite={invite} />
           )}
         </div>
       </div>
@@ -108,13 +111,19 @@ function LoginView({ error }: { error?: string }) {
   );
 }
 
-function SignupView({ error }: { error?: string }) {
+function SignupView({
+  error,
+  prefilledInvite
+}: {
+  error?: string;
+  prefilledInvite?: string;
+}) {
+  const hasInvite = !!prefilledInvite;
   return (
     <>
-      <h1 className="text-2xl font-bold mb-1">Регистрация</h1>
-      <p className="text-sm text-ink-mid mb-5">
-        Если есть инвайт — вход сразу. Если нет — заявка уйдёт админу.
-      </p>
+      <h1 className="text-2xl font-bold mb-5">
+        {hasInvite ? 'Регистрация по инвайту' : 'Регистрация'}
+      </h1>
       <ErrorBox msg={error} />
       <form action={submitSignup} className="space-y-4">
         <div>
@@ -122,7 +131,7 @@ function SignupView({ error }: { error?: string }) {
           <input
             name="name"
             required
-            placeholder="Как тебя называть"
+            placeholder="Аня"
             className="input"
           />
         </div>
@@ -142,28 +151,15 @@ function SignupView({ error }: { error?: string }) {
           <label className="label">
             Инвайт-код{' '}
             <span className="text-ink-dim font-normal normal-case">
-              (если есть — вход моментальный)
+              {hasInvite ? '(подставлен из ссылки)' : '(если есть — вход моментальный)'}
             </span>
           </label>
           <input
             name="code"
+            defaultValue={prefilledInvite}
             placeholder="ABCD-EFGH-JKLM"
             className="input font-mono uppercase tracking-wider"
             autoComplete="off"
-          />
-        </div>
-        <div>
-          <label className="label">
-            Кто ты и зачем тебе доступ{' '}
-            <span className="text-ink-dim font-normal normal-case">
-              (без инвайта это видит админ)
-            </span>
-          </label>
-          <textarea
-            name="reason"
-            rows={3}
-            placeholder="Кто из круга тебя знает, чем занимаешься в UAE"
-            className="input resize-none"
           />
         </div>
         <button type="submit" className="btn-primary w-full">

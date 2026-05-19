@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { isAdmin } from '@/lib/auth';
 import { sql } from '@/lib/db';
 import { formatDate } from '@/lib/utils';
+import { headers } from 'next/headers';
+import { CopyButton } from '@/components/copy-button';
 import {
   adminLogin,
   adminLogout,
@@ -29,6 +31,8 @@ type InviteRow = {
   used_by: string | null;
   used_at: string | null;
   used_by_name: string | null;
+  usage_count: number;
+  usage_limit: number;
 };
 
 type UserRow = {
@@ -91,6 +95,11 @@ export default async function AdminPage({
 
   const tab = params.tab || 'requests';
 
+  const hdrs = await headers();
+  const host = hdrs.get('host') || 'fixclub.vercel.app';
+  const proto = hdrs.get('x-forwarded-proto') || 'https';
+  const inviteOrigin = `${proto}://${host}`;
+
   const [pendingRows, allRequestRows, inviteRows, userRows] = await Promise.all([
     sql`SELECT * FROM access_requests WHERE status = 'pending' ORDER BY created_at DESC` as unknown as Promise<
       RequestRow[]
@@ -99,7 +108,10 @@ export default async function AdminPage({
       RequestRow[]
     >,
     sql`
-      SELECT i.code, i.note, i.created_at, i.used_by, i.used_at, u.name AS used_by_name
+      SELECT
+        i.code, i.note, i.created_at, i.used_by, i.used_at,
+        i.usage_count, i.usage_limit,
+        u.name AS used_by_name
       FROM invite_codes i
       LEFT JOIN users u ON u.id = i.used_by
       ORDER BY i.created_at DESC
@@ -221,15 +233,24 @@ export default async function AdminPage({
 
         {tab === 'invites' && (
           <section>
-            <div className="flex items-baseline justify-between mb-6">
+            <div className="flex items-baseline justify-between mb-6 gap-3 flex-wrap">
               <h2 className="font-bold tracking-tight text-4xl">
                 Инвайт-<span className="text-accent">коды</span>
               </h2>
-              <form action={generateInvite} className="flex gap-2">
+              <form action={generateInvite} className="flex gap-2 flex-wrap">
                 <input
                   name="note"
                   placeholder="Кому (заметка)"
-                  className="input"
+                  className="input md:w-48"
+                />
+                <input
+                  name="limit"
+                  type="number"
+                  min={1}
+                  max={10000}
+                  defaultValue={100}
+                  title="Лимит использований"
+                  className="input md:w-24"
                 />
                 <button className="btn-primary">+ Сгенерировать</button>
               </form>
@@ -240,33 +261,58 @@ export default async function AdminPage({
               </div>
             ) : (
               <div className="space-y-2">
-                {inviteRows.map((i) => (
-                  <div
-                    key={i.code}
-                    className="card flex items-center justify-between gap-4"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <div className="font-mono text-lg tracking-wider">
-                        {i.code}
-                      </div>
-                      <div className="text-xs text-ink-mid mt-1">
-                        {i.note && <span>«{i.note}» · </span>}
-                        {formatDate(i.created_at)}
-                        {i.used_by_name && (
-                          <span className="text-success ml-2">
-                            → использовал {i.used_by_name}
-                          </span>
-                        )}
+                {inviteRows.map((i) => {
+                  const origin =
+                    (typeof inviteOrigin === 'string' && inviteOrigin) ||
+                    'https://fixclub.vercel.app';
+                  const url = `${origin}/access?mode=signup&invite=${i.code}`;
+                  const remaining = i.usage_limit - i.usage_count;
+                  const exhausted = remaining <= 0;
+                  return (
+                    <div key={i.code} className="card">
+                      <div className="flex items-center justify-between gap-4 flex-wrap">
+                        <div className="flex-1 min-w-0">
+                          <div className="font-mono text-lg tracking-wider">
+                            {i.code}
+                          </div>
+                          <div className="text-xs text-ink-mid mt-1">
+                            {i.note && <span>«{i.note}» · </span>}
+                            {formatDate(i.created_at)}
+                          </div>
+                          <div className="text-xs mt-1.5">
+                            <span
+                              className={
+                                exhausted ? 'text-danger' : 'text-success'
+                              }
+                            >
+                              {i.usage_count}/{i.usage_limit} использований
+                            </span>
+                            {!exhausted && (
+                              <span className="text-ink-dim ml-1">
+                                · осталось {remaining}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <CopyButton text={url} />
+                          {i.usage_count === 0 && (
+                            <form action={deleteInvite}>
+                              <input
+                                type="hidden"
+                                name="code"
+                                value={i.code}
+                              />
+                              <button className="btn-danger text-xs">
+                                Удалить
+                              </button>
+                            </form>
+                          )}
+                        </div>
                       </div>
                     </div>
-                    {!i.used_by && (
-                      <form action={deleteInvite}>
-                        <input type="hidden" name="code" value={i.code} />
-                        <button className="btn-danger text-xs">Удалить</button>
-                      </form>
-                    )}
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </section>

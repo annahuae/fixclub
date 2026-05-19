@@ -117,4 +117,10 @@ export async function initSchema() {
 
   // v3: pre-hashed password on access requests so admin approval = direct user creation
   await sql`ALTER TABLE access_requests ADD COLUMN IF NOT EXISTS password_hash TEXT`;
+
+  // v4: multi-use invite codes with usage limit
+  await sql`ALTER TABLE invite_codes ADD COLUMN IF NOT EXISTS usage_limit INTEGER NOT NULL DEFAULT 1`;
+  await sql`ALTER TABLE invite_codes ADD COLUMN IF NOT EXISTS usage_count INTEGER NOT NULL DEFAULT 0`;
+  // backfill: codes already used by someone count as 1 use
+  await sql`UPDATE invite_codes SET usage_count = 1 WHERE used_by IS NOT NULL AND usage_count = 0`;
 }

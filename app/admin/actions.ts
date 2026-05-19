@@ -95,8 +95,16 @@ export async function rejectRequest(formData: FormData) {
 export async function generateInvite(formData: FormData) {
   await requireAdmin();
   const note = String(formData.get('note') || '').trim() || null;
+  const limitRaw = parseInt(String(formData.get('limit') || '100'));
+  const limit =
+    Number.isFinite(limitRaw) && limitRaw > 0 && limitRaw <= 10000
+      ? limitRaw
+      : 100;
   const code = generateInviteCode();
-  await sql`INSERT INTO invite_codes (code, note) VALUES (${code}, ${note})`;
+  await sql`
+    INSERT INTO invite_codes (code, note, usage_limit)
+    VALUES (${code}, ${note}, ${limit})
+  `;
   revalidatePath('/admin');
   redirect('/admin?tab=invites');
 }
@@ -104,7 +112,7 @@ export async function generateInvite(formData: FormData) {
 export async function deleteInvite(formData: FormData) {
   await requireAdmin();
   const code = String(formData.get('code') || '');
-  await sql`DELETE FROM invite_codes WHERE code = ${code} AND used_by IS NULL`;
+  await sql`DELETE FROM invite_codes WHERE code = ${code} AND usage_count = 0`;
   revalidatePath('/admin');
   redirect('/admin?tab=invites');
 }
