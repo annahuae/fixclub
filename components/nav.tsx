@@ -72,7 +72,7 @@ export async function Nav({
                 name="q"
                 defaultValue={query || ''}
                 placeholder="Поиск"
-                className="input pl-9"
+                className="input pl-10"
               />
               {emirate && (
                 <input type="hidden" name="emirate" value={emirate} />

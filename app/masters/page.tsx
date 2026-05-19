@@ -35,14 +35,6 @@ const SORTS = [
   { value: 'newest', label: 'Свежие отзывы' }
 ] as const;
 
-const RATING_FILTERS = [
-  { value: '', label: 'Любой' },
-  { value: '4', label: '4.0+' },
-  { value: '3.5', label: '3.5+' },
-  { value: '3', label: '3.0+' },
-  { value: '2', label: '2.0+' }
-] as const;
-
 export default async function MastersPage({
   searchParams
 }: {
@@ -179,16 +171,23 @@ export default async function MastersPage({
       <main className="max-w-6xl mx-auto px-6 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-[220px_minmax(0,1fr)_280px] gap-6">
           {/* Sidebar: filters */}
-          <aside className="lg:sticky lg:top-[72px] lg:self-start space-y-6">
-            <div>
+          <aside className="lg:sticky lg:top-[72px] lg:self-start">
+            <div className="bg-surface border border-border rounded-2xl p-3">
               <FilterLink
                 active={!specialty}
                 href={buildHref({ specialty: null })}
                 label="Все специальности"
               />
-              {SPECIALTY_GROUPS.map((group) => (
-                <div key={group.title} className="mt-4">
-                  <div className="text-xs font-semibold text-ink-dim uppercase tracking-wide mb-1 px-2">
+              {SPECIALTY_GROUPS.map((group, idx) => (
+                <div
+                  key={group.title}
+                  className={
+                    idx === 0
+                      ? 'mt-4 pt-1'
+                      : 'mt-4 pt-4 border-t border-border'
+                  }
+                >
+                  <div className="text-[11px] font-bold text-ink-dim uppercase tracking-widest mb-2 px-2">
                     {group.title}
                   </div>
                   {group.items.map((s) => (
@@ -202,17 +201,6 @@ export default async function MastersPage({
                 </div>
               ))}
             </div>
-
-            <FiltersBlock title="Рейтинг">
-              {RATING_FILTERS.map((r) => (
-                <FilterLink
-                  key={r.value}
-                  active={(minRating ? String(minRating) : '') === r.value}
-                  href={buildHref({ rating: r.value || null })}
-                  label={r.label}
-                />
-              ))}
-            </FiltersBlock>
           </aside>
 
           {/* Main column: results */}
@@ -416,23 +404,6 @@ export default async function MastersPage({
         </div>
       </main>
     </>
-  );
-}
-
-function FiltersBlock({
-  title,
-  children
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div>
-      <div className="text-xs font-semibold text-ink uppercase tracking-wide mb-2">
-        {title}
-      </div>
-      <div className="space-y-0.5">{children}</div>
-    </div>
   );
 }
 

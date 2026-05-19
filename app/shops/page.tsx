@@ -29,13 +29,6 @@ const SORTS = [
   { value: 'newest', label: 'Свежие отзывы' }
 ] as const;
 
-const RATING_FILTERS = [
-  { value: '', label: 'Любой' },
-  { value: '4', label: '4.0+' },
-  { value: '3.5', label: '3.5+' },
-  { value: '3', label: '3.0+' }
-] as const;
-
 export default async function ShopsPage({
   searchParams
 }: {
@@ -122,8 +115,11 @@ export default async function ShopsPage({
       />
       <main className="max-w-6xl mx-auto px-6 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-[220px_minmax(0,1fr)] gap-6">
-          <aside className="lg:sticky lg:top-[72px] lg:self-start space-y-6">
-            <FiltersBlock title="Категория">
+          <aside className="lg:sticky lg:top-[72px] lg:self-start">
+            <div className="bg-surface border border-border rounded-2xl p-3">
+              <div className="text-[11px] font-bold text-ink-dim uppercase tracking-widest mb-2 px-2">
+                Категория
+              </div>
               <FilterLink
                 active={!category}
                 href={buildHref({ category: null })}
@@ -137,18 +133,7 @@ export default async function ShopsPage({
                   label={c.label}
                 />
               ))}
-            </FiltersBlock>
-
-            <FiltersBlock title="Рейтинг">
-              {RATING_FILTERS.map((r) => (
-                <FilterLink
-                  key={r.value}
-                  active={(minRating ? String(minRating) : '') === r.value}
-                  href={buildHref({ rating: r.value || null })}
-                  label={r.label}
-                />
-              ))}
-            </FiltersBlock>
+            </div>
           </aside>
 
           <section className="min-w-0">
@@ -264,23 +249,6 @@ export default async function ShopsPage({
         </div>
       </main>
     </>
-  );
-}
-
-function FiltersBlock({
-  title,
-  children
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div>
-      <div className="text-xs font-semibold text-ink uppercase tracking-wide mb-2">
-        {title}
-      </div>
-      <div className="space-y-0.5">{children}</div>
-    </div>
   );
 }
 
