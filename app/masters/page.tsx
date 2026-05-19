@@ -36,14 +36,6 @@ const SORTS = [
   { value: 'newest', label: 'Newest reviews' }
 ] as const;
 
-const FILTER_SPECIALTIES = [
-  'plumber',
-  'electrician',
-  'ac',
-  'handyman',
-  'appliance'
-];
-
 export default async function MastersPage({
   searchParams
 }: {
@@ -52,7 +44,6 @@ export default async function MastersPage({
     emirate?: string;
     q?: string;
     sort?: string;
-    rating?: string;
   }>;
 }) {
   await requireUser();
@@ -60,7 +51,6 @@ export default async function MastersPage({
   const specialty = params.specialty || null;
   const emirate = params.emirate || null;
   const q = params.q?.trim() || null;
-  const minRating = params.rating ? parseFloat(params.rating) : null;
   const sort = (params.sort as (typeof SORTS)[number]['value']) || 'reviewed';
 
   const rowsUnsorted = (await sql`
@@ -77,7 +67,6 @@ export default async function MastersPage({
       AND (${emirate}::text IS NULL OR m.emirate = ${emirate})
       AND (${q}::text IS NULL OR m.name ILIKE ${'%' + (q || '') + '%'} OR m.area ILIKE ${'%' + (q || '') + '%'})
     GROUP BY m.id
-    HAVING (${minRating}::numeric IS NULL OR AVG(r.rating) >= ${minRating})
   `) as unknown as (MasterRow & {
     last_review_at: string | null;
     master_created_at: string;
@@ -159,7 +148,6 @@ export default async function MastersPage({
       emirate,
       q,
       sort,
-      rating: minRating ? String(minRating) : null,
       ...over
     };
     Object.entries(merged).forEach(([k, v]) => {
@@ -189,47 +177,12 @@ export default async function MastersPage({
                   active={!specialty}
                   label="All specialties"
                 />
-                {FILTER_SPECIALTIES.map((value) => (
+                {SPECIALTIES.map((s) => (
                   <CheckLink
-                    key={value}
-                    href={buildHref({ specialty: value })}
-                    active={specialty === value}
-                    label={specialtyLabel(value)}
-                  />
-                ))}
-                <details>
-                  <summary className="mt-2 cursor-pointer list-none text-sm font-medium text-accent">
-                    Show more
-                  </summary>
-                  <div className="mt-2 space-y-2">
-                    {SPECIALTIES.filter(
-                      (s) => !FILTER_SPECIALTIES.includes(s.value)
-                    ).map((s) => (
-                      <CheckLink
-                        key={s.value}
-                        href={buildHref({ specialty: s.value })}
-                        active={specialty === s.value}
-                        label={s.label}
-                      />
-                    ))}
-                  </div>
-                </details>
-              </FilterSection>
-
-              <FilterSection title="Rating">
-                <CheckLink
-                  href={buildHref({ rating: null })}
-                  active={!minRating}
-                  label="Any rating"
-                  radio
-                />
-                {['4', '3.5', '3', '2'].map((rating) => (
-                  <CheckLink
-                    key={rating}
-                    href={buildHref({ rating })}
-                    active={String(minRating) === rating}
-                    label={`${rating}+`}
-                    radio
+                    key={s.value}
+                    href={buildHref({ specialty: s.value })}
+                    active={specialty === s.value}
+                    label={s.label}
                   />
                 ))}
               </FilterSection>
