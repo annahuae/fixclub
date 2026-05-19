@@ -34,24 +34,49 @@ export async function approveRequest(formData: FormData) {
   const id = String(formData.get('id') || '');
   if (!id) redirect('/admin?tab=requests');
 
-  // Mark request approved and generate a fresh invite code for them
-  await sql`
-    UPDATE access_requests
-    SET status = 'approved', reviewed_at = NOW()
-    WHERE id = ${id}
-  `;
   const reqRows = (await sql`
-    SELECT name FROM access_requests WHERE id = ${id} LIMIT 1
-  `) as { name: string }[];
-  const note = reqRows.length > 0 ? `Approved: ${reqRows[0].name}` : 'Approved';
+    SELECT name, email, password_hash FROM access_requests
+    WHERE id = ${id} LIMIT 1
+  `) as { name: string; email: string; password_hash: string | null }[];
 
-  const code = generateInviteCode();
-  await sql`
-    INSERT INTO invite_codes (code, note) VALUES (${code}, ${note})
-  `;
+  if (reqRows.length === 0) {
+    redirect('/admin?tab=requests');
+  }
+  const r = reqRows[0];
 
-  revalidatePath('/admin');
-  redirect(`/admin?tab=invites`);
+  if (r.password_hash) {
+    // Modern flow: create user directly with their pre-set password
+    const exists = (await sql`
+      SELECT 1 FROM users WHERE LOWER(email) = LOWER(${r.email}) LIMIT 1
+    `) as { '?column?': number }[];
+    if (exists.length === 0) {
+      await sql`
+        INSERT INTO users (name, email, password_hash)
+        VALUES (${r.name}, ${r.email}, ${r.password_hash})
+      `;
+    }
+    await sql`
+      UPDATE access_requests
+      SET status = 'approved', reviewed_at = NOW()
+      WHERE id = ${id}
+    `;
+    revalidatePath('/admin');
+    redirect('/admin?tab=users');
+  } else {
+    // Legacy: generate an invite code
+    await sql`
+      UPDATE access_requests
+      SET status = 'approved', reviewed_at = NOW()
+      WHERE id = ${id}
+    `;
+    const code = generateInviteCode();
+    await sql`
+      INSERT INTO invite_codes (code, note)
+      VALUES (${code}, ${`Approved: ${r.name}`})
+    `;
+    revalidatePath('/admin');
+    redirect('/admin?tab=invites');
+  }
 }
 
 export async function rejectRequest(formData: FormData) {

@@ -114,4 +114,7 @@ export async function initSchema() {
   await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash TEXT`;
   await sql`DROP INDEX IF EXISTS idx_users_contact`;
   await sql`CREATE INDEX IF NOT EXISTS idx_users_email ON users(LOWER(email))`;
+
+  // v3: pre-hashed password on access requests so admin approval = direct user creation
+  await sql`ALTER TABLE access_requests ADD COLUMN IF NOT EXISTS password_hash TEXT`;
 }
