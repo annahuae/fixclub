@@ -101,6 +101,11 @@ export function formatDate(date: string | Date): string {
   });
 }
 
+export function whatsappLink(phone: string): string {
+  const digits = phone.replace(/\D+/g, '');
+  return `https://wa.me/${digits}`;
+}
+
 export function buildMapsEmbedUrl(input: string): string | null {
   const v = input.trim();
   if (!v) return null;

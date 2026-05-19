@@ -160,4 +160,8 @@ export async function initSchema() {
   await sql`CREATE INDEX IF NOT EXISTS idx_shops_emirate ON shops(emirate)`;
   await sql`CREATE INDEX IF NOT EXISTS idx_shop_reviews_shop ON shop_reviews(shop_id)`;
   await sql`CREATE INDEX IF NOT EXISTS idx_masters_emirate ON masters(emirate)`;
+
+  // v6: mark whether phone is a WhatsApp number
+  await sql`ALTER TABLE masters ADD COLUMN IF NOT EXISTS phone_is_whatsapp BOOLEAN NOT NULL DEFAULT FALSE`;
+  await sql`ALTER TABLE shops ADD COLUMN IF NOT EXISTS phone_is_whatsapp BOOLEAN NOT NULL DEFAULT FALSE`;
 }

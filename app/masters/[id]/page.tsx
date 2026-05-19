@@ -7,6 +7,7 @@ import { StarRating, StarInput } from '@/components/star-rating';
 import { Avatar } from '@/components/avatar';
 import { MapEmbed } from '@/components/map-embed';
 import { Nav } from '@/components/nav';
+import { PhoneLink } from '@/components/phone-link';
 import { addReview, deleteMaster } from '../actions';
 
 type Master = {
@@ -16,6 +17,7 @@ type Master = {
   emirate: string | null;
   area: string | null;
   phone: string | null;
+  phone_is_whatsapp: boolean | null;
   maps_url: string | null;
   description: string | null;
   added_by: string | null;
@@ -125,12 +127,12 @@ export default async function MasterPage({
                   <span className="text-ink-mid text-sm">No reviews yet</span>
                 )}
                 {master.phone && (
-                  <a
-                    href={`tel:${master.phone}`}
-                    className="font-mono text-sm text-accent hover:underline ml-auto"
-                  >
-                    {master.phone}
-                  </a>
+                  <span className="ml-auto">
+                    <PhoneLink
+                      phone={master.phone}
+                      isWhatsapp={master.phone_is_whatsapp}
+                    />
+                  </span>
                 )}
               </div>
 

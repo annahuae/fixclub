@@ -12,6 +12,7 @@ export async function addMaster(formData: FormData) {
   const emirate = String(formData.get('emirate') || '').trim() || null;
   const area = String(formData.get('area') || '').trim() || null;
   const phone = String(formData.get('phone') || '').trim() || null;
+  const phoneIsWhatsapp = !!formData.get('phone_is_whatsapp') && !!phone;
   const mapsUrl = String(formData.get('maps_url') || '').trim() || null;
   const description =
     String(formData.get('description') || '').trim() || null;
@@ -21,8 +22,8 @@ export async function addMaster(formData: FormData) {
   }
 
   const rows = (await sql`
-    INSERT INTO masters (name, phone, specialty, emirate, area, maps_url, description, added_by)
-    VALUES (${name}, ${phone}, ${specialty}, ${emirate}, ${area}, ${mapsUrl}, ${description}, ${user.userId})
+    INSERT INTO masters (name, phone, phone_is_whatsapp, specialty, emirate, area, maps_url, description, added_by)
+    VALUES (${name}, ${phone}, ${phoneIsWhatsapp}, ${specialty}, ${emirate}, ${area}, ${mapsUrl}, ${description}, ${user.userId})
     RETURNING id
   `) as { id: string }[];
 

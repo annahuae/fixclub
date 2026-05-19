@@ -7,6 +7,7 @@ import { StarRating, StarInput } from '@/components/star-rating';
 import { Avatar } from '@/components/avatar';
 import { MapEmbed } from '@/components/map-embed';
 import { Nav } from '@/components/nav';
+import { PhoneLink } from '@/components/phone-link';
 import { addShopReview, deleteShop } from '../actions';
 
 type Shop = {
@@ -17,6 +18,7 @@ type Shop = {
   area: string | null;
   address: string | null;
   phone: string | null;
+  phone_is_whatsapp: boolean | null;
   maps_url: string | null;
   description: string | null;
   added_by: string | null;
@@ -110,12 +112,12 @@ export default async function ShopPage({
                   <span className="text-ink-mid text-sm">No reviews yet</span>
                 )}
                 {shop.phone && (
-                  <a
-                    href={`tel:${shop.phone}`}
-                    className="font-mono text-sm text-accent hover:underline ml-auto"
-                  >
-                    {shop.phone}
-                  </a>
+                  <span className="ml-auto">
+                    <PhoneLink
+                      phone={shop.phone}
+                      isWhatsapp={shop.phone_is_whatsapp}
+                    />
+                  </span>
                 )}
               </div>
 

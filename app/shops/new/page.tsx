@@ -75,6 +75,15 @@ export default async function NewShopPage() {
                 placeholder="+971 4 ..."
                 className="input font-mono"
               />
+              <label className="mt-2 flex cursor-pointer items-center gap-2 text-sm text-ink-mid">
+                <input
+                  type="checkbox"
+                  name="phone_is_whatsapp"
+                  value="1"
+                  className="h-4 w-4 accent-accent"
+                />
+                This is a WhatsApp number
+              </label>
             </div>
           </div>
 

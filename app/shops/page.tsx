@@ -359,12 +359,28 @@ export default async function ShopsPage({
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-accent text-accent">
                 ✎
               </div>
-              <h2 className="font-semibold">Share a shop</h2>
+              <h2 className="font-semibold">Share your experience</h2>
               <p className="mt-2 text-sm leading-6 text-ink-mid">
-                Add a place where buying materials is actually convenient.
+                Help others find trusted specialists.
               </p>
-              <Link href="/shops/new" className="btn-outline mt-5 w-full">
-                Add shop
+              <Link
+                href="/new"
+                className="mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border-2 border-accent bg-surface px-5 text-sm font-semibold text-accent transition hover:bg-accent-soft"
+              >
+                <svg
+                  className="h-[18px] w-[18px]"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden
+                >
+                  <path d="M12 20h9" />
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
+                </svg>
+                Write a review
               </Link>
             </div>
             </div>
