@@ -19,7 +19,7 @@ export function EmirateSelect({ value }: { value?: string }) {
           const qs = sp.toString();
           router.push(qs ? `${pathname}?${qs}` : pathname);
         }}
-        className="input pr-8 text-sm appearance-none cursor-pointer min-w-[170px]"
+        className="input h-11 pr-8 text-sm appearance-none cursor-pointer min-w-[170px]"
       >
         <option value="">All emirates</option>
         {EMIRATES.map((e) => (
