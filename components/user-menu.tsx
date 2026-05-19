@@ -5,9 +5,11 @@ import { useEffect, useRef, useState } from 'react';
 
 export function UserMenu({
   name,
+  isAdmin = false,
   signOutAction
 }: {
   name: string;
+  isAdmin?: boolean;
   signOutAction: () => Promise<void>;
 }) {
   const [open, setOpen] = useState(false);
@@ -40,9 +42,30 @@ export function UserMenu({
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
-        className="flex h-9 w-9 items-center justify-center rounded-full bg-surface-2 text-sm font-medium text-ink-mid hover:bg-border hover:text-ink"
+        className={
+          isAdmin
+            ? 'flex h-9 w-9 items-center justify-center rounded-full bg-[#fef3c7] text-[#92400e] hover:bg-[#fde68a]'
+            : 'flex h-9 w-9 items-center justify-center rounded-full bg-surface-2 text-sm font-medium text-ink-mid hover:bg-border hover:text-ink'
+        }
+        title={isAdmin ? 'Admin' : undefined}
       >
-        {initial}
+        {isAdmin ? (
+          <svg
+            className="h-[18px] w-[18px]"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden
+          >
+            <path d="M12 2 4 5v6c0 5 3.5 9.5 8 11 4.5-1.5 8-6 8-11V5l-8-3z" />
+            <path d="m9 12 2 2 4-4" />
+          </svg>
+        ) : (
+          <span className="text-sm font-medium">{initial}</span>
+        )}
       </button>
       {open && (
         <div

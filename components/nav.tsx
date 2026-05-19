@@ -1,13 +1,18 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { destroySession, getSessionUser } from '@/lib/auth';
+import {
+  destroyAdminCookie,
+  destroySession,
+  getSessionUser,
+  isAdmin
+} from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { EmirateSelect } from './emirate-select';
 import { UserMenu } from './user-menu';
 
 async function signOut() {
   'use server';
-  await destroySession();
+  await Promise.all([destroySession(), destroyAdminCookie()]);
   redirect('/');
 }
 
@@ -22,7 +27,7 @@ export async function Nav({
   showSearch?: boolean;
   searchAction?: string;
 }) {
-  const user = await getSessionUser();
+  const [user, admin] = await Promise.all([getSessionUser(), isAdmin()]);
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-white/95 backdrop-blur-xl">
       <div className="shell h-20 flex items-center gap-5">
@@ -63,7 +68,11 @@ export async function Nav({
         )}
 
         <div className="ml-auto flex items-center gap-3">
-          {user && <UserMenu name={user.name} signOutAction={signOut} />}
+          {user ? (
+            <UserMenu name={user.name} signOutAction={signOut} />
+          ) : admin ? (
+            <UserMenu name="Admin" isAdmin signOutAction={signOut} />
+          ) : null}
         </div>
       </div>
     </header>
