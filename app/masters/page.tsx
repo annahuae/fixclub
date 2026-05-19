@@ -250,7 +250,7 @@ export default async function MastersPage({
                       className="card block transition hover:border-accent/50 hover:shadow-lg"
                     >
                       <div className="flex gap-5">
-                        <Avatar name={m.name} seed={m.id} size="lg" />
+                        <Avatar name={m.name} seed={m.id} size="lg" fallback="master" />
                         <div className="min-w-0 flex-1">
                           <h2 className="text-xl font-semibold tracking-tight">
                             {m.name}

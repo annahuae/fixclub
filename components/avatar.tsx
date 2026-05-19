@@ -1,3 +1,5 @@
+import Image from 'next/image';
+
 const PALETTE = [
   ['#fce8e6', '#b3261e'],
   ['#e8f0fe', '#1967d2'],
@@ -14,25 +16,56 @@ function hashIndex(seed: string, mod: number) {
   return Math.abs(h) % mod;
 }
 
+const SIZES = {
+  sm: { cls: 'w-8 h-8 text-xs', px: 32 },
+  md: { cls: 'w-12 h-12 text-base', px: 48 },
+  lg: { cls: 'w-20 h-20 text-2xl', px: 80 }
+} as const;
+
 export function Avatar({
   name,
   size = 'md',
-  seed
+  seed,
+  photoUrl,
+  fallback = 'initial'
 }: {
   name: string;
-  size?: 'sm' | 'md' | 'lg';
+  size?: keyof typeof SIZES;
   seed?: string;
+  photoUrl?: string | null;
+  fallback?: 'initial' | 'master';
 }) {
-  const sizes = {
-    sm: 'w-8 h-8 text-xs',
-    md: 'w-12 h-12 text-base',
-    lg: 'w-20 h-20 text-2xl'
-  };
+  const { cls, px } = SIZES[size];
+
+  if (photoUrl) {
+    return (
+      <Image
+        src={photoUrl}
+        alt={name}
+        width={px}
+        height={px}
+        className={`rounded-full object-cover shrink-0 ${cls}`}
+      />
+    );
+  }
+
+  if (fallback === 'master') {
+    return (
+      <Image
+        src="/master-default.png"
+        alt={name}
+        width={px}
+        height={px}
+        className={`rounded-full object-cover bg-surface-2 shrink-0 ${cls}`}
+      />
+    );
+  }
+
   const letter = (name || '?').trim().charAt(0).toUpperCase() || '?';
   const [bg, fg] = PALETTE[hashIndex(seed || name || '?', PALETTE.length)];
   return (
     <span
-      className={`inline-flex items-center justify-center rounded-full font-semibold shrink-0 ${sizes[size]}`}
+      className={`inline-flex items-center justify-center rounded-full font-semibold shrink-0 ${cls}`}
       style={{ background: bg, color: fg }}
       aria-hidden
     >

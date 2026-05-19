@@ -89,7 +89,7 @@ export default async function MasterPage({
 
         <div className="panel mt-4 p-6">
           <div className="flex items-start gap-5">
-            <Avatar name={master.name} seed={master.id} size="lg" />
+            <Avatar name={master.name} seed={master.id} size="lg" fallback="master" />
             <div className="flex-1 min-w-0">
               <h1 className="text-3xl font-bold text-ink">{master.name}</h1>
               <div className="text-sm text-ink-mid mt-1">
