@@ -2,8 +2,7 @@ import Link from 'next/link';
 import { requireUser } from '@/lib/auth';
 import { sql } from '@/lib/db';
 import {
-  SPECIALTIES,
-  EMIRATES,
+  SPECIALTY_GROUPS,
   specialtyLabel,
   emirateLabel,
   formatDate
@@ -176,42 +175,33 @@ export default async function MastersPage({
 
   return (
     <>
-      <Nav query={q || undefined} />
+      <Nav query={q || undefined} emirate={emirate || undefined} />
       <main className="max-w-6xl mx-auto px-6 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-[220px_minmax(0,1fr)_280px] gap-6">
           {/* Sidebar: filters */}
           <aside className="lg:sticky lg:top-[72px] lg:self-start space-y-6">
-            <FiltersBlock title="Специальность">
+            <div>
               <FilterLink
                 active={!specialty}
                 href={buildHref({ specialty: null })}
-                label="Все"
+                label="Все специальности"
               />
-              {SPECIALTIES.map((s) => (
-                <FilterLink
-                  key={s.value}
-                  active={specialty === s.value}
-                  href={buildHref({ specialty: s.value })}
-                  label={s.label}
-                />
+              {SPECIALTY_GROUPS.map((group) => (
+                <div key={group.title} className="mt-4">
+                  <div className="text-xs font-semibold text-ink-dim uppercase tracking-wide mb-1 px-2">
+                    {group.title}
+                  </div>
+                  {group.items.map((s) => (
+                    <FilterLink
+                      key={s.value}
+                      active={specialty === s.value}
+                      href={buildHref({ specialty: s.value })}
+                      label={s.label}
+                    />
+                  ))}
+                </div>
               ))}
-            </FiltersBlock>
-
-            <FiltersBlock title="Эмират">
-              <FilterLink
-                active={!emirate}
-                href={buildHref({ emirate: null })}
-                label="Все"
-              />
-              {EMIRATES.map((e) => (
-                <FilterLink
-                  key={e.value}
-                  active={emirate === e.value}
-                  href={buildHref({ emirate: e.value })}
-                  label={e.label}
-                />
-              ))}
-            </FiltersBlock>
+            </div>
 
             <FiltersBlock title="Рейтинг">
               {RATING_FILTERS.map((r) => (

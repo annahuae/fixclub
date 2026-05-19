@@ -1,15 +1,43 @@
-export const SPECIALTIES = [
-  { value: 'plumber', label: 'Сантехник' },
-  { value: 'electrician', label: 'Электрик' },
-  { value: 'ac', label: 'Кондиционеры' },
-  { value: 'handyman', label: 'Хэндимен' },
-  { value: 'appliance', label: 'Бытовая техника' },
-  { value: 'carpenter', label: 'Плотник / мебель' },
-  { value: 'painter', label: 'Малярка' },
-  { value: 'cleaner', label: 'Клининг' },
-  { value: 'mover', label: 'Муверы' },
-  { value: 'other', label: 'Другое' }
+export const SPECIALTY_GROUPS = [
+  {
+    title: 'Ремонт квартиры',
+    items: [
+      { value: 'plumber', label: 'Сантехник' },
+      { value: 'electrician', label: 'Электрик' },
+      { value: 'ac', label: 'Кондиционеры' },
+      { value: 'handyman', label: 'Хэндимен' },
+      { value: 'painter', label: 'Малярка' },
+      { value: 'carpenter', label: 'Плотник' },
+      { value: 'tiler', label: 'Плиточник' },
+      { value: 'locksmith', label: 'Замки / двери' },
+      { value: 'windows', label: 'Окна / стекло' }
+    ]
+  },
+  {
+    title: 'Дом и быт',
+    items: [
+      { value: 'appliance', label: 'Бытовая техника' },
+      { value: 'furniture_assembly', label: 'Сборка мебели' },
+      { value: 'furniture_repair', label: 'Ремонт мебели' },
+      { value: 'cleaner', label: 'Клининг' },
+      { value: 'gardener', label: 'Сад / растения' },
+      { value: 'pest', label: 'Дезинсекция' }
+    ]
+  },
+  {
+    title: 'Перевозки и хранение',
+    items: [
+      { value: 'mover', label: 'Муверы' },
+      { value: 'storage', label: 'Стораджи' }
+    ]
+  },
+  {
+    title: 'Прочее',
+    items: [{ value: 'other', label: 'Другое' }]
+  }
 ] as const;
+
+export const SPECIALTIES = SPECIALTY_GROUPS.flatMap((g) => g.items);
 
 export const EMIRATES = [
   { value: 'dubai', label: 'Dubai' },
@@ -31,6 +59,8 @@ export const SHOP_CATEGORIES = [
   { value: 'lumber', label: 'Дерево / пиломатериалы' },
   { value: 'glass', label: 'Стекло / зеркала' },
   { value: 'garden', label: 'Сад / уличное' },
+  { value: 'furniture', label: 'Мебель' },
+  { value: 'appliance_store', label: 'Бытовая техника' },
   { value: 'other', label: 'Прочее' }
 ] as const;
 
@@ -68,17 +98,12 @@ export function formatDate(date: string | Date): string {
   });
 }
 
-// Build an embeddable Google Maps URL.
-// Accepts a Google Maps share/URL or a free-form address/place.
 export function buildMapsEmbedUrl(input: string): string | null {
   const v = input.trim();
   if (!v) return null;
-  // Already an embed link
   if (/^https?:\/\/(www\.)?google\.com\/maps\/embed/i.test(v)) return v;
-  // Any other google maps URL — pass through ?q=
   if (/^https?:\/\//i.test(v)) {
     return `https://www.google.com/maps?q=${encodeURIComponent(v)}&output=embed`;
   }
-  // Plain address
   return `https://www.google.com/maps?q=${encodeURIComponent(v)}&output=embed`;
 }

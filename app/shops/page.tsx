@@ -3,7 +3,6 @@ import { requireUser } from '@/lib/auth';
 import { sql } from '@/lib/db';
 import {
   SHOP_CATEGORIES,
-  EMIRATES,
   shopCategoryLabel,
   emirateLabel
 } from '@/lib/utils';
@@ -116,7 +115,11 @@ export default async function ShopsPage({
 
   return (
     <>
-      <Nav query={q || undefined} searchAction="/shops" />
+      <Nav
+        query={q || undefined}
+        emirate={emirate || undefined}
+        searchAction="/shops"
+      />
       <main className="max-w-6xl mx-auto px-6 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-[220px_minmax(0,1fr)] gap-6">
           <aside className="lg:sticky lg:top-[72px] lg:self-start space-y-6">
@@ -132,22 +135,6 @@ export default async function ShopsPage({
                   active={category === c.value}
                   href={buildHref({ category: c.value })}
                   label={c.label}
-                />
-              ))}
-            </FiltersBlock>
-
-            <FiltersBlock title="Эмират">
-              <FilterLink
-                active={!emirate}
-                href={buildHref({ emirate: null })}
-                label="Все"
-              />
-              {EMIRATES.map((e) => (
-                <FilterLink
-                  key={e.value}
-                  active={emirate === e.value}
-                  href={buildHref({ emirate: e.value })}
-                  label={e.label}
                 />
               ))}
             </FiltersBlock>

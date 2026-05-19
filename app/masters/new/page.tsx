@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { requireUser } from '@/lib/auth';
-import { SPECIALTIES, EMIRATES } from '@/lib/utils';
+import { SPECIALTY_GROUPS, EMIRATES } from '@/lib/utils';
 import { Nav } from '@/components/nav';
 import { addMaster } from '../actions';
 
@@ -33,10 +33,14 @@ export default async function NewMasterPage() {
             <div>
               <label className="label">Специальность</label>
               <select name="specialty" required className="input">
-                {SPECIALTIES.map((s) => (
-                  <option key={s.value} value={s.value}>
-                    {s.label}
-                  </option>
+                {SPECIALTY_GROUPS.map((g) => (
+                  <optgroup key={g.title} label={g.title}>
+                    {g.items.map((s) => (
+                      <option key={s.value} value={s.value}>
+                        {s.label}
+                      </option>
+                    ))}
+                  </optgroup>
                 ))}
               </select>
             </div>
