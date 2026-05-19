@@ -31,9 +31,9 @@ type ReviewPreview = {
 };
 
 const SORTS = [
-  { value: 'reviewed', label: 'Больше отзывов' },
-  { value: 'rated', label: 'Выше рейтинг' },
-  { value: 'newest', label: 'Свежие отзывы' }
+  { value: 'reviewed', label: 'Most reviewed' },
+  { value: 'rated', label: 'Highest rated' },
+  { value: 'newest', label: 'Newest reviews' }
 ] as const;
 
 const FILTER_SPECIALTIES = [
@@ -177,17 +177,17 @@ export default async function MastersPage({
           <aside className="hidden lg:block">
             <div className="panel sticky top-28 p-5">
               <div className="mb-5 flex items-center justify-between">
-                <h2 className="font-semibold text-ink">Фильтры</h2>
+                <h2 className="font-semibold text-ink">Filters</h2>
                 <Link href="/masters" className="text-sm text-accent">
-                  Сбросить
+                  Clear all
                 </Link>
               </div>
 
-              <FilterSection title="Специальность">
+              <FilterSection title="Specialty">
                 <CheckLink
                   href={buildHref({ specialty: null })}
                   active={!specialty}
-                  label="Все специальности"
+                  label="All specialties"
                 />
                 {FILTER_SPECIALTIES.map((value) => (
                   <CheckLink
@@ -199,7 +199,7 @@ export default async function MastersPage({
                 ))}
                 <details>
                   <summary className="mt-2 cursor-pointer list-none text-sm font-medium text-accent">
-                    Показать ещё
+                    Show more
                   </summary>
                   <div className="mt-2 space-y-2">
                     {SPECIALTIES.filter(
@@ -216,11 +216,11 @@ export default async function MastersPage({
                 </details>
               </FilterSection>
 
-              <FilterSection title="Рейтинг">
+              <FilterSection title="Rating">
                 <CheckLink
                   href={buildHref({ rating: null })}
                   active={!minRating}
-                  label="Любой рейтинг"
+                  label="Any rating"
                   radio
                 />
                 {['4', '3.5', '3', '2'].map((rating) => (
@@ -241,16 +241,16 @@ export default async function MastersPage({
               <h1 className="font-semibold text-ink">
                 {rows.length}{' '}
                 {labelCount(rows.length, [
-                  'мастер найден',
-                  'мастера найдено',
-                  'мастеров найдено'
+                  'specialist found',
+                  'specialists found',
+                  'specialists found'
                 ])}{' '}
                 <span className="text-accent">
-                  {emirate ? `в ${emirateLabel(emirate)}` : 'в UAE'}
+                  {emirate ? `in ${emirateLabel(emirate)}` : 'in the UAE'}
                 </span>
               </h1>
               <Link href="/masters/new" className="btn-outline lg:hidden">
-                Оставить отзыв
+                Write a review
               </Link>
             </div>
 
@@ -270,9 +270,9 @@ export default async function MastersPage({
 
             {rows.length === 0 ? (
               <div className="card py-16 text-center">
-                <h2 className="text-2xl font-semibold">Ничего не найдено</h2>
+                <h2 className="text-2xl font-semibold">Nothing found</h2>
                 <p className="mt-2 text-ink-mid">
-                  Попробуй убрать часть фильтров или добавить первого мастера.
+                  Try clearing some filters or add the first specialist.
                 </p>
               </div>
             ) : (
@@ -304,16 +304,16 @@ export default async function MastersPage({
                                 <span className="text-sm text-accent">
                                   ({count}{' '}
                                   {labelCount(count, [
-                                    'отзыв',
-                                    'отзыва',
-                                    'отзывов'
+                                    'review',
+                                    'reviews',
+                                    'reviews'
                                   ])}
                                   )
                                 </span>
                               </>
                             ) : (
                               <span className="text-sm text-ink-mid">
-                                Без отзывов
+                                No reviews yet
                               </span>
                             )}
                           </div>
@@ -333,7 +333,7 @@ export default async function MastersPage({
                                   <div className="min-w-0">
                                     <div className="flex flex-wrap items-center gap-2 text-sm">
                                       <span className="font-semibold">
-                                        {review.user_name || 'Участник'}
+                                        {review.user_name || 'Member'}
                                       </span>
                                       <StarRating
                                         rating={review.rating}
@@ -364,7 +364,7 @@ export default async function MastersPage({
 
           <aside className="hidden lg:block">
             <div className="panel sticky top-28 p-6">
-              <h2 className="font-semibold">Сводный рейтинг</h2>
+              <h2 className="font-semibold">Rating summary</h2>
               <div className="mt-6 text-6xl font-semibold tracking-tight">
                 {aggregateAvg.toFixed(1)}
               </div>
@@ -372,8 +372,8 @@ export default async function MastersPage({
                 <StarRating rating={aggregateAvg} size="lg" />
               </div>
               <div className="mt-3 text-sm text-ink-mid">
-                По {totalReviews}{' '}
-                {labelCount(totalReviews, ['отзыву', 'отзывам', 'отзывам'])}
+                Based on {totalReviews}{' '}
+                {labelCount(totalReviews, ['review', 'reviews', 'reviews'])}
               </div>
               <div className="mt-6 space-y-3">
                 {distribution.map((item) => (
@@ -400,12 +400,12 @@ export default async function MastersPage({
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-accent text-accent">
                 ✎
               </div>
-              <h2 className="font-semibold">Поделись опытом</h2>
+              <h2 className="font-semibold">Share your experience</h2>
               <p className="mt-2 text-sm leading-6 text-ink-mid">
-                Помоги другим найти проверенных специалистов.
+                Help others find trusted specialists.
               </p>
               <Link href="/masters/new" className="btn-outline mt-5 w-full">
-                Оставить отзыв
+                Write a review
               </Link>
             </div>
           </aside>

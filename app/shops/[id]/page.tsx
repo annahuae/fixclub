@@ -75,7 +75,7 @@ export default async function ShopPage({
       <Nav searchAction="/shops" />
       <main className="shell py-8">
         <Link href="/shops" className="text-sm text-ink-mid hover:text-accent">
-          ← К магазинам
+          ← Back to shops
         </Link>
 
         <div className="panel mt-4 p-6">
@@ -107,7 +107,7 @@ export default async function ShopPage({
                     </span>
                   </>
                 ) : (
-                  <span className="text-ink-mid text-sm">Пока без отзывов</span>
+                  <span className="text-ink-mid text-sm">No reviews yet</span>
                 )}
                 {shop.phone && (
                   <a
@@ -130,9 +130,9 @@ export default async function ShopPage({
               )}
 
               <div className="mt-4 text-xs text-ink-dim">
-                Добавил{' '}
+                Added by{' '}
                 <span className="text-ink">
-                  {shop.added_by_name || 'участник'}
+                  {shop.added_by_name || 'member'}
                 </span>{' '}
                 · {formatDate(shop.created_at)}
               </div>
@@ -141,7 +141,7 @@ export default async function ShopPage({
                 <form action={deleteShop} className="mt-3">
                   <input type="hidden" name="id" value={shop.id} />
                   <button type="submit" className="btn-danger text-xs">
-                    Удалить магазин
+                    Delete shop
                   </button>
                 </form>
               )}
@@ -154,40 +154,40 @@ export default async function ShopPage({
         <section className="mt-6">
           {!userHasReviewed ? (
             <div className="panel mb-6 p-6">
-              <h2 className="text-xl font-bold mb-1">Оставить отзыв</h2>
+              <h2 className="text-xl font-bold mb-1">Write a review</h2>
               <p className="text-ink-mid text-sm mb-4">
-                Один отзыв на магазин. Пиши по делу.
+                One review per shop. Keep it useful.
               </p>
               <form action={addShopReview} className="space-y-4">
                 <input type="hidden" name="shop_id" value={shop.id} />
                 <div>
-                  <label className="label">Оценка</label>
+                  <label className="label">Rating</label>
                   <StarInput />
                 </div>
                 <div>
-                  <label className="label">Комментарий</label>
+                  <label className="label">Comment</label>
                   <textarea
                     name="comment"
                     rows={4}
-                    placeholder="Что купил, цены, отношение, есть ли нюансы"
+                    placeholder="What you bought, pricing, service, important details"
                     className="input resize-none"
                   />
                 </div>
                 <button type="submit" className="btn-primary">
-                  Опубликовать
+                  Publish
                 </button>
               </form>
             </div>
           ) : (
             <div className="mb-6 rounded-xl border border-transparent bg-accent-soft p-4 text-sm text-accent-strong">
-              Ты уже оставлял отзыв этому магазину.
+              You have already reviewed this shop.
             </div>
           )}
 
           {reviewRows.length > 0 && (
             <div>
               <h2 className="text-xl font-bold mb-4">
-                Отзывы ({reviewRows.length})
+                Reviews ({reviewRows.length})
               </h2>
               <div className="space-y-3">
                 {reviewRows.map((r) => (

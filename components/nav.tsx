@@ -41,13 +41,13 @@ export async function Nav({
             href="/masters"
             className="px-3 py-2 text-ink-mid hover:text-ink"
           >
-            Мастера
+            Specialists
           </Link>
           <Link
             href="/shops"
             className="px-3 py-2 text-ink-mid hover:text-ink"
           >
-            Магазины
+            Shops
           </Link>
         </nav>
 
@@ -71,7 +71,7 @@ export async function Nav({
                 type="search"
                 name="q"
                 defaultValue={query || ''}
-                placeholder="Поиск мастера или компании..."
+                placeholder="Search for a specialist or company..."
                 className="input h-11 pl-10"
               />
               {emirate && (
@@ -91,7 +91,7 @@ export async function Nav({
             href="/masters/new"
             className="btn-outline h-11"
           >
-            <span className="hidden sm:inline">Оставить отзыв</span>
+            <span className="hidden sm:inline">Write a review</span>
             <span className="sm:hidden">+</span>
           </Link>
           {user && (
@@ -99,9 +99,9 @@ export async function Nav({
               <button
                 type="submit"
                 className="text-xs text-ink-mid hover:text-danger"
-                title={`${user.name} — выйти`}
+                title={`${user.name} — sign out`}
               >
-                Выйти
+                Sign out
               </button>
             </form>
           )}

@@ -64,9 +64,9 @@ function ErrorBox({ msg }: { msg?: string }) {
 function LoginView({ error }: { error?: string }) {
   return (
     <>
-      <h1 className="text-2xl font-bold mb-1">Вход</h1>
+      <h1 className="text-2xl font-bold mb-1">Sign in</h1>
       <p className="text-sm text-ink-mid mb-5">
-        Email и пароль, который задал при регистрации.
+        Use the email and password you set during registration.
       </p>
       <ErrorBox msg={error} />
       <form action={submitLogin} className="space-y-4">
@@ -82,7 +82,7 @@ function LoginView({ error }: { error?: string }) {
           />
         </div>
         <div>
-          <label className="label">Пароль</label>
+          <label className="label">Password</label>
           <input
             name="password"
             type="password"
@@ -92,18 +92,18 @@ function LoginView({ error }: { error?: string }) {
           />
         </div>
         <button type="submit" className="btn-primary w-full">
-          Войти
+          Sign in
         </button>
       </form>
 
       <div className="mt-5 pt-5 border-t border-border text-center">
         <p className="text-sm text-ink-mid">
-          Нет аккаунта?{' '}
+          No account yet?{' '}
           <Link
             href="/access?mode=signup"
             className="text-accent font-medium hover:underline"
           >
-            Зарегистрироваться →
+            Register →
           </Link>
         </p>
       </div>
@@ -122,16 +122,16 @@ function SignupView({
   return (
     <>
       <h1 className="text-2xl font-bold mb-5">
-        {hasInvite ? 'Регистрация по инвайту' : 'Регистрация'}
+        {hasInvite ? 'Register with invite' : 'Register'}
       </h1>
       <ErrorBox msg={error} />
       <form action={submitSignup} className="space-y-4">
         <div>
-          <label className="label">Имя</label>
+          <label className="label">Name</label>
           <input
             name="name"
             required
-            placeholder="Аня"
+            placeholder="Anna"
             className="input"
           />
         </div>
@@ -146,9 +146,9 @@ function SignupView({
             autoComplete="email"
           />
         </div>
-        <PasswordField hint="Сохрани — это твой пароль для входа." />
+        <PasswordField hint="Save it — this is your sign-in password." />
         <div>
-          <label className="label">Инвайт-код</label>
+          <label className="label">Invite code</label>
           <input
             name="code"
             defaultValue={prefilledInvite}
@@ -158,15 +158,15 @@ function SignupView({
           />
         </div>
         <button type="submit" className="btn-primary w-full">
-          Зарегистрироваться
+          Register
         </button>
       </form>
 
       <div className="mt-5 pt-5 border-t border-border text-center text-sm">
         <p className="text-ink-mid">
-          Уже есть аккаунт?{' '}
+          Already have an account?{' '}
           <Link href="/access" className="text-accent hover:underline">
-            Войти
+            Sign in
           </Link>
         </p>
       </div>

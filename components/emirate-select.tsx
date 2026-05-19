@@ -34,7 +34,7 @@ export function EmirateSelect({ value }: { value?: string }) {
         }}
         className="input pl-9 pr-8 text-sm appearance-none cursor-pointer min-w-[170px]"
       >
-        <option value="">Все эмираты</option>
+        <option value="">All emirates</option>
         {EMIRATES.map((e) => (
           <option key={e.value} value={e.value}>
             {e.label}

@@ -84,7 +84,7 @@ export default async function MasterPage({
       <Nav />
       <main className="shell py-8">
         <Link href="/masters" className="text-sm text-ink-mid hover:text-accent">
-          ← К каталогу
+          ← Back to catalog
         </Link>
 
         <div className="panel mt-4 p-6">
@@ -114,15 +114,15 @@ export default async function MasterPage({
                     <span className="text-ink-mid text-sm">
                       ({reviewRows.length}{' '}
                       {labelCount(reviewRows.length, [
-                        'отзыв',
-                        'отзыва',
-                        'отзывов'
+                        'review',
+                        'reviews',
+                        'reviews'
                       ])}
                       )
                     </span>
                   </>
                 ) : (
-                  <span className="text-ink-mid text-sm">Пока без отзывов</span>
+                  <span className="text-ink-mid text-sm">No reviews yet</span>
                 )}
                 {master.phone && (
                   <a
@@ -141,9 +141,9 @@ export default async function MasterPage({
               )}
 
               <div className="mt-4 text-xs text-ink-dim">
-                Добавил{' '}
+                Added by{' '}
                 <span className="text-ink">
-                  {master.added_by_name || 'участник'}
+                  {master.added_by_name || 'member'}
                 </span>{' '}
                 · {formatDate(master.created_at)}
               </div>
@@ -152,7 +152,7 @@ export default async function MasterPage({
                 <form action={deleteMaster} className="mt-3">
                   <input type="hidden" name="id" value={master.id} />
                   <button type="submit" className="btn-danger text-xs">
-                    Удалить мастера
+                    Delete specialist
                   </button>
                 </form>
               )}
@@ -168,40 +168,40 @@ export default async function MasterPage({
           <section className="min-w-0">
             {!userHasReviewed ? (
               <div className="panel mb-6 p-6">
-                <h2 className="text-xl font-bold mb-1">Оставить отзыв</h2>
+                <h2 className="text-xl font-bold mb-1">Write a review</h2>
                 <p className="text-ink-mid text-sm mb-4">
-                  Один отзыв на мастера. Пиши по делу.
+                  One review per specialist. Keep it useful.
                 </p>
                 <form action={addReview} className="space-y-4">
                   <input type="hidden" name="master_id" value={master.id} />
                   <div>
-                    <label className="label">Оценка</label>
+                    <label className="label">Rating</label>
                     <StarInput />
                   </div>
                   <div>
-                    <label className="label">Комментарий</label>
+                    <label className="label">Comment</label>
                     <textarea
                       name="comment"
                       rows={4}
-                      placeholder="Что делал, как сработал, есть ли нюансы"
+                      placeholder="What they did, how it went, any important details"
                       className="input resize-none"
                     />
                   </div>
                   <button type="submit" className="btn-primary">
-                    Опубликовать
+                    Publish
                   </button>
                 </form>
               </div>
             ) : (
               <div className="mb-6 rounded-xl border border-transparent bg-accent-soft p-4 text-sm text-accent-strong">
-                Ты уже оставлял отзыв этому мастеру.
+                You have already reviewed this specialist.
               </div>
             )}
 
             {reviewRows.length > 0 && (
               <div>
                 <h2 className="text-xl font-bold mb-4">
-                  Отзывы ({reviewRows.length})
+                  Reviews ({reviewRows.length})
                 </h2>
                 <div className="space-y-3">
                   {reviewRows.map((r) => (
@@ -239,7 +239,7 @@ export default async function MasterPage({
           {reviewRows.length > 0 && (
             <aside className="card h-fit lg:sticky lg:top-28 lg:self-start">
               <div className="text-sm font-semibold text-ink mb-2">
-                Распределение
+                Breakdown
               </div>
               <div className="flex items-baseline gap-2 mb-4">
                 <span className="text-3xl font-bold">{avg.toFixed(1)}</span>

@@ -15,7 +15,7 @@ export async function submitLogin(formData: FormData) {
   const password = String(formData.get('password') || '');
 
   if (!email || !password) {
-    redirect('/access?error=Заполни+оба+поля');
+    redirect('/access?error=Fill+in+both+fields');
   }
 
   const rows = (await sql`
@@ -26,11 +26,11 @@ export async function submitLogin(formData: FormData) {
   `) as { id: string; password_hash: string | null }[];
 
   if (rows.length === 0 || !rows[0].password_hash) {
-    redirect('/access?error=Неверный+email+или+пароль');
+    redirect('/access?error=Invalid+email+or+password');
   }
 
   if (!verifyPassword(password, rows[0].password_hash)) {
-    redirect('/access?error=Неверный+email+или+пароль');
+    redirect('/access?error=Invalid+email+or+password');
   }
 
   await createSession(rows[0].id);
@@ -50,7 +50,7 @@ export async function submitSignup(formData: FormData) {
 
   if (!name || !email || !isEmail(email) || password.length < 6) {
     redirect(
-      '/access?mode=signup&error=Заполни+имя,+email+и+пароль+(минимум+6+символов)'
+      '/access?mode=signup&error=Enter+your+name,+email,+and+password+(minimum+6+characters)'
     );
   }
 
@@ -59,7 +59,7 @@ export async function submitSignup(formData: FormData) {
     SELECT 1 FROM users WHERE LOWER(email) = ${email} LIMIT 1
   `) as { '?column?': number }[];
   if (existsUser.length > 0) {
-    redirect('/access?mode=signup&error=Этот+email+уже+зарегистрирован.+Войди.');
+    redirect('/access?mode=signup&error=This+email+is+already+registered.+Sign+in.');
   }
 
   const passwordHash = hashPassword(password);
@@ -77,11 +77,11 @@ export async function submitSignup(formData: FormData) {
     }[];
 
     if (codeRows.length === 0) {
-      redirect('/access?mode=signup&error=Инвайт-код+не+найден');
+      redirect('/access?mode=signup&error=Invite+code+not+found');
     }
     if (codeRows[0].usage_count >= codeRows[0].usage_limit) {
       redirect(
-        '/access?mode=signup&error=Лимит+инвайта+исчерпан.+Попроси+новый.'
+        '/access?mode=signup&error=Invite+limit+reached.+Ask+for+a+new+one.'
       );
     }
 

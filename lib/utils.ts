@@ -1,39 +1,39 @@
 export const SPECIALTY_GROUPS = [
   {
-    title: 'Ремонт квартиры',
+    title: 'Apartment repair',
     items: [
-      { value: 'plumber', label: 'Сантехник' },
-      { value: 'electrician', label: 'Электрик' },
-      { value: 'ac', label: 'Кондиционеры' },
-      { value: 'handyman', label: 'Хэндимен' },
-      { value: 'painter', label: 'Малярка' },
-      { value: 'carpenter', label: 'Плотник' },
-      { value: 'tiler', label: 'Плиточник' },
-      { value: 'locksmith', label: 'Замки / двери' },
-      { value: 'windows', label: 'Окна / стекло' }
+      { value: 'plumber', label: 'Plumber' },
+      { value: 'electrician', label: 'Electrician' },
+      { value: 'ac', label: 'AC technician' },
+      { value: 'handyman', label: 'Handyman' },
+      { value: 'painter', label: 'Painting' },
+      { value: 'carpenter', label: 'Carpenter' },
+      { value: 'tiler', label: 'Tiler' },
+      { value: 'locksmith', label: 'Locks / doors' },
+      { value: 'windows', label: 'Windows / glass' }
     ]
   },
   {
-    title: 'Дом и быт',
+    title: 'Home and household',
     items: [
-      { value: 'appliance', label: 'Бытовая техника' },
-      { value: 'furniture_assembly', label: 'Сборка мебели' },
-      { value: 'furniture_repair', label: 'Ремонт мебели' },
-      { value: 'cleaner', label: 'Клининг' },
-      { value: 'gardener', label: 'Сад / растения' },
-      { value: 'pest', label: 'Дезинсекция' }
+      { value: 'appliance', label: 'Appliance repair' },
+      { value: 'furniture_assembly', label: 'Furniture assembly' },
+      { value: 'furniture_repair', label: 'Furniture repair' },
+      { value: 'cleaner', label: 'Cleaning' },
+      { value: 'gardener', label: 'Garden / plants' },
+      { value: 'pest', label: 'Pest control' }
     ]
   },
   {
-    title: 'Перевозки и хранение',
+    title: 'Moving and storage',
     items: [
-      { value: 'mover', label: 'Муверы' },
-      { value: 'storage', label: 'Стораджи' }
+      { value: 'mover', label: 'Movers' },
+      { value: 'storage', label: 'Storage' }
     ]
   },
   {
-    title: 'Прочее',
-    items: [{ value: 'other', label: 'Другое' }]
+    title: 'Other',
+    items: [{ value: 'other', label: 'Other' }]
   }
 ] as const;
 
@@ -53,18 +53,18 @@ export const EMIRATES = [
 ] as const;
 
 export const SHOP_CATEGORIES = [
-  { value: 'hardware', label: 'Хозтовары / hardware' },
-  { value: 'tiles', label: 'Плитка / отделка' },
-  { value: 'plumbing_parts', label: 'Сантехника / запчасти' },
-  { value: 'electrical_parts', label: 'Электрика / запчасти' },
-  { value: 'tools', label: 'Инструменты' },
-  { value: 'paint', label: 'Краски' },
-  { value: 'lumber', label: 'Дерево / пиломатериалы' },
-  { value: 'glass', label: 'Стекло / зеркала' },
-  { value: 'garden', label: 'Сад / уличное' },
-  { value: 'furniture', label: 'Мебель' },
-  { value: 'appliance_store', label: 'Бытовая техника' },
-  { value: 'other', label: 'Прочее' }
+  { value: 'hardware', label: 'Hardware' },
+  { value: 'tiles', label: 'Tiles / finishes' },
+  { value: 'plumbing_parts', label: 'Plumbing parts' },
+  { value: 'electrical_parts', label: 'Electrical parts' },
+  { value: 'tools', label: 'Tools' },
+  { value: 'paint', label: 'Paint' },
+  { value: 'lumber', label: 'Lumber / wood' },
+  { value: 'glass', label: 'Glass / mirrors' },
+  { value: 'garden', label: 'Garden / outdoor' },
+  { value: 'furniture', label: 'Furniture' },
+  { value: 'appliance_store', label: 'Appliances' },
+  { value: 'other', label: 'Other' }
 ] as const;
 
 export function specialtyLabel(value: string): string {
@@ -94,7 +94,7 @@ export function generateInviteCode(): string {
 
 export function formatDate(date: string | Date): string {
   const d = typeof date === 'string' ? new Date(date) : date;
-  return d.toLocaleDateString('ru-RU', {
+  return d.toLocaleDateString('en-US', {
     day: 'numeric',
     month: 'short',
     year: 'numeric'

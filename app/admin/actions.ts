@@ -18,7 +18,7 @@ async function requireAdmin() {
 export async function adminLogin(formData: FormData) {
   const password = String(formData.get('password') || '');
   if (!checkAdminPassword(password)) {
-    redirect('/admin?error=Неверный+пароль');
+    redirect('/admin?error=Invalid+password');
   }
   await setAdminCookie();
   redirect('/admin?tab=requests');

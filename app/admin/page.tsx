@@ -79,7 +79,7 @@ export default async function AdminPage({
           </Link>
 
           <div className="bg-surface border border-border rounded-2xl p-6 shadow-sm">
-            <h1 className="text-2xl font-bold mb-5">Админ-вход</h1>
+            <h1 className="text-2xl font-bold mb-5">Admin sign in</h1>
             {params.error && (
               <div className="mb-4 p-3 border border-danger rounded-lg text-danger text-sm">
                 {params.error}
@@ -87,7 +87,7 @@ export default async function AdminPage({
             )}
             <form action={adminLogin} className="space-y-4">
               <div>
-                <label className="label">Пароль</label>
+                <label className="label">Password</label>
                 <input
                   name="password"
                   type="password"
@@ -97,7 +97,7 @@ export default async function AdminPage({
                 />
               </div>
               <button type="submit" className="btn-primary w-full">
-                Войти
+                Sign in
               </button>
             </form>
           </div>
@@ -157,7 +157,7 @@ export default async function AdminPage({
               type="submit"
               className="text-xs text-ink-mid hover:text-danger uppercase tracking-widest"
             >
-              Выйти
+              Sign out
             </button>
           </form>
         </div>
@@ -165,18 +165,18 @@ export default async function AdminPage({
 
       <main className="max-w-5xl mx-auto px-6 py-10">
         <nav className="flex gap-2 mb-8 border-b border-border">
-          <TabLink current={tab} value="requests" label={`Запросы (${pendingRows.length})`} />
-          <TabLink current={tab} value="invites" label="Инвайты" />
-          <TabLink current={tab} value="users" label={`Юзеры (${userRows.length})`} />
+          <TabLink current={tab} value="requests" label={`Requests (${pendingRows.length})`} />
+          <TabLink current={tab} value="invites" label="Invites" />
+          <TabLink current={tab} value="users" label={`Users (${userRows.length})`} />
         </nav>
 
         {tab === 'requests' && (
           <section>
             <h2 className="font-bold tracking-tight text-4xl mb-6">
-              Запросы на <span className="text-accent">доступ</span>
+              Access <span className="text-accent">requests</span>
             </h2>
             {pendingRows.length === 0 ? (
-              <div className="card text-ink-mid text-sm">Нет ожидающих заявок.</div>
+              <div className="card text-ink-mid text-sm">No pending requests.</div>
             ) : (
               <div className="space-y-3 mb-12">
                 {pendingRows.map((r) => (
@@ -201,12 +201,12 @@ export default async function AdminPage({
                       <form action={approveRequest}>
                         <input type="hidden" name="id" value={r.id} />
                         <button className="btn-primary text-sm">
-                          Одобрить + создать инвайт
+                          Approve + create invite
                         </button>
                       </form>
                       <form action={rejectRequest}>
                         <input type="hidden" name="id" value={r.id} />
-                        <button className="btn-danger text-sm">Отклонить</button>
+                        <button className="btn-danger text-sm">Reject</button>
                       </form>
                     </div>
                   </div>
@@ -216,7 +216,7 @@ export default async function AdminPage({
 
             {allRequestRows.length > 0 && (
               <div>
-                <h3 className="label mb-3">Прошлые решения</h3>
+                <h3 className="label mb-3">Past decisions</h3>
                 <div className="space-y-2">
                   {allRequestRows.map((r) => (
                     <div
@@ -234,7 +234,7 @@ export default async function AdminPage({
                             : 'text-danger text-xs uppercase tracking-widest'
                         }
                       >
-                        {r.status === 'approved' ? 'одобрено' : 'отклонено'}
+                        {r.status === 'approved' ? 'approved' : 'rejected'}
                       </span>
                     </div>
                   ))}
@@ -248,12 +248,12 @@ export default async function AdminPage({
           <section>
             <div className="flex items-baseline justify-between mb-6 gap-3 flex-wrap">
               <h2 className="font-bold tracking-tight text-4xl">
-                Инвайт-<span className="text-accent">коды</span>
+                Invite <span className="text-accent">codes</span>
               </h2>
               <form action={generateInvite} className="flex gap-2 flex-wrap">
                 <input
                   name="note"
-                  placeholder="Кому (заметка)"
+                  placeholder="Recipient note"
                   className="input md:w-48"
                 />
                 <input
@@ -262,15 +262,15 @@ export default async function AdminPage({
                   min={1}
                   max={10000}
                   defaultValue={100}
-                  title="Лимит использований"
+                  title="Usage limit"
                   className="input md:w-24"
                 />
-                <button className="btn-primary">+ Сгенерировать</button>
+                <button className="btn-primary">+ Generate</button>
               </form>
             </div>
             {inviteRows.length === 0 ? (
               <div className="card text-ink-mid text-sm">
-                Пока нет кодов. Сгенерируй первый.
+                No codes yet. Generate the first one.
               </div>
             ) : (
               <div className="space-y-2">
@@ -298,11 +298,11 @@ export default async function AdminPage({
                                 exhausted ? 'text-danger' : 'text-success'
                               }
                             >
-                              {i.usage_count}/{i.usage_limit} использований
+                              {i.usage_count}/{i.usage_limit} uses
                             </span>
                             {!exhausted && (
                               <span className="text-ink-dim ml-1">
-                                · осталось {remaining}
+                                · {remaining} left
                               </span>
                             )}
                           </div>
@@ -317,7 +317,7 @@ export default async function AdminPage({
                                 value={i.code}
                               />
                               <button className="btn-danger text-xs">
-                                Удалить
+                                Delete
                               </button>
                             </form>
                           )}
@@ -334,10 +334,10 @@ export default async function AdminPage({
         {tab === 'users' && (
           <section>
             <h2 className="font-bold tracking-tight text-4xl mb-6">
-              Участники <span className="text-accent">круга</span>
+              Circle <span className="text-accent">members</span>
             </h2>
             {userRows.length === 0 ? (
-              <div className="card text-ink-mid text-sm">Пока никого.</div>
+              <div className="card text-ink-mid text-sm">No users yet.</div>
             ) : (
               <div className="space-y-2">
                 {userRows.map((u) => (
@@ -351,13 +351,13 @@ export default async function AdminPage({
                         {u.email}
                       </div>
                       <div className="text-xs text-ink-mid mt-1">
-                        {u.master_count} мастеров · {u.review_count} отзывов ·{' '}
+                        {u.master_count} specialists · {u.review_count} reviews ·{' '}
                         {formatDate(u.created_at)}
                       </div>
                     </div>
                     <form action={deleteUser}>
                       <input type="hidden" name="id" value={u.id} />
-                      <button className="btn-danger text-xs">Удалить</button>
+                      <button className="btn-danger text-xs">Delete</button>
                     </form>
                   </div>
                 ))}

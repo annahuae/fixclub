@@ -34,9 +34,9 @@ type ReviewPreview = {
 };
 
 const SORTS = [
-  { value: 'reviewed', label: 'Больше отзывов' },
-  { value: 'rated', label: 'Выше рейтинг' },
-  { value: 'newest', label: 'Свежие отзывы' }
+  { value: 'reviewed', label: 'Most reviewed' },
+  { value: 'rated', label: 'Highest rated' },
+  { value: 'newest', label: 'Newest reviews' }
 ] as const;
 
 const FILTER_CATEGORIES = [
@@ -171,17 +171,17 @@ export default async function ShopsPage({
           <aside className="hidden lg:block">
             <div className="panel sticky top-28 p-5">
               <div className="mb-5 flex items-center justify-between">
-                <h2 className="font-semibold text-ink">Фильтры</h2>
+                <h2 className="font-semibold text-ink">Filters</h2>
                 <Link href="/shops" className="text-sm text-accent">
-                  Сбросить
+                  Clear all
                 </Link>
               </div>
 
-              <FilterSection title="Категория">
+              <FilterSection title="Category">
                 <CheckLink
                   href={buildHref({ category: null })}
                   active={!category}
-                  label="Все категории"
+                  label="All categories"
                 />
                 {FILTER_CATEGORIES.map((value) => (
                   <CheckLink
@@ -193,7 +193,7 @@ export default async function ShopsPage({
                 ))}
                 <details>
                   <summary className="mt-2 cursor-pointer list-none text-sm font-medium text-accent">
-                    Показать ещё
+                    Show more
                   </summary>
                   <div className="mt-2 space-y-2">
                     {SHOP_CATEGORIES.filter(
@@ -216,13 +216,13 @@ export default async function ShopsPage({
             <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <h1 className="font-semibold text-ink">
                 {rows.length}{' '}
-                {labelCount(rows.length, ['магазин', 'магазина', 'магазинов'])}{' '}
+                {labelCount(rows.length, ['shop', 'shops', 'shops'])}{' '}
                 <span className="text-accent">
-                  {emirate ? `в ${emirateLabel(emirate)}` : 'в UAE'}
+                  {emirate ? `in ${emirateLabel(emirate)}` : 'in the UAE'}
                 </span>
               </h1>
               <Link href="/shops/new" className="btn-outline lg:hidden">
-                Добавить магазин
+                Add shop
               </Link>
             </div>
 
@@ -242,9 +242,9 @@ export default async function ShopsPage({
 
             {rows.length === 0 ? (
               <div className="card py-16 text-center">
-                <h2 className="text-2xl font-semibold">Ничего не найдено</h2>
+                <h2 className="text-2xl font-semibold">Nothing found</h2>
                 <p className="mt-2 text-ink-mid">
-                  Попробуй убрать часть фильтров или добавить магазин.
+                  Try clearing some filters or add a shop.
                 </p>
               </div>
             ) : (
@@ -281,16 +281,16 @@ export default async function ShopsPage({
                                 <span className="text-sm text-accent">
                                   ({count}{' '}
                                   {labelCount(count, [
-                                    'отзыв',
-                                    'отзыва',
-                                    'отзывов'
+                                    'review',
+                                    'reviews',
+                                    'reviews'
                                   ])}
                                   )
                                 </span>
                               </>
                             ) : (
                               <span className="text-sm text-ink-mid">
-                                Без отзывов
+                                No reviews yet
                               </span>
                             )}
                           </div>
@@ -310,7 +310,7 @@ export default async function ShopsPage({
                                   <div className="min-w-0">
                                     <div className="flex flex-wrap items-center gap-2 text-sm">
                                       <span className="font-semibold">
-                                        {review.user_name || 'Участник'}
+                                        {review.user_name || 'Member'}
                                       </span>
                                       <StarRating
                                         rating={review.rating}
@@ -341,7 +341,7 @@ export default async function ShopsPage({
 
           <aside className="hidden lg:block">
             <div className="panel sticky top-28 p-6">
-              <h2 className="font-semibold">Сводный рейтинг</h2>
+              <h2 className="font-semibold">Rating summary</h2>
               <div className="mt-6 text-6xl font-semibold tracking-tight">
                 {aggregateAvg.toFixed(1)}
               </div>
@@ -349,8 +349,8 @@ export default async function ShopsPage({
                 <StarRating rating={aggregateAvg} size="lg" />
               </div>
               <div className="mt-3 text-sm text-ink-mid">
-                По {totalReviews}{' '}
-                {labelCount(totalReviews, ['отзыву', 'отзывам', 'отзывам'])}
+                Based on {totalReviews}{' '}
+                {labelCount(totalReviews, ['review', 'reviews', 'reviews'])}
               </div>
             </div>
 
@@ -358,12 +358,12 @@ export default async function ShopsPage({
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-accent text-accent">
                 ✎
               </div>
-              <h2 className="font-semibold">Поделись магазином</h2>
+              <h2 className="font-semibold">Share a shop</h2>
               <p className="mt-2 text-sm leading-6 text-ink-mid">
-                Добавь место, где реально удобно покупать материалы.
+                Add a place where buying materials is actually convenient.
               </p>
               <Link href="/shops/new" className="btn-outline mt-5 w-full">
-                Добавить магазин
+                Add shop
               </Link>
             </div>
           </aside>

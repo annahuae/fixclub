@@ -14,7 +14,7 @@ function generate(): string {
 
 export function PasswordField({
   name = 'password',
-  label = 'Пароль',
+  label = 'Password',
   hint
 }: {
   name?: string;
@@ -37,7 +37,7 @@ export function PasswordField({
           }}
           className="text-xs text-accent hover:underline mb-1.5"
         >
-          Сгенерировать
+          Generate
         </button>
       </div>
       <div className="relative">
@@ -56,7 +56,7 @@ export function PasswordField({
           onClick={() => setVisible((v) => !v)}
           className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-ink-mid hover:text-accent px-2 py-1"
         >
-          {visible ? 'скрыть' : 'показать'}
+          {visible ? 'hide' : 'show'}
         </button>
       </div>
       {hint && <p className="text-xs text-ink-dim mt-1">{hint}</p>}

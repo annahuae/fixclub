@@ -27,18 +27,24 @@ const sql = neon(url);
 const passwordHash = await bcrypt.hash('demo12345', 10);
 
 const users = [
-  ['Анна', 'anna.demo@fixclub.test'],
-  ['Мария', 'maria.demo@fixclub.test'],
-  ['Ольга', 'olga.demo@fixclub.test'],
-  ['Катя', 'katya.demo@fixclub.test'],
-  ['Ирина', 'irina.demo@fixclub.test']
+  ['Anna', 'anna.demo@fixclub.test'],
+  ['Maria', 'maria.demo@fixclub.test'],
+  ['Olga', 'olga.demo@fixclub.test'],
+  ['Kate', 'katya.demo@fixclub.test'],
+  ['Irina', 'irina.demo@fixclub.test']
 ];
 
 async function ensureUser(name, email) {
   const existing = await sql`
     SELECT id FROM users WHERE LOWER(email) = LOWER(${email}) LIMIT 1
   `;
-  if (existing.length) return existing[0].id;
+  if (existing.length) {
+    await sql`
+      UPDATE users SET name = ${name}
+      WHERE LOWER(email) = LOWER(${email})
+    `;
+    return existing[0].id;
+  }
 
   const rows = await sql`
     INSERT INTO users (name, email, password_hash)
@@ -62,7 +68,7 @@ const masters = [
     emirate: 'dubai',
     area: 'Dubai Marina',
     phone: '+971 50 318 2044',
-    description: 'Аккуратный сантехник для протечек, смесителей, сифонов и мелкого ремонта. Отвечает быстро, приезжает со своими инструментами.',
+    description: 'Careful plumber for leaks, faucets, drains, and small repairs. Responds quickly and brings his own tools.',
     rating: [5, 5, 4]
   },
   {
@@ -71,7 +77,7 @@ const masters = [
     emirate: 'dubai',
     area: 'JLT',
     phone: '+971 55 901 6682',
-    description: 'Чистка и ремонт кондиционеров. Хорош для срочных вызовов перед летом, заранее говорит цену.',
+    description: 'AC cleaning and repair. Good for urgent calls before summer and gives the price upfront.',
     rating: [5, 4, 5, 5]
   },
   {
@@ -80,7 +86,7 @@ const masters = [
     emirate: 'dubai',
     area: 'Downtown',
     phone: '+971 52 774 1903',
-    description: 'Розетки, автоматы, свет, диагностика. Спокойно объясняет, что именно сломалось.',
+    description: 'Sockets, breakers, lighting, and diagnostics. Explains clearly what went wrong.',
     rating: [5, 5]
   },
   {
@@ -89,7 +95,7 @@ const masters = [
     emirate: 'dubai',
     area: 'Business Bay',
     phone: '+971 58 441 2280',
-    description: 'Полки, карнизы, мелкие задачи после переезда. Удобно звать на список работ на пару часов.',
+    description: 'Shelves, curtain rods, and small post-move tasks. Good for a two-hour list of fixes.',
     rating: [4, 5, 4]
   },
   {
@@ -98,7 +104,7 @@ const masters = [
     emirate: 'dubai',
     area: 'Palm Jumeirah',
     phone: '+971 56 700 3921',
-    description: 'Генеральная уборка, окна, уборка после ремонта. Лучше бронировать за несколько дней.',
+    description: 'Deep cleaning, windows, and post-renovation cleaning. Best booked a few days ahead.',
     rating: [5, 5, 5]
   },
   {
@@ -107,7 +113,7 @@ const masters = [
     emirate: 'dubai',
     area: 'Jumeirah',
     phone: '+971 50 662 8814',
-    description: 'Замки, ручки, доводчики, регулировка дверей. Приезжает быстро, если срочно.',
+    description: 'Locks, handles, door closers, and door adjustments. Fast response for urgent calls.',
     rating: [5, 4]
   },
   {
@@ -116,7 +122,7 @@ const masters = [
     emirate: 'dubai',
     area: 'Al Barsha',
     phone: '+971 54 188 7720',
-    description: 'Плитка в ванной и на балконе, аккуратная затирка, умеют чинить небольшие участки без полного ремонта.',
+    description: 'Bathroom and balcony tiles, clean grout work, and small repairs without redoing the whole area.',
     rating: [4, 4, 5]
   },
   {
@@ -125,7 +131,7 @@ const masters = [
     emirate: 'dubai',
     area: 'Arabian Ranches',
     phone: '+971 52 340 0199',
-    description: 'Растения для балконов и вилл, автополив, регулярный уход. Хорошо знает, что выживает на солнце.',
+    description: 'Balcony and villa plants, irrigation, and regular care. Knows what survives UAE sun.',
     rating: [5, 5]
   },
   {
@@ -134,7 +140,7 @@ const masters = [
     emirate: 'sharjah',
     area: 'Al Majaz',
     phone: '+971 55 448 9230',
-    description: 'Переезды между эмиратами, упаковка, разбор мебели. Аккуратные с коробками и стеклом.',
+    description: 'Moves between emirates, packing, and furniture disassembly. Careful with boxes and glass.',
     rating: [5, 4, 4]
   },
   {
@@ -143,7 +149,7 @@ const masters = [
     emirate: 'abu_dhabi',
     area: 'Al Reem Island',
     phone: '+971 50 918 3306',
-    description: 'Стиралки, сушилки, посудомойки. Сначала диагностирует, потом предлагает варианты ремонта.',
+    description: 'Washing machines, dryers, and dishwashers. Diagnoses first, then explains repair options.',
     rating: [4, 5]
   },
   {
@@ -152,7 +158,7 @@ const masters = [
     emirate: 'ajman',
     area: 'Al Nuaimiya',
     phone: '+971 58 230 4100',
-    description: 'Ремонт диванов, ножек, фурнитуры и шкафов. Может забрать деталь в мастерскую.',
+    description: 'Sofa, chair leg, hardware, and cabinet repairs. Can take parts back to the workshop.',
     rating: [5, 4]
   },
   {
@@ -161,24 +167,63 @@ const masters = [
     emirate: 'rak',
     area: 'Mina Al Arab',
     phone: '+971 56 114 7810',
-    description: 'Дезинсекция квартир и вилл, особенно муравьи и тараканы. Присылают инструкцию до визита.',
+    description: 'Pest control for apartments and villas, especially ants and cockroaches. Sends prep instructions before the visit.',
     rating: [4, 5, 5]
   }
 ];
 
 const reviewTexts = [
-  'Пришёл вовремя, сделал аккуратно, после себя всё убрал.',
-  'Цена совпала с тем, что сказал заранее. Можно рекомендовать.',
-  'Быстро ответил в WhatsApp и приехал в тот же день.',
-  'Работа нормальная, но лучше заранее проговорить все материалы.',
-  'Очень спокойно и профессионально, без лишних разговоров.'
+  'Arrived on time, worked neatly, and cleaned up afterward.',
+  'The price matched what was agreed in advance. Easy to recommend.',
+  'Replied quickly on WhatsApp and came the same day.',
+  'Good work, but it is worth confirming all materials upfront.',
+  'Calm and professional, no unnecessary upselling.'
 ];
+
+const legacyReviewMap = [
+  [
+    '\u041f\u0440\u0438\u0448\u0451\u043b \u0432\u043e\u0432\u0440\u0435\u043c\u044f, \u0441\u0434\u0435\u043b\u0430\u043b \u0430\u043a\u043a\u0443\u0440\u0430\u0442\u043d\u043e, \u043f\u043e\u0441\u043b\u0435 \u0441\u0435\u0431\u044f \u0432\u0441\u0451 \u0443\u0431\u0440\u0430\u043b.',
+    reviewTexts[0]
+  ],
+  [
+    '\u0426\u0435\u043d\u0430 \u0441\u043e\u0432\u043f\u0430\u043b\u0430 \u0441 \u0442\u0435\u043c, \u0447\u0442\u043e \u0441\u043a\u0430\u0437\u0430\u043b \u0437\u0430\u0440\u0430\u043d\u0435\u0435. \u041c\u043e\u0436\u043d\u043e \u0440\u0435\u043a\u043e\u043c\u0435\u043d\u0434\u043e\u0432\u0430\u0442\u044c.',
+    reviewTexts[1]
+  ],
+  [
+    '\u0411\u044b\u0441\u0442\u0440\u043e \u043e\u0442\u0432\u0435\u0442\u0438\u043b \u0432 WhatsApp \u0438 \u043f\u0440\u0438\u0435\u0445\u0430\u043b \u0432 \u0442\u043e\u0442 \u0436\u0435 \u0434\u0435\u043d\u044c.',
+    reviewTexts[2]
+  ],
+  [
+    '\u0420\u0430\u0431\u043e\u0442\u0430 \u043d\u043e\u0440\u043c\u0430\u043b\u044c\u043d\u0430\u044f, \u043d\u043e \u043b\u0443\u0447\u0448\u0435 \u0437\u0430\u0440\u0430\u043d\u0435\u0435 \u043f\u0440\u043e\u0433\u043e\u0432\u043e\u0440\u0438\u0442\u044c \u0432\u0441\u0435 \u043c\u0430\u0442\u0435\u0440\u0438\u0430\u043b\u044b.',
+    reviewTexts[3]
+  ],
+  [
+    '\u041e\u0447\u0435\u043d\u044c \u0441\u043f\u043e\u043a\u043e\u0439\u043d\u043e \u0438 \u043f\u0440\u043e\u0444\u0435\u0441\u0441\u0438\u043e\u043d\u0430\u043b\u044c\u043d\u043e, \u0431\u0435\u0437 \u043b\u0438\u0448\u043d\u0438\u0445 \u0440\u0430\u0437\u0433\u043e\u0432\u043e\u0440\u043e\u0432.',
+    reviewTexts[4]
+  ]
+];
+
+for (const [oldComment, newComment] of legacyReviewMap) {
+  await sql`UPDATE reviews SET comment = ${newComment} WHERE comment = ${oldComment}`;
+  await sql`UPDATE shop_reviews SET comment = ${newComment} WHERE comment = ${oldComment}`;
+}
 
 async function ensureMaster(master, index) {
   const existing = await sql`
     SELECT id FROM masters WHERE name = ${master.name} LIMIT 1
   `;
-  if (existing.length) return existing[0].id;
+  if (existing.length) {
+    await sql`
+      UPDATE masters
+      SET phone = ${master.phone},
+          specialty = ${master.specialty},
+          emirate = ${master.emirate},
+          area = ${master.area},
+          description = ${master.description}
+      WHERE id = ${existing[0].id}
+    `;
+    return existing[0].id;
+  }
 
   const rows = await sql`
     INSERT INTO masters
@@ -219,7 +264,7 @@ const shops = [
     area: 'International City',
     address: 'Dragon Mart area',
     phone: '+971 4 555 0190',
-    description: 'Инструменты, расходники, крепеж и мелкие запчасти. Удобно, когда нужно всё в одном месте.',
+    description: 'Tools, consumables, fasteners, and small parts. Convenient when you need everything in one place.',
     rating: [5, 4, 5]
   },
   {
@@ -229,7 +274,7 @@ const shops = [
     area: 'Al Quoz',
     address: 'Al Quoz industrial area',
     phone: '+971 4 555 0124',
-    description: 'Сифоны, смесители, фитинги, шланги. Часто есть редкие размеры.',
+    description: 'Traps, mixers, fittings, and hoses. Often has unusual sizes in stock.',
     rating: [4, 5]
   },
   {
@@ -239,7 +284,7 @@ const shops = [
     area: 'Industrial Area',
     address: 'Sharjah Industrial Area',
     phone: '+971 6 555 0188',
-    description: 'Электрика, автоматы, лампы, кабель и расходники для мастеров.',
+    description: 'Electrical parts, breakers, lamps, cable, and supplies for technicians.',
     rating: [5, 4]
   },
   {
@@ -249,7 +294,7 @@ const shops = [
     area: 'Al Barsha',
     address: 'Near Umm Suqeim Street',
     phone: '+971 4 555 0136',
-    description: 'Плитка, затирка, образцы, можно подобрать похожую плитку для ремонта участка.',
+    description: 'Tiles, grout, samples, and help finding a close match for small repairs.',
     rating: [4, 4, 5]
   },
   {
@@ -259,7 +304,7 @@ const shops = [
     area: 'Khalifa City',
     address: 'Khalifa City',
     phone: '+971 2 555 0144',
-    description: 'Растения, грунт, горшки, капельный полив и всё для балкона.',
+    description: 'Plants, soil, pots, drip irrigation, and balcony supplies.',
     rating: [5, 5]
   }
 ];
@@ -268,7 +313,19 @@ async function ensureShop(shop, index) {
   const existing = await sql`
     SELECT id FROM shops WHERE name = ${shop.name} LIMIT 1
   `;
-  if (existing.length) return existing[0].id;
+  if (existing.length) {
+    await sql`
+      UPDATE shops
+      SET category = ${shop.category},
+          emirate = ${shop.emirate},
+          area = ${shop.area},
+          address = ${shop.address},
+          phone = ${shop.phone},
+          description = ${shop.description}
+      WHERE id = ${existing[0].id}
+    `;
+    return existing[0].id;
+  }
 
   const rows = await sql`
     INSERT INTO shops

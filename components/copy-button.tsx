@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 export function CopyButton({
   text,
-  label = 'Копировать ссылку',
+  label = 'Copy link',
   className = ''
 }: {
   text: string;
@@ -26,7 +26,7 @@ export function CopyButton({
       }}
       className={`text-xs px-2.5 py-1 rounded-md border border-border hover:border-accent hover:text-accent transition ${className}`}
     >
-      {copied ? '✓ Скопировано' : label}
+      {copied ? '✓ Copied' : label}
     </button>
   );
 }
