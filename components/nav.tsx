@@ -56,28 +56,28 @@ export async function Nav({
         </nav>
 
         {showSearch && (
-          <form action={searchAction} className="flex-1 max-w-md flex gap-2">
-            <div className="relative flex-1">
-              <input
-                type="search"
-                name="q"
-                defaultValue={query || ''}
-                placeholder="Search for a specialist or company..."
-                className="input h-11"
-              />
-              {emirate && (
-                <input type="hidden" name="emirate" value={emirate} />
-              )}
-            </div>
-          </form>
-        )}
-
-        <div className="ml-auto flex items-center gap-3">
-          {showSearch && (
+          <>
+            <form action={searchAction} className="flex-1 max-w-md">
+              <div className="relative">
+                <input
+                  type="search"
+                  name="q"
+                  defaultValue={query || ''}
+                  placeholder="Search for a specialist or company..."
+                  className="input h-11"
+                />
+                {emirate && (
+                  <input type="hidden" name="emirate" value={emirate} />
+                )}
+              </div>
+            </form>
             <div className="hidden md:block">
               <EmirateSelect value={emirate} />
             </div>
-          )}
+          </>
+        )}
+
+        <div className="ml-auto flex items-center gap-3">
           {user && <UserMenu name={user.name} signOutAction={signOut} />}
         </div>
       </div>
