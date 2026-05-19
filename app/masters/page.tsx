@@ -326,26 +326,26 @@ export default async function MastersPage({
 
           <aside className="hidden lg:block">
             <div className="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto pr-1">
-              <div className="panel p-6">
+              <div className="panel p-5">
               <h2 className="font-semibold">Rating summary</h2>
-              <div className="mt-6 text-6xl font-semibold tracking-tight">
-                {aggregateAvg.toFixed(1)}
+              <div className="mt-3 flex items-baseline gap-3">
+                <div className="text-5xl font-semibold tracking-tight">
+                  {aggregateAvg.toFixed(1)}
+                </div>
+                <StarRating rating={aggregateAvg} />
               </div>
-              <div className="mt-3">
-                <StarRating rating={aggregateAvg} size="lg" />
-              </div>
-              <div className="mt-3 text-sm text-ink-mid">
+              <div className="mt-1 text-sm text-ink-mid">
                 Based on {totalReviews}{' '}
                 {labelCount(totalReviews, ['review', 'reviews', 'reviews'])}
               </div>
-              <div className="mt-6 space-y-3">
+              <div className="mt-4 space-y-2">
                 {distribution.map((item) => (
                   <div
                     key={item.stars}
                     className="grid grid-cols-[28px_1fr_38px] items-center gap-2 text-sm"
                   >
                     <span className="text-ink-mid">{item.stars} ★</span>
-                    <div className="h-2 overflow-hidden rounded-full bg-surface-2">
+                    <div className="h-1.5 overflow-hidden rounded-full bg-surface-2">
                       <div
                         className="h-full rounded-full bg-accent"
                         style={{ width: `${item.pct}%` }}
