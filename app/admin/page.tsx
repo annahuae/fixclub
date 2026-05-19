@@ -54,40 +54,53 @@ export default async function AdminPage({
 
   if (!authed) {
     return (
-      <main className="min-h-screen flex items-center justify-center p-6">
-        <div className="max-w-sm w-full">
-          <Link
-            href="/"
-            className="text-xs uppercase tracking-widest text-ink-mid hover:text-accent"
-          >
-            ← На главную
+      <main className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
+        <div
+          className="absolute -top-32 -right-32 w-96 h-96 rounded-full opacity-30 blur-3xl pointer-events-none"
+          style={{ background: 'var(--accent-soft)' }}
+        />
+        <div
+          className="absolute -bottom-32 -left-32 w-96 h-96 rounded-full opacity-40 blur-3xl pointer-events-none"
+          style={{ background: '#fff3d6' }}
+        />
+
+        <div className="max-w-md w-full relative">
+          <Link href="/" className="inline-flex items-center gap-2 mb-6">
+            <span
+              className="inline-flex items-center justify-center w-8 h-8 rounded-md text-white font-bold"
+              style={{ background: 'var(--accent)' }}
+            >
+              F
+            </span>
+            <span className="font-bold text-lg text-ink">
+              Fixclub{' '}
+              <span className="text-ink-mid font-medium">admin</span>
+            </span>
           </Link>
-          <h1 className="font-bold tracking-tight text-5xl mt-4 mb-2">
-            Админ <span className="text-accent">вход</span>
-          </h1>
-          <p className="text-ink-mid text-sm mb-8">
-            Только для того, кто крутит этим всем.
-          </p>
-          {params.error && (
-            <div className="mb-4 p-3 border border-danger rounded-md text-danger text-sm">
-              {params.error}
-            </div>
-          )}
-          <form action={adminLogin} className="space-y-4">
-            <div>
-              <label className="label">Пароль</label>
-              <input
-                name="password"
-                type="password"
-                required
-                autoComplete="current-password"
-                className="input"
-              />
-            </div>
-            <button type="submit" className="btn-primary w-full">
-              Войти
-            </button>
-          </form>
+
+          <div className="bg-surface border border-border rounded-2xl p-6 shadow-sm">
+            <h1 className="text-2xl font-bold mb-5">Админ-вход</h1>
+            {params.error && (
+              <div className="mb-4 p-3 border border-danger rounded-lg text-danger text-sm">
+                {params.error}
+              </div>
+            )}
+            <form action={adminLogin} className="space-y-4">
+              <div>
+                <label className="label">Пароль</label>
+                <input
+                  name="password"
+                  type="password"
+                  required
+                  autoComplete="current-password"
+                  className="input font-mono"
+                />
+              </div>
+              <button type="submit" className="btn-primary w-full">
+                Войти
+              </button>
+            </form>
+          </div>
         </div>
       </main>
     );
