@@ -119,8 +119,11 @@ export async function initSchema() {
   await sql`ALTER TABLE access_requests ADD COLUMN IF NOT EXISTS password_hash TEXT`;
 
   // v4: multi-use invite codes with usage limit
-  await sql`ALTER TABLE invite_codes ADD COLUMN IF NOT EXISTS usage_limit INTEGER NOT NULL DEFAULT 1`;
+  await sql`ALTER TABLE invite_codes ADD COLUMN IF NOT EXISTS usage_limit INTEGER NOT NULL DEFAULT 100`;
   await sql`ALTER TABLE invite_codes ADD COLUMN IF NOT EXISTS usage_count INTEGER NOT NULL DEFAULT 0`;
+  await sql`ALTER TABLE invite_codes ALTER COLUMN usage_limit SET DEFAULT 100`;
   // backfill: codes already used by someone count as 1 use
   await sql`UPDATE invite_codes SET usage_count = 1 WHERE used_by IS NOT NULL AND usage_count = 0`;
+  // bump legacy single-use codes (created with the old default of 1) up to 100 if not exhausted
+  await sql`UPDATE invite_codes SET usage_limit = 100 WHERE usage_limit < 100 AND usage_count < usage_limit`;
 }
