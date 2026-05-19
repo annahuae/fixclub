@@ -1,8 +1,8 @@
 import Link from 'next/link';
-import { submitInvite, submitLogin, submitRequest } from './actions';
+import { submitLogin, submitSignup } from './actions';
 import { PasswordField } from '@/components/password-field';
 
-type Mode = 'login' | 'signup' | 'invite';
+type Mode = 'login' | 'signup';
 
 export default async function AccessPage({
   searchParams
@@ -10,12 +10,7 @@ export default async function AccessPage({
   searchParams: Promise<{ mode?: string; error?: string }>;
 }) {
   const params = await searchParams;
-  const mode: Mode =
-    params.mode === 'signup'
-      ? 'signup'
-      : params.mode === 'invite'
-        ? 'invite'
-        : 'login';
+  const mode: Mode = params.mode === 'signup' ? 'signup' : 'login';
   const error = params.error;
 
   return (
@@ -30,10 +25,7 @@ export default async function AccessPage({
       />
 
       <div className="max-w-md w-full relative">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 mb-6"
-        >
+        <Link href="/" className="inline-flex items-center gap-2 mb-6">
           <span
             className="inline-flex items-center justify-center w-8 h-8 rounded-md text-white font-bold"
             style={{ background: 'var(--accent)' }}
@@ -46,9 +38,11 @@ export default async function AccessPage({
         </Link>
 
         <div className="bg-surface border border-border rounded-2xl p-6 shadow-sm">
-          {mode === 'login' && <LoginView error={error} />}
-          {mode === 'signup' && <SignupView error={error} />}
-          {mode === 'invite' && <InviteView error={error} />}
+          {mode === 'login' ? (
+            <LoginView error={error} />
+          ) : (
+            <SignupView error={error} />
+          )}
         </div>
       </div>
     </main>
@@ -119,84 +113,10 @@ function SignupView({ error }: { error?: string }) {
     <>
       <h1 className="text-2xl font-bold mb-1">Регистрация</h1>
       <p className="text-sm text-ink-mid mb-5">
-        Заявка уйдёт админу. После одобрения сможешь войти по email и паролю.
+        Если есть инвайт — вход сразу. Если нет — заявка уйдёт админу.
       </p>
       <ErrorBox msg={error} />
-      <form action={submitRequest} className="space-y-4">
-        <div>
-          <label className="label">Имя (как обращаться)</label>
-          <input
-            name="name"
-            required
-            placeholder="Аня"
-            className="input"
-          />
-        </div>
-        <div>
-          <label className="label">Email</label>
-          <input
-            name="email"
-            type="email"
-            required
-            placeholder="you@example.com"
-            className="input"
-            autoComplete="email"
-          />
-        </div>
-        <PasswordField hint="Сохрани — это твой пароль для входа после одобрения." />
-        <div>
-          <label className="label">Кто ты и зачем тебе доступ</label>
-          <textarea
-            name="reason"
-            rows={3}
-            placeholder="Кто из круга тебя знает, чем занимаешься в UAE"
-            className="input resize-none"
-          />
-        </div>
-        <button type="submit" className="btn-primary w-full">
-          Отправить заявку
-        </button>
-      </form>
-
-      <div className="mt-5 pt-5 border-t border-border space-y-2 text-center text-sm">
-        <p className="text-ink-mid">
-          <Link
-            href="/access?mode=invite"
-            className="text-accent font-medium hover:underline"
-          >
-            У меня есть инвайт-код →
-          </Link>
-        </p>
-        <p className="text-ink-mid">
-          Уже есть аккаунт?{' '}
-          <Link href="/access" className="text-accent hover:underline">
-            Войти
-          </Link>
-        </p>
-      </div>
-    </>
-  );
-}
-
-function InviteView({ error }: { error?: string }) {
-  return (
-    <>
-      <h1 className="text-2xl font-bold mb-1">Вход по инвайту</h1>
-      <p className="text-sm text-ink-mid mb-5">
-        Введи код, который тебе дали, придумай пароль — и ты внутри.
-      </p>
-      <ErrorBox msg={error} />
-      <form action={submitInvite} className="space-y-4">
-        <div>
-          <label className="label">Инвайт-код</label>
-          <input
-            name="code"
-            required
-            placeholder="ABCD-EFGH-JKLM"
-            className="input font-mono uppercase tracking-wider"
-            autoComplete="off"
-          />
-        </div>
+      <form action={submitSignup} className="space-y-4">
         <div>
           <label className="label">Имя</label>
           <input
@@ -217,16 +137,45 @@ function InviteView({ error }: { error?: string }) {
             autoComplete="email"
           />
         </div>
-        <PasswordField hint="Сохрани — это твой пароль для повторного входа." />
+        <PasswordField hint="Сохрани — это твой пароль для входа." />
+        <div>
+          <label className="label">
+            Инвайт-код{' '}
+            <span className="text-ink-dim font-normal normal-case">
+              (если есть — вход моментальный)
+            </span>
+          </label>
+          <input
+            name="code"
+            placeholder="ABCD-EFGH-JKLM"
+            className="input font-mono uppercase tracking-wider"
+            autoComplete="off"
+          />
+        </div>
+        <div>
+          <label className="label">
+            Кто ты и зачем тебе доступ{' '}
+            <span className="text-ink-dim font-normal normal-case">
+              (без инвайта это видит админ)
+            </span>
+          </label>
+          <textarea
+            name="reason"
+            rows={3}
+            placeholder="Кто из круга тебя знает, чем занимаешься в UAE"
+            className="input resize-none"
+          />
+        </div>
         <button type="submit" className="btn-primary w-full">
-          Войти
+          Зарегистрироваться
         </button>
       </form>
 
       <div className="mt-5 pt-5 border-t border-border text-center text-sm">
         <p className="text-ink-mid">
-          <Link href="/access?mode=signup" className="text-accent hover:underline">
-            ← Назад к заявке
+          Уже есть аккаунт?{' '}
+          <Link href="/access" className="text-accent hover:underline">
+            Войти
           </Link>
         </p>
       </div>

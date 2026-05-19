@@ -37,81 +37,67 @@ export async function submitLogin(formData: FormData) {
   redirect('/masters');
 }
 
-export async function submitRequest(formData: FormData) {
-  const name = String(formData.get('name') || '').trim() || 'Аноним';
+export async function submitSignup(formData: FormData) {
+  const name = String(formData.get('name') || '').trim();
   const email = String(formData.get('email') || '')
     .trim()
     .toLowerCase();
   const password = String(formData.get('password') || '');
+  const code = String(formData.get('code') || '')
+    .trim()
+    .toUpperCase();
   const reason = String(formData.get('reason') || '').trim() || null;
 
-  if (!email || !isEmail(email) || password.length < 6) {
+  if (!name || !email || !isEmail(email) || password.length < 6) {
     redirect(
-      '/access?mode=signup&error=Введи+email+и+пароль+(минимум+6+символов)'
+      '/access?mode=signup&error=Заполни+имя,+email+и+пароль+(минимум+6+символов)'
     );
   }
 
-  const exists = (await sql`
+  // Email already a registered user?
+  const existsUser = (await sql`
     SELECT 1 FROM users WHERE LOWER(email) = ${email} LIMIT 1
   `) as { '?column?': number }[];
-  if (exists.length > 0) {
-    redirect(
-      '/access?mode=signup&error=Этот+email+уже+зарегистрирован.+Войди.'
-    );
+  if (existsUser.length > 0) {
+    redirect('/access?mode=signup&error=Этот+email+уже+зарегистрирован.+Войди.');
   }
 
   const passwordHash = hashPassword(password);
 
+  if (code) {
+    // Invite path — instant access
+    const codeRows = (await sql`
+      SELECT code, used_by FROM invite_codes WHERE code = ${code} LIMIT 1
+    `) as { code: string; used_by: string | null }[];
+
+    if (codeRows.length === 0) {
+      redirect('/access?mode=signup&error=Инвайт-код+не+найден');
+    }
+    if (codeRows[0].used_by) {
+      redirect('/access?mode=signup&error=Этот+инвайт+уже+использован');
+    }
+
+    const userRows = (await sql`
+      INSERT INTO users (name, email, password_hash)
+      VALUES (${name}, ${email}, ${passwordHash})
+      RETURNING id
+    `) as { id: string }[];
+    const userId = userRows[0].id;
+
+    await sql`
+      UPDATE invite_codes SET used_by = ${userId}, used_at = NOW()
+      WHERE code = ${code}
+    `;
+
+    await createSession(userId);
+    redirect('/masters');
+  }
+
+  // No invite — admin approval queue
   await sql`
     INSERT INTO access_requests (name, email, reason, password_hash)
     VALUES (${name}, ${email}, ${reason}, ${passwordHash})
   `;
 
   redirect('/pending');
-}
-
-export async function submitInvite(formData: FormData) {
-  const code = String(formData.get('code') || '')
-    .trim()
-    .toUpperCase();
-  const name = String(formData.get('name') || '').trim();
-  const email = String(formData.get('email') || '')
-    .trim()
-    .toLowerCase();
-  const password = String(formData.get('password') || '');
-
-  if (!code || !name || !email || password.length < 6 || !isEmail(email)) {
-    redirect(
-      '/access?mode=invite&error=Заполни+все+поля+(пароль+минимум+6+символов)'
-    );
-  }
-
-  const codeRows = (await sql`
-    SELECT code, used_by FROM invite_codes WHERE code = ${code} LIMIT 1
-  `) as { code: string; used_by: string | null }[];
-
-  if (codeRows.length === 0) {
-    redirect('/access?mode=invite&error=Код+не+найден');
-  }
-  if (codeRows[0].used_by) {
-    redirect('/access?mode=invite&error=Этот+код+уже+использован');
-  }
-
-  const passwordHash = hashPassword(password);
-
-  const userRows = (await sql`
-    INSERT INTO users (name, email, password_hash)
-    VALUES (${name}, ${email}, ${passwordHash})
-    RETURNING id
-  `) as { id: string }[];
-  const userId = userRows[0].id;
-
-  await sql`
-    UPDATE invite_codes
-    SET used_by = ${userId}, used_at = NOW()
-    WHERE code = ${code}
-  `;
-
-  await createSession(userId);
-  redirect('/masters');
 }
