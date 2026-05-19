@@ -3,7 +3,7 @@
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { sql } from '@/lib/db';
-import { requireUser } from '@/lib/auth';
+import { requireUser, isAdmin } from '@/lib/auth';
 
 export async function addShop(formData: FormData) {
   const user = await requireUser();
@@ -81,7 +81,7 @@ export async function updateShop(formData: FormData) {
     redirect(`/shops/${id}/edit`);
   }
 
-  // Only creator can edit (admin path can be added later via separate endpoint).
+  const admin = await isAdmin();
   const result = (await sql`
     UPDATE shops SET
       name = ${name},
@@ -93,7 +93,7 @@ export async function updateShop(formData: FormData) {
       whatsapp_phone = ${whatsappPhone},
       maps_url = ${mapsUrl},
       description = ${description}
-    WHERE id = ${id} AND added_by = ${user.userId}
+    WHERE id = ${id} AND (${admin}::boolean OR added_by = ${user.userId})
     RETURNING id
   `) as { id: string }[];
 
@@ -108,9 +108,11 @@ export async function deleteShop(formData: FormData) {
   const user = await requireUser();
   const id = String(formData.get('id') || '');
   if (!id) redirect('/shops');
+  const admin = await isAdmin();
 
   await sql`
-    DELETE FROM shops WHERE id = ${id} AND added_by = ${user.userId}
+    DELETE FROM shops
+    WHERE id = ${id} AND (${admin}::boolean OR added_by = ${user.userId})
   `;
 
   revalidatePath('/shops');

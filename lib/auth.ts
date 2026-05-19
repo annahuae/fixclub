@@ -58,8 +58,18 @@ export async function getSessionUser(): Promise<SessionUser | null> {
 
 export async function requireUser(): Promise<SessionUser> {
   const user = await getSessionUser();
-  if (!user) redirect('/');
-  return user;
+  if (user) return user;
+  // Admin without a regular user session can still browse — acts as a
+  // pseudo-user. Writes that depend on a real user_id should check isAdmin()
+  // explicitly to avoid foreign-key failures.
+  if (await isAdmin()) {
+    return {
+      userId: '00000000-0000-0000-0000-000000000000',
+      name: 'Admin',
+      email: 'admin@fixclub'
+    };
+  }
+  redirect('/');
 }
 
 export async function destroySession() {

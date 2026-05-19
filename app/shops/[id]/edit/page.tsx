@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { requireUser } from '@/lib/auth';
+import { requireUser, isAdmin } from '@/lib/auth';
 import { sql } from '@/lib/db';
 import { SHOP_CATEGORIES, EMIRATES } from '@/lib/utils';
 import { Nav } from '@/components/nav';
@@ -34,7 +34,8 @@ export default async function EditShopPage({
 
   if (rows.length === 0) notFound();
   const shop = rows[0];
-  if (shop.added_by !== user.userId) redirect(`/shops/${id}`);
+  const admin = await isAdmin();
+  if (!admin && shop.added_by !== user.userId) redirect(`/shops/${id}`);
 
   return (
     <>

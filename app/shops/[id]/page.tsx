@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { requireUser } from '@/lib/auth';
+import { requireUser, isAdmin } from '@/lib/auth';
 import { sql } from '@/lib/db';
 import { shopCategoryLabel, emirateLabel, formatDate } from '@/lib/utils';
 import { StarRating, StarInput } from '@/components/star-rating';
@@ -71,7 +71,8 @@ export default async function ShopPage({
       : 0;
 
   const userHasReviewed = reviewRows.some((r) => r.user_id === user.userId);
-  const userAdded = shop.added_by === user.userId;
+  const admin = await isAdmin();
+  const canManage = admin || shop.added_by === user.userId;
 
   const mapValue = shop.maps_url || shop.address || null;
 
@@ -145,7 +146,7 @@ export default async function ShopPage({
                 · {formatDate(shop.created_at)}
               </div>
 
-              {userAdded && (
+              {canManage && (
                 <div className="mt-3 flex flex-wrap gap-3">
                   <Link
                     href={`/shops/${shop.id}/edit`}
@@ -168,7 +169,7 @@ export default async function ShopPage({
         </div>
 
         <section className="mt-6">
-          {!userHasReviewed ? (
+          {!admin && !userHasReviewed ? (
             <div className="panel mb-6 p-6">
               <h2 className="text-xl font-bold mb-1">Write a review</h2>
               <p className="text-ink-mid text-sm mb-4">
