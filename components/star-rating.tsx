@@ -1,3 +1,7 @@
+'use client';
+
+import { useState } from 'react';
+
 export type RatingGlyph = 'star' | 'dollar';
 
 export function StarRating({
@@ -52,32 +56,37 @@ export function StarInput({
   defaultValue?: number;
   levels?: number;
 }) {
-  const filled = glyph === 'dollar' ? '$' : '★';
-  const activeCls =
-    glyph === 'dollar'
-      ? 'peer-checked:!text-[#2f9e44] hover:!text-[#2f9e44]'
-      : 'peer-checked:!text-[color:var(--star)] hover:!text-[color:var(--star)]';
   const initial = defaultValue ?? Math.ceil(levels / 2);
+  const [value, setValue] = useState(initial);
+  const [hovered, setHovered] = useState<number | null>(null);
+  const filled = glyph === 'dollar' ? '$' : '★';
+  const activeColor = glyph === 'dollar' ? '#2f9e44' : 'var(--star)';
+  const dimColor = 'var(--border-strong)';
+  const shown = hovered ?? value;
+
   return (
     <div
       className={`flex items-center gap-1 ${glyph === 'dollar' ? 'text-2xl font-bold' : 'text-3xl'}`}
+      onMouseLeave={() => setHovered(null)}
     >
+      <input
+        type="hidden"
+        name={name}
+        value={value}
+        required={required && value < 1}
+      />
       {Array.from({ length: levels }, (_, i) => i + 1).map((n) => (
-        <label
+        <button
           key={n}
-          className="cursor-pointer transition-colors"
-          style={{ color: 'var(--border-strong)' }}
+          type="button"
+          aria-label={`${n} ${glyph === 'dollar' ? 'dollar signs' : 'stars'}`}
+          onClick={() => setValue(n)}
+          onMouseEnter={() => setHovered(n)}
+          className="cursor-pointer transition-colors leading-none"
+          style={{ color: n <= shown ? activeColor : dimColor }}
         >
-          <input
-            type="radio"
-            name={name}
-            value={n}
-            className="sr-only peer"
-            required={required && n === 1}
-            defaultChecked={n === initial}
-          />
-          <span className={activeCls}>{filled}</span>
-        </label>
+          {filled}
+        </button>
       ))}
     </div>
   );
