@@ -74,6 +74,19 @@ export default async function NewReviewChooserPage() {
               </span>
             </Link>
           </div>
+
+          <p className="mt-6 text-center text-sm text-ink-mid">
+            On Telegram? Post a review in 30 seconds via{' '}
+            <a
+              href="https://t.me/fixclubuae_bot"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-accent hover:underline"
+            >
+              @fixclubuae_bot
+            </a>{' '}
+            — share a contact, tap stars, done.
+          </p>
         </div>
       </main>
     </>

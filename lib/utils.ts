@@ -14,6 +14,13 @@ export const SPECIALTY_GROUPS = [
     ]
   },
   {
+    title: 'Renovation & design',
+    items: [
+      { value: 'renovation', label: 'Turnkey renovation' },
+      { value: 'interior_designer', label: 'Interior designer' }
+    ]
+  },
+  {
     title: 'Home and household',
     items: [
       { value: 'appliance', label: 'Appliance repair' },

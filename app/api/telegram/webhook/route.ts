@@ -350,7 +350,13 @@ function inferSpecialty(text: string | undefined | null): string | null {
     дезинсекция: 'pest',
     грузчик: 'mover',
     переезд: 'mover',
-    хранение: 'storage'
+    хранение: 'storage',
+    ремонт: 'renovation',
+    реновация: 'renovation',
+    turnkey: 'renovation',
+    'под ключ': 'renovation',
+    дизайнер: 'interior_designer',
+    дизайн: 'interior_designer'
   };
   for (const t of tokens) {
     for (const [ru, val] of Object.entries(aliases)) {
@@ -523,7 +529,7 @@ async function finishQuickReview(
   await setState(chatId, 'quick_pick_location', { ...data, comment });
   await tgSendMessage(
     chatId,
-    'Where in UAE do they work? Send the area (e.g. "Marina" or "Sharjah Industrial 5") — or /skip for Dubai.'
+    'Which area do they cover? Send a neighbourhood (e.g. "Marina") or another emirate ("Sharjah Industrial 5"). Many masters work across the whole city — send /skip if so (defaults to Dubai).'
   );
 }
 

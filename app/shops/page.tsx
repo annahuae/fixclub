@@ -409,6 +409,17 @@ export default async function ShopsPage({
                 </svg>
                 Write a review
               </Link>
+              <p className="mt-3 text-xs text-ink-mid">
+                or post a quick review via{' '}
+                <a
+                  href="https://t.me/fixclubuae_bot"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-accent hover:underline"
+                >
+                  @fixclubuae_bot
+                </a>
+              </p>
             </div>
             </div>
           </aside>
