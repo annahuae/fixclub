@@ -62,6 +62,24 @@ export default async function ShopsPage({
 
   const likeQ = '%' + (q || '') + '%';
 
+  const matchedCategories: string[] = q
+    ? Array.from(
+        new Set(
+          q
+            .toLowerCase()
+            .split(/\s+/)
+            .filter((t) => t.length >= 2)
+            .flatMap((token) =>
+              SHOP_CATEGORIES.filter(
+                (c) =>
+                  c.label.toLowerCase().includes(token) ||
+                  c.value.toLowerCase().includes(token)
+              ).map((c) => c.value)
+            )
+        )
+      )
+    : [];
+
   const [unsortedRaw, previewsRaw] = await Promise.all([
     sql`
       SELECT
@@ -81,9 +99,8 @@ export default async function ShopsPage({
           OR s.area ILIKE ${likeQ}
           OR s.address ILIKE ${likeQ}
           OR s.description ILIKE ${likeQ}
-          OR EXISTS (
-            SELECT 1 FROM unnest(s.categories) c WHERE c ILIKE ${likeQ}
-          )
+          OR (cardinality(${matchedCategories}::text[]) > 0
+              AND s.categories && ${matchedCategories}::text[])
         )
       GROUP BY s.id
       HAVING (${minRating}::numeric IS NULL OR AVG(r.rating) >= ${minRating})
@@ -107,9 +124,8 @@ export default async function ShopsPage({
               OR area ILIKE ${likeQ}
               OR address ILIKE ${likeQ}
               OR description ILIKE ${likeQ}
-              OR EXISTS (
-                SELECT 1 FROM unnest(categories) c WHERE c ILIKE ${likeQ}
-              )
+              OR (cardinality(${matchedCategories}::text[]) > 0
+                  AND categories && ${matchedCategories}::text[])
             )
         )
       ) t

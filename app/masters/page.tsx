@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { requireUser } from '@/lib/auth';
 import { sql } from '@/lib/db';
 import {
+  SPECIALTIES,
   SPECIALTY_GROUPS,
   specialtyLabel,
   emirateLabel,
@@ -63,6 +64,26 @@ export default async function MastersPage({
 
   const likeQ = '%' + (q || '') + '%';
 
+  // Match user query against specialty labels/values so "AC clean", "plumber",
+  // "marble" all resolve to the right stored specialty values.
+  const matchedSpecialties: string[] = q
+    ? Array.from(
+        new Set(
+          q
+            .toLowerCase()
+            .split(/\s+/)
+            .filter((t) => t.length >= 2)
+            .flatMap((token) =>
+              SPECIALTIES.filter(
+                (s) =>
+                  s.label.toLowerCase().includes(token) ||
+                  s.value.toLowerCase().includes(token)
+              ).map((s) => s.value)
+            )
+        )
+      )
+    : [];
+
   const [rowsUnsortedRaw, previewsRaw] = await Promise.all([
     sql`
       SELECT
@@ -82,9 +103,8 @@ export default async function MastersPage({
           OR m.name ILIKE ${likeQ}
           OR m.area ILIKE ${likeQ}
           OR m.description ILIKE ${likeQ}
-          OR EXISTS (
-            SELECT 1 FROM unnest(m.specialties) sp WHERE sp ILIKE ${likeQ}
-          )
+          OR (cardinality(${matchedSpecialties}::text[]) > 0
+              AND m.specialties && ${matchedSpecialties}::text[])
         )
       GROUP BY m.id
     `,
@@ -107,9 +127,8 @@ export default async function MastersPage({
               OR name ILIKE ${likeQ}
               OR area ILIKE ${likeQ}
               OR description ILIKE ${likeQ}
-              OR EXISTS (
-                SELECT 1 FROM unnest(specialties) sp WHERE sp ILIKE ${likeQ}
-              )
+              OR (cardinality(${matchedSpecialties}::text[]) > 0
+                  AND specialties && ${matchedSpecialties}::text[])
             )
         )
       ) t
