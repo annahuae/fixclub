@@ -189,6 +189,11 @@ export async function initSchema() {
   await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS telegram_username TEXT`;
   await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS telegram_photo TEXT`;
 
+  // v14: languages spoken + pace on masters
+  await sql`ALTER TABLE masters ADD COLUMN IF NOT EXISTS languages TEXT[] NOT NULL DEFAULT '{}'`;
+  await sql`ALTER TABLE masters ADD COLUMN IF NOT EXISTS pace TEXT`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_masters_languages ON masters USING GIN (languages)`;
+
   // v13: Telegram bot conversation state
   await sql`
     CREATE TABLE IF NOT EXISTS telegram_chat_state (

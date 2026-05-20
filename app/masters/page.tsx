@@ -4,7 +4,11 @@ import { sql } from '@/lib/db';
 import {
   SPECIALTIES,
   SPECIALTY_GROUPS,
+  LANGUAGES,
+  PACES,
   specialtyLabel,
+  languageLabel,
+  paceLabel,
   emirateLabel,
   formatDate
 } from '@/lib/utils';
@@ -22,6 +26,8 @@ type MasterRow = {
   kind: string;
   area: string | null;
   phone: string | null;
+  languages: string[];
+  pace: string | null;
   avg_rating: string | null;
   review_count: string;
 };
@@ -49,6 +55,8 @@ export default async function MastersPage({
     q?: string;
     sort?: string;
     kind?: string;
+    lang?: string;
+    pace?: string;
   }>;
 }) {
   await requireUser();
@@ -59,6 +67,13 @@ export default async function MastersPage({
   const kind =
     params.kind === 'individual' || params.kind === 'company'
       ? params.kind
+      : null;
+  const lang = LANGUAGES.find((l) => l.value === params.lang)?.value || null;
+  const pace =
+    params.pace === 'fast' ||
+    params.pace === 'average' ||
+    params.pace === 'slow'
+      ? params.pace
       : null;
   const sort = (params.sort as (typeof SORTS)[number]['value']) || 'reviewed';
 
@@ -87,7 +102,7 @@ export default async function MastersPage({
   const [rowsUnsortedRaw, previewsRaw] = await Promise.all([
     sql`
       SELECT
-        m.id, m.name, m.specialty, m.specialties, m.kind, m.area, m.phone,
+        m.id, m.name, m.specialty, m.specialties, m.kind, m.area, m.phone, m.languages, m.pace,
         AVG(r.rating)::numeric(10,2) AS avg_rating,
         COUNT(r.id) AS review_count,
         MAX(r.created_at) AS last_review_at,
@@ -98,6 +113,8 @@ export default async function MastersPage({
         (${specialty}::text IS NULL OR ${specialty} = ANY(m.specialties))
         AND (${emirate}::text IS NULL OR m.emirate = ${emirate})
         AND (${kind}::text IS NULL OR m.kind = ${kind})
+        AND (${lang}::text IS NULL OR ${lang} = ANY(m.languages))
+        AND (${pace}::text IS NULL OR m.pace = ${pace})
         AND (
           ${q}::text IS NULL
           OR m.name ILIKE ${likeQ}
@@ -122,6 +139,8 @@ export default async function MastersPage({
             (${specialty}::text IS NULL OR ${specialty} = ANY(specialties))
             AND (${emirate}::text IS NULL OR emirate = ${emirate})
             AND (${kind}::text IS NULL OR kind = ${kind})
+            AND (${lang}::text IS NULL OR ${lang} = ANY(languages))
+            AND (${pace}::text IS NULL OR pace = ${pace})
             AND (
               ${q}::text IS NULL
               OR name ILIKE ${likeQ}
@@ -204,6 +223,8 @@ export default async function MastersPage({
       q,
       sort,
       kind,
+      lang,
+      pace,
       ...over
     };
     Object.entries(merged).forEach(([k, v]) => {
@@ -246,6 +267,42 @@ export default async function MastersPage({
                   label="Companies"
                   radio
                 />
+              </FilterSection>
+
+              <FilterSection title="Language">
+                <CheckLink
+                  href={buildHref({ lang: null })}
+                  active={!lang}
+                  label="Any language"
+                  radio
+                />
+                {LANGUAGES.map((l) => (
+                  <CheckLink
+                    key={l.value}
+                    href={buildHref({ lang: l.value })}
+                    active={lang === l.value}
+                    label={l.label}
+                    radio
+                  />
+                ))}
+              </FilterSection>
+
+              <FilterSection title="Pace">
+                <CheckLink
+                  href={buildHref({ pace: null })}
+                  active={!pace}
+                  label="Any pace"
+                  radio
+                />
+                {PACES.map((p) => (
+                  <CheckLink
+                    key={p.value}
+                    href={buildHref({ pace: p.value })}
+                    active={pace === p.value}
+                    label={`${p.emoji} ${p.label}`}
+                    radio
+                  />
+                ))}
               </FilterSection>
 
               <FilterSection title="Specialty">
@@ -353,6 +410,23 @@ export default async function MastersPage({
                               .join(' · ')}
                             {m.area && <> · {m.area}</>}
                           </div>
+                          {(m.languages?.length || m.pace) && (
+                            <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+                              {m.languages?.length > 0 && (
+                                <span className="inline-flex items-center rounded-full bg-surface-2 px-2 py-0.5 text-ink-mid">
+                                  {m.languages
+                                    .map((l) => languageLabel(l))
+                                    .join(' · ')}
+                                </span>
+                              )}
+                              {m.pace && (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-surface-2 px-2 py-0.5 text-ink-mid">
+                                  {PACES.find((p) => p.value === m.pace)?.emoji}
+                                  {paceLabel(m.pace)}
+                                </span>
+                              )}
+                            </div>
+                          )}
                           <div className="mt-3 flex items-center gap-2">
                             {count > 0 ? (
                               <>

@@ -43,6 +43,30 @@ export const SPECIALTIES: Specialty[] = SPECIALTY_GROUPS.flatMap(
   (g) => g.items as readonly Specialty[]
 );
 
+export const LANGUAGES = [
+  { value: 'en', label: 'English' },
+  { value: 'ar', label: 'Arabic' },
+  { value: 'ru', label: 'Russian' },
+  { value: 'hi', label: 'Hindi' },
+  { value: 'ur', label: 'Urdu' },
+  { value: 'tl', label: 'Tagalog' }
+] as const;
+
+export function languageLabel(value: string): string {
+  return LANGUAGES.find((l) => l.value === value)?.label ?? value;
+}
+
+export const PACES = [
+  { value: 'fast', label: 'Fast', emoji: '🏎️' },
+  { value: 'average', label: 'Average', emoji: '🚗' },
+  { value: 'slow', label: 'Slow', emoji: '🐢' }
+] as const;
+
+export function paceLabel(value: string | null | undefined): string {
+  if (!value) return '';
+  return PACES.find((p) => p.value === value)?.label ?? value;
+}
+
 export const EMIRATES = [
   { value: 'dubai', label: 'Dubai' },
   { value: 'sharjah', label: 'Sharjah' },

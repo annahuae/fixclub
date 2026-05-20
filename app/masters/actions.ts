@@ -19,6 +19,12 @@ export async function addMaster(formData: FormData) {
   const phone = String(formData.get('phone') || '').trim() || null;
   const whatsappPhone =
     String(formData.get('whatsapp_phone') || '').trim() || null;
+  const languages = formData
+    .getAll('languages')
+    .map((v) => String(v).trim())
+    .filter(Boolean);
+  const paceRaw = String(formData.get('pace') || '').trim();
+  const pace = ['fast', 'average', 'slow'].includes(paceRaw) ? paceRaw : null;
   const mapsUrl = String(formData.get('maps_url') || '').trim() || null;
   const description =
     String(formData.get('description') || '').trim() || null;
@@ -29,8 +35,8 @@ export async function addMaster(formData: FormData) {
   const primary = specialties[0];
 
   const rows = (await sql`
-    INSERT INTO masters (name, phone, whatsapp_phone, specialty, specialties, kind, emirate, area, maps_url, description, added_by)
-    VALUES (${name}, ${phone}, ${whatsappPhone}, ${primary}, ${specialties}, ${kind}, ${emirate}, ${area}, ${mapsUrl}, ${description}, ${user.userId})
+    INSERT INTO masters (name, phone, whatsapp_phone, specialty, specialties, kind, emirate, area, languages, pace, maps_url, description, added_by)
+    VALUES (${name}, ${phone}, ${whatsappPhone}, ${primary}, ${specialties}, ${kind}, ${emirate}, ${area}, ${languages}, ${pace}, ${mapsUrl}, ${description}, ${user.userId})
     RETURNING id
   `) as { id: string }[];
 

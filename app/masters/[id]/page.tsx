@@ -2,7 +2,14 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { requireUser } from '@/lib/auth';
 import { sql } from '@/lib/db';
-import { specialtyLabel, emirateLabel, formatDate } from '@/lib/utils';
+import {
+  specialtyLabel,
+  emirateLabel,
+  formatDate,
+  languageLabel,
+  paceLabel,
+  PACES
+} from '@/lib/utils';
 import { StarRating, StarInput } from '@/components/star-rating';
 import { Avatar } from '@/components/avatar';
 import { MapEmbed } from '@/components/map-embed';
@@ -21,6 +28,8 @@ type Master = {
   area: string | null;
   phone: string | null;
   whatsapp_phone: string | null;
+  languages: string[];
+  pace: string | null;
   maps_url: string | null;
   description: string | null;
   added_by: string | null;
@@ -165,6 +174,23 @@ export default async function MasterPage({
                   )}
                   {master.phone && (
                     <PhoneLink phone={master.phone} kind="call" />
+                  )}
+                </div>
+              )}
+
+              {(master.languages?.length > 0 || master.pace) && (
+                <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
+                  {master.languages?.length > 0 && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-surface-2 px-3 py-1 text-ink-mid">
+                      <span className="text-ink-dim">Speaks:</span>{' '}
+                      {master.languages.map((l) => languageLabel(l)).join(', ')}
+                    </span>
+                  )}
+                  {master.pace && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-surface-2 px-3 py-1 text-ink-mid">
+                      {PACES.find((p) => p.value === master.pace)?.emoji}{' '}
+                      {paceLabel(master.pace)} pace
+                    </span>
                   )}
                 </div>
               )}

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { requireUser } from '@/lib/auth';
-import { SPECIALTY_GROUPS, EMIRATES } from '@/lib/utils';
+import { SPECIALTY_GROUPS, EMIRATES, LANGUAGES, PACES } from '@/lib/utils';
 import { Nav } from '@/components/nav';
 import { addMaster } from '../actions';
 
@@ -136,6 +136,53 @@ export default async function NewMasterPage() {
                 placeholder="+971 50 ..."
                 className="input font-mono"
               />
+            </div>
+          </div>
+
+          <div>
+            <label className="label">
+              Languages{' '}
+              <span className="font-normal text-ink-dim">(pick any)</span>
+            </label>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+              {LANGUAGES.map((l) => (
+                <label
+                  key={l.value}
+                  className="flex cursor-pointer items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm hover:border-accent has-[:checked]:border-accent has-[:checked]:bg-accent-soft"
+                >
+                  <input
+                    type="checkbox"
+                    name="languages"
+                    value={l.value}
+                    className="h-4 w-4 accent-accent"
+                  />
+                  {l.label}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="label">
+              Pace{' '}
+              <span className="font-normal text-ink-dim">(optional)</span>
+            </label>
+            <div className="grid grid-cols-3 gap-2">
+              {PACES.map((p) => (
+                <label
+                  key={p.value}
+                  className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-border px-3 py-2 text-sm hover:border-accent has-[:checked]:border-accent has-[:checked]:bg-accent-soft"
+                >
+                  <input
+                    type="radio"
+                    name="pace"
+                    value={p.value}
+                    className="h-4 w-4 accent-accent"
+                  />
+                  <span>{p.emoji}</span>
+                  {p.label}
+                </label>
+              ))}
             </div>
           </div>
 
