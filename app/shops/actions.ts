@@ -34,7 +34,7 @@ export async function addShop(formData: FormData) {
   `) as { id: string }[];
 
   revalidatePath('/shops');
-  redirect(`/shops/${rows[0].id}`);
+  redirect(`/shops/${rows[0].id}?created=1`);
 }
 
 export async function addShopReview(formData: FormData) {
@@ -61,7 +61,7 @@ export async function addShopReview(formData: FormData) {
 
   revalidatePath(`/shops/${shopId}`);
   revalidatePath('/shops');
-  redirect(`/shops/${shopId}`);
+  redirect(`/shops/${shopId}?reviewed=1`);
 }
 
 export async function updateShop(formData: FormData) {

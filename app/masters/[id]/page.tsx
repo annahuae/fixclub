@@ -8,6 +8,7 @@ import { Avatar } from '@/components/avatar';
 import { MapEmbed } from '@/components/map-embed';
 import { Nav } from '@/components/nav';
 import { PhoneLink } from '@/components/phone-link';
+import { AnalyticsEvent } from '@/components/analytics-event';
 import { addReview, deleteMaster } from '../actions';
 
 type Master = {
@@ -37,12 +38,15 @@ type Review = {
 };
 
 export default async function MasterPage({
-  params
+  params,
+  searchParams
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ created?: string; reviewed?: string }>;
 }) {
   const user = await requireUser();
   const { id } = await params;
+  const sp = await searchParams;
 
   const [masterRowsRaw, reviewRowsRaw] = await Promise.all([
     sql`
@@ -88,6 +92,11 @@ export default async function MasterPage({
 
   return (
     <>
+      <AnalyticsEvent name="card_view_specialist" params={{ kind: master.kind }} />
+      {sp.created === '1' && <AnalyticsEvent name="specialist_added" />}
+      {sp.reviewed === '1' && (
+        <AnalyticsEvent name="review_specialist_added" />
+      )}
       <Nav />
       <main className="shell py-8">
         <Link href="/masters" className="text-sm text-ink-mid hover:text-accent">

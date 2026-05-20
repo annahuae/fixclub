@@ -35,7 +35,7 @@ export async function addMaster(formData: FormData) {
   `) as { id: string }[];
 
   revalidatePath('/masters');
-  redirect(`/masters/${rows[0].id}`);
+  redirect(`/masters/${rows[0].id}?created=1`);
 }
 
 export async function addReview(formData: FormData) {
@@ -62,7 +62,7 @@ export async function addReview(formData: FormData) {
 
   revalidatePath(`/masters/${masterId}`);
   revalidatePath('/masters');
-  redirect(`/masters/${masterId}`);
+  redirect(`/masters/${masterId}?reviewed=1`);
 }
 
 export async function deleteMaster(formData: FormData) {
