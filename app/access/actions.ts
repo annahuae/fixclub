@@ -66,8 +66,12 @@ export async function submitSignup(formData: FormData) {
 
   const passwordHash = hashPassword(password);
 
+  // Invite codes are temporarily optional — anyone with the link can join.
+  // Re-enable the gate later by restoring the `if (!code) -> access_requests`
+  // path below and removing this open-signup block.
+  void reason;
+
   if (code) {
-    // Invite path — instant access if code has remaining uses
     const codeRows = (await sql`
       SELECT code, usage_count, usage_limit, used_by
       FROM invite_codes WHERE code = ${code} LIMIT 1
@@ -86,40 +90,27 @@ export async function submitSignup(formData: FormData) {
         '/access?mode=signup&error=Invite+limit+reached.+Ask+for+a+new+one.'
       );
     }
-
-    const userRows = (await sql`
-      INSERT INTO users (name, email, password_hash)
-      VALUES (${name}, ${email}, ${passwordHash})
-      RETURNING id
-    `) as { id: string }[];
-    const userId = userRows[0].id;
-
-    // First user gets recorded in used_by for legacy display
-    if (codeRows[0].used_by === null) {
-      await sql`
-        UPDATE invite_codes
-        SET used_by = ${userId}, used_at = NOW(), usage_count = usage_count + 1
-        WHERE code = ${code}
-      `;
-    } else {
-      await sql`
-        UPDATE invite_codes
-        SET usage_count = usage_count + 1
-        WHERE code = ${code}
-      `;
-    }
-
-    await createSession(userId);
-    redirect('/masters');
   }
 
-  // No invite — admin approval queue
-  await sql`
-    INSERT INTO access_requests (name, email, reason, password_hash)
-    VALUES (${name}, ${email}, ${reason}, ${passwordHash})
-  `;
+  const userRows = (await sql`
+    INSERT INTO users (name, email, password_hash)
+    VALUES (${name}, ${email}, ${passwordHash})
+    RETURNING id
+  `) as { id: string }[];
+  const userId = userRows[0].id;
 
-  redirect('/pending');
+  if (code) {
+    await sql`
+      UPDATE invite_codes
+      SET usage_count = usage_count + 1,
+          used_at = COALESCE(used_at, NOW()),
+          used_by = COALESCE(used_by, ${userId})
+      WHERE code = ${code}
+    `;
+  }
+
+  await createSession(userId);
+  redirect('/masters');
 }
 
 export async function submitTelegramSignup(formData: FormData) {
@@ -159,23 +150,23 @@ export async function submitTelegramSignup(formData: FormData) {
     parsed.username ||
     'Member';
 
-  if (!code) {
-    redirect('/access?tg=1&error=Invite+code+is+required');
-  }
   if (email && !isEmail(email)) {
     redirect('/access?tg=1&error=Invalid+email');
   }
 
-  const codeRows = (await sql`
-    SELECT code, usage_count, usage_limit
-    FROM invite_codes WHERE code = ${code} LIMIT 1
-  `) as { code: string; usage_count: number; usage_limit: number }[];
+  // Invite codes are temporarily optional — see submitSignup for the toggle.
+  if (code) {
+    const codeRows = (await sql`
+      SELECT code, usage_count, usage_limit
+      FROM invite_codes WHERE code = ${code} LIMIT 1
+    `) as { code: string; usage_count: number; usage_limit: number }[];
 
-  if (codeRows.length === 0) {
-    redirect('/access?tg=1&error=Invite+code+not+found');
-  }
-  if (codeRows[0].usage_count >= codeRows[0].usage_limit) {
-    redirect('/access?tg=1&error=Invite+limit+reached');
+    if (codeRows.length === 0) {
+      redirect('/access?tg=1&error=Invite+code+not+found');
+    }
+    if (codeRows[0].usage_count >= codeRows[0].usage_limit) {
+      redirect('/access?tg=1&error=Invite+limit+reached');
+    }
   }
 
   // Email collision protection (skip if no email provided)
@@ -196,13 +187,15 @@ export async function submitTelegramSignup(formData: FormData) {
   `) as { id: string }[];
   const userId = userRows[0].id;
 
-  await sql`
-    UPDATE invite_codes
-    SET usage_count = usage_count + 1,
-        used_at = COALESCE(used_at, NOW()),
-        used_by = COALESCE(used_by, ${userId})
-    WHERE code = ${code}
-  `;
+  if (code) {
+    await sql`
+      UPDATE invite_codes
+      SET usage_count = usage_count + 1,
+          used_at = COALESCE(used_at, NOW()),
+          used_by = COALESCE(used_by, ${userId})
+      WHERE code = ${code}
+    `;
+  }
 
   cookieStore.delete('fixclub_tg_pending');
   await createSession(userId);

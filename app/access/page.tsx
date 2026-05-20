@@ -173,7 +173,7 @@ function TelegramSignupView({
         <span className="font-medium text-ink">
           {fullName || tg.username || `id ${tg.id}`}
         </span>
-        . Enter an invite code to finish.
+        . One more step and you’re in.
       </p>
       <ErrorBox msg={error} />
       <form action={submitTelegramSignup} className="space-y-4">
@@ -196,10 +196,12 @@ function TelegramSignupView({
           />
         </div>
         <div>
-          <label className="label">Invite code</label>
+          <label className="label">
+            Invite code{' '}
+            <span className="font-normal text-ink-dim">(optional)</span>
+          </label>
           <input
             name="code"
-            required
             placeholder="ABCD-EFGH-JKLM"
             className="input font-mono uppercase tracking-wider"
             autoComplete="off"
@@ -256,7 +258,10 @@ function SignupView({
         </div>
         <PasswordField hint="Save it — this is your sign-in password." />
         <div>
-          <label className="label">Invite code</label>
+          <label className="label">
+            Invite code{' '}
+            <span className="font-normal text-ink-dim">(optional)</span>
+          </label>
           <input
             name="code"
             defaultValue={prefilledInvite}

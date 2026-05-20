@@ -120,10 +120,12 @@ async function handleMessage(msg: TgMessage): Promise<void> {
         `Hi ${linked.name}! Send /review to post a review, or /help for the menu.`
       );
     } else {
-      await setState(chatId, 'awaiting_invite');
+      // Invites are temporarily off — auto-register the user.
+      const created = await autoRegister(from);
+      await resetState(chatId);
       await tgSendMessage(
         chatId,
-        `Welcome to Fixclub UAE — a closed community of repair-specialist reviews.\n\nTo join, send me your invite code (e.g. ABCD-EFGH-JKLM).`
+        `Welcome, ${created.name}! You're in.\n\nSend /review to post a review, or /help for the menu.`
       );
     }
     return;
@@ -146,14 +148,8 @@ async function handleMessage(msg: TgMessage): Promise<void> {
   }
 
   if (text === '/review') {
-    if (!linked) {
-      await tgSendMessage(
-        chatId,
-        'Send your invite code first — then you can post reviews.'
-      );
-      return;
-    }
-    await setState(chatId, 'review_pick_kind', { userId: linked.id });
+    const actor = linked || (await autoRegister(from));
+    await setState(chatId, 'review_pick_kind', { userId: actor.id });
     await tgSendMessage(chatId, 'What are you reviewing?', {
       reply_markup: {
         inline_keyboard: [
@@ -170,8 +166,10 @@ async function handleMessage(msg: TgMessage): Promise<void> {
   // Stateful messages
   const { state, data } = await getState(chatId);
 
+  // Legacy awaiting_invite state still exists for users mid-flow — accept it
+  // but invites are no longer required for new chats.
   if (state === 'awaiting_invite') {
-    await tryConsumeInvite(chatId, from, text.toUpperCase());
+    if (text) await tryConsumeInvite(chatId, from, text.toUpperCase());
     return;
   }
 
@@ -185,18 +183,32 @@ async function handleMessage(msg: TgMessage): Promise<void> {
     return;
   }
 
-  // Fallback
-  if (linked) {
+  // Fallback — auto-register on any first message instead of nagging for code
+  if (!linked) {
+    const created = await autoRegister(from);
     await tgSendMessage(
       chatId,
-      'I didn’t catch that. Use /review or /help.'
+      `You're in, ${created.name}. Use /review or /help.`
     );
-  } else {
-    await tgSendMessage(
-      chatId,
-      'Send your invite code, or /help.'
-    );
+    return;
   }
+  await tgSendMessage(chatId, 'I didn’t catch that. Use /review or /help.');
+}
+
+async function autoRegister(from: TgUser): Promise<LinkedUser> {
+  const name =
+    [from.first_name, from.last_name].filter(Boolean).join(' ').trim() ||
+    from.username ||
+    'Member';
+  const email = `tg-${from.id}@telegram`;
+  const rows = (await sql`
+    INSERT INTO users (name, email, telegram_id, telegram_username)
+    VALUES (${name}, ${email}, ${from.id}, ${from.username || null})
+    ON CONFLICT (telegram_id) DO UPDATE
+      SET telegram_username = EXCLUDED.telegram_username
+    RETURNING id, name
+  `) as { id: string; name: string }[];
+  return rows[0];
 }
 
 // === Invite consumption ==========================================
@@ -379,14 +391,7 @@ async function handleCallback(cb: TgCallback): Promise<void> {
   const data = cb.data || '';
   await tgAnswerCallback(cb.id);
 
-  const linked = await getLinkedUser(cb.from.id);
-  if (!linked) {
-    await tgSendMessage(
-      chatId,
-      'Sign in first — send your invite code.'
-    );
-    return;
-  }
+  const linked = (await getLinkedUser(cb.from.id)) || (await autoRegister(cb.from));
 
   if (data === 'rev:cancel') {
     await resetState(chatId);
