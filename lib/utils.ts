@@ -11,7 +11,8 @@ export const SPECIALTY_GROUPS = [
       { value: 'tiler', label: 'Marble & tile works' },
       { value: 'locksmith', label: 'Locks / doors' },
       { value: 'windows', label: 'Windows / glass' },
-      { value: 'renovation', label: 'Full renovation' }
+      { value: 'renovation', label: 'Full renovation' },
+      { value: 'interior_designer', label: 'Interior designer' }
     ]
   },
   {

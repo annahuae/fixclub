@@ -173,17 +173,15 @@ export default async function ShopsPage({
     previewsByShop.set(p.shop_id, list);
   }
 
-  const totalReviews = rows.reduce(
-    (acc, s) => acc + parseInt(s.review_count),
-    0
-  );
-  const weightedSum = rows.reduce(
-    (acc, s) =>
-      acc +
-      (s.avg_rating ? parseFloat(s.avg_rating) * parseInt(s.review_count) : 0),
-    0
-  );
-  const aggregateAvg = totalReviews > 0 ? weightedSum / totalReviews : 0;
+  const topRated = rows
+    .filter((s) => parseInt(s.review_count) > 0 && s.avg_rating)
+    .sort((a, b) => {
+      const ar = parseFloat(a.avg_rating || '0');
+      const br = parseFloat(b.avg_rating || '0');
+      if (br !== ar) return br - ar;
+      return parseInt(b.review_count) - parseInt(a.review_count);
+    })
+    .slice(0, 3);
 
   function buildHref(over: Record<string, string | null>) {
     const sp = new URLSearchParams();
@@ -387,22 +385,8 @@ export default async function ShopsPage({
           </section>
 
           <aside className="hidden lg:block">
-            <div className="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto pr-1">
-              <div className="panel p-6">
-              <h2 className="font-semibold">Rating summary</h2>
-              <div className="mt-6 text-6xl font-semibold tracking-tight">
-                {aggregateAvg.toFixed(1)}
-              </div>
-              <div className="mt-3">
-                <StarRating rating={aggregateAvg} size="lg" />
-              </div>
-              <div className="mt-3 text-sm text-ink-mid">
-                Based on {totalReviews}{' '}
-                {labelCount(totalReviews, ['review', 'reviews', 'reviews'])}
-              </div>
-            </div>
-
-            <div className="panel mt-6 bg-accent-soft p-6 text-center">
+            <div className="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto pr-1 space-y-6">
+              <div className="panel bg-accent-soft p-6 text-center">
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-accent text-accent">
                 ✎
               </div>
@@ -441,6 +425,43 @@ export default async function ShopsPage({
                 </a>
               </p>
             </div>
+
+            {topRated.length > 0 && (
+              <div className="panel p-5">
+                <h2 className="font-semibold">Top rated</h2>
+                <div className="mt-4 space-y-3">
+                  {topRated.map((s) => (
+                    <Link
+                      key={s.id}
+                      href={`/shops/${s.id}`}
+                      className="flex items-center gap-3 rounded-lg p-2 -m-2 hover:bg-surface-2"
+                    >
+                      <Avatar
+                        name={s.name}
+                        seed={s.id}
+                        size="sm"
+                        fallback="shop"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-sm font-semibold text-ink">
+                          {s.name}
+                        </div>
+                        <div className="truncate text-xs text-ink-mid">
+                          {shopCategoryLabel(
+                            s.categories?.[0] || s.category
+                          )}
+                        </div>
+                      </div>
+                      <StarRating
+                        rating={parseFloat(s.avg_rating || '0')}
+                        size="sm"
+                        showNumber
+                      />
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
             </div>
           </aside>
         </div>

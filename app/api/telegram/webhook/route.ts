@@ -354,7 +354,9 @@ function inferSpecialty(text: string | undefined | null): string | null {
     ремонт: 'renovation',
     реновация: 'renovation',
     turnkey: 'renovation',
-    'под ключ': 'renovation'
+    'под ключ': 'renovation',
+    дизайнер: 'interior_designer',
+    дизайн: 'interior_designer'
   };
   for (const t of tokens) {
     for (const [ru, val] of Object.entries(aliases)) {

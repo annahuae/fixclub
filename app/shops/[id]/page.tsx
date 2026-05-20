@@ -283,7 +283,22 @@ export default async function ShopPage({
                             {formatDate(r.created_at)}
                           </span>
                         </div>
-                        <StarRating rating={r.rating} size="sm" />
+                        <div className="flex items-center flex-wrap gap-x-3 gap-y-1">
+                          <StarRating rating={r.rating} size="sm" />
+                          {r.price_rating && r.price_rating > 0 && (
+                            <span className="inline-flex items-center gap-1 text-xs">
+                              <StarRating
+                                rating={r.price_rating}
+                                glyph="dollar"
+                                levels={3}
+                                size="sm"
+                              />
+                              <span className="text-ink-mid">
+                                {priceTierLabel(r.price_rating)}
+                              </span>
+                            </span>
+                          )}
+                        </div>
                         {r.comment && (
                           <p className="text-sm text-ink-mid leading-relaxed whitespace-pre-wrap mt-2">
                             {r.comment}

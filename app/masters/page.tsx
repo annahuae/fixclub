@@ -187,27 +187,15 @@ export default async function MastersPage({
     previewsByMaster.set(p.master_id, list);
   }
 
-  const totalReviews = rows.reduce(
-    (acc, m) => acc + parseInt(m.review_count),
-    0
-  );
-  const weightedSum = rows.reduce(
-    (acc, m) =>
-      acc +
-      (m.avg_rating ? parseFloat(m.avg_rating) * parseInt(m.review_count) : 0),
-    0
-  );
-  const aggregateAvg = totalReviews > 0 ? weightedSum / totalReviews : 0;
-  const distribution = [5, 4, 3, 2, 1].map((stars) => {
-    const count = rows.reduce((acc, m) => {
-      const avg = m.avg_rating ? Math.round(parseFloat(m.avg_rating)) : 0;
-      return acc + (avg === stars ? parseInt(m.review_count) : 0);
-    }, 0);
-    return {
-      stars,
-      pct: totalReviews > 0 ? Math.round((count / totalReviews) * 100) : 0
-    };
-  });
+  const topRated = rows
+    .filter((m) => parseInt(m.review_count) > 0 && m.avg_rating)
+    .sort((a, b) => {
+      const ar = parseFloat(a.avg_rating || '0');
+      const br = parseFloat(b.avg_rating || '0');
+      if (br !== ar) return br - ar;
+      return parseInt(b.review_count) - parseInt(a.review_count);
+    })
+    .slice(0, 3);
 
   function buildHref(over: Record<string, string | null>) {
     const sp = new URLSearchParams();
@@ -472,41 +460,8 @@ export default async function MastersPage({
           </section>
 
           <aside className="hidden lg:block">
-            <div className="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto pr-1">
-              <div className="panel p-5">
-              <h2 className="font-semibold">Rating summary</h2>
-              <div className="mt-3 flex items-baseline gap-3">
-                <div className="text-5xl font-semibold tracking-tight">
-                  {aggregateAvg.toFixed(1)}
-                </div>
-                <StarRating rating={aggregateAvg} />
-              </div>
-              <div className="mt-1 text-sm text-ink-mid">
-                Based on {totalReviews}{' '}
-                {labelCount(totalReviews, ['review', 'reviews', 'reviews'])}
-              </div>
-              <div className="mt-4 space-y-2">
-                {distribution.map((item) => (
-                  <div
-                    key={item.stars}
-                    className="grid grid-cols-[28px_1fr_38px] items-center gap-2 text-sm"
-                  >
-                    <span className="text-ink-mid">{item.stars} ★</span>
-                    <div className="h-1.5 overflow-hidden rounded-full bg-surface-2">
-                      <div
-                        className="h-full rounded-full bg-accent"
-                        style={{ width: `${item.pct}%` }}
-                      />
-                    </div>
-                    <span className="text-right text-ink-mid">
-                      {item.pct}%
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="panel mt-6 bg-accent-soft p-6 text-center">
+            <div className="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto pr-1 space-y-6">
+              <div className="panel bg-accent-soft p-6 text-center">
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-accent text-accent">
                 ✎
               </div>
@@ -545,6 +500,43 @@ export default async function MastersPage({
                 </a>
               </p>
             </div>
+
+            {topRated.length > 0 && (
+              <div className="panel p-5">
+                <h2 className="font-semibold">Top rated</h2>
+                <div className="mt-4 space-y-3">
+                  {topRated.map((m) => (
+                    <Link
+                      key={m.id}
+                      href={`/masters/${m.id}`}
+                      className="flex items-center gap-3 rounded-lg p-2 -m-2 hover:bg-surface-2"
+                    >
+                      <Avatar
+                        name={m.name}
+                        seed={m.id}
+                        size="sm"
+                        fallback="master"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-sm font-semibold text-ink">
+                          {m.name}
+                        </div>
+                        <div className="truncate text-xs text-ink-mid">
+                          {specialtyLabel(
+                            m.specialties?.[0] || m.specialty
+                          )}
+                        </div>
+                      </div>
+                      <StarRating
+                        rating={parseFloat(m.avg_rating || '0')}
+                        size="sm"
+                        showNumber
+                      />
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
             </div>
           </aside>
         </div>
