@@ -2,12 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { requireUser, isAdmin } from '@/lib/auth';
 import { sql } from '@/lib/db';
-import {
-  shopCategoryLabel,
-  emirateLabel,
-  formatDate,
-  priceTierLabel
-} from '@/lib/utils';
+import { shopCategoryLabel, emirateLabel, formatDate } from '@/lib/utils';
 import { StarRating, StarInput } from '@/components/star-rating';
 import { Avatar } from '@/components/avatar';
 import { MapEmbed } from '@/components/map-embed';
@@ -150,9 +145,6 @@ export default async function ShopPage({
                           glyph="dollar"
                           levels={3}
                         />
-                        <span className="text-sm text-ink-mid">
-                          {priceTierLabel(priceAvg)}
-                        </span>
                       </span>
                     )}
                     <span className="text-ink-mid text-sm">
@@ -286,17 +278,12 @@ export default async function ShopPage({
                         <div className="flex items-center flex-wrap gap-x-3 gap-y-1">
                           <StarRating rating={r.rating} size="sm" />
                           {r.price_rating && r.price_rating > 0 && (
-                            <span className="inline-flex items-center gap-1 text-xs">
-                              <StarRating
-                                rating={r.price_rating}
-                                glyph="dollar"
-                                levels={3}
-                                size="sm"
-                              />
-                              <span className="text-ink-mid">
-                                {priceTierLabel(r.price_rating)}
-                              </span>
-                            </span>
+                            <StarRating
+                              rating={r.price_rating}
+                              glyph="dollar"
+                              levels={3}
+                              size="sm"
+                            />
                           )}
                         </div>
                         {r.comment && (

@@ -5,8 +5,7 @@ import {
   SHOP_CATEGORIES,
   shopCategoryLabel,
   emirateLabel,
-  formatDate,
-  priceTierLabel
+  formatDate
 } from '@/lib/utils';
 import { StarRating } from '@/components/star-rating';
 import { Avatar } from '@/components/avatar';
@@ -310,18 +309,11 @@ export default async function ShopsPage({
                                 <StarRating rating={avg} showNumber />
                                 {shop.avg_price &&
                                   parseFloat(shop.avg_price) > 0 && (
-                                    <span className="inline-flex items-center gap-1.5 text-sm">
-                                      <StarRating
-                                        rating={parseFloat(shop.avg_price)}
-                                        glyph="dollar"
-                                        levels={3}
-                                      />
-                                      <span className="text-ink-mid">
-                                        {priceTierLabel(
-                                          parseFloat(shop.avg_price)
-                                        )}
-                                      </span>
-                                    </span>
+                                    <StarRating
+                                      rating={parseFloat(shop.avg_price)}
+                                      glyph="dollar"
+                                      levels={3}
+                                    />
                                   )}
                                 <span className="text-sm text-accent">
                                   ({count}{' '}

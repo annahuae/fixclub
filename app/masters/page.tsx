@@ -8,8 +8,7 @@ import {
   specialtyLabel,
   languageLabel,
   emirateLabel,
-  formatDate,
-  priceTierLabel
+  formatDate
 } from '@/lib/utils';
 import { StarRating } from '@/components/star-rating';
 import { Avatar } from '@/components/avatar';
@@ -387,16 +386,11 @@ export default async function MastersPage({
                               <>
                                 <StarRating rating={avg} showNumber />
                                 {m.avg_price && parseFloat(m.avg_price) > 0 && (
-                                  <span className="inline-flex items-center gap-1.5 text-sm">
-                                    <StarRating
-                                      rating={parseFloat(m.avg_price)}
-                                      glyph="dollar"
-                                      levels={3}
-                                    />
-                                    <span className="text-ink-mid">
-                                      {priceTierLabel(parseFloat(m.avg_price))}
-                                    </span>
-                                  </span>
+                                  <StarRating
+                                    rating={parseFloat(m.avg_price)}
+                                    glyph="dollar"
+                                    levels={3}
+                                  />
                                 )}
                                 <span className="text-sm text-accent">
                                   ({count}{' '}
