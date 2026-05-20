@@ -22,6 +22,7 @@ export function TelegramLogin({
     script.setAttribute('data-size', 'large');
     script.setAttribute('data-radius', '10');
     script.setAttribute('data-userpic', 'false');
+    script.setAttribute('data-lang', 'en');
     script.setAttribute('data-request-access', 'write');
     script.setAttribute('data-auth-url', authUrl);
     ref.current.appendChild(script);
