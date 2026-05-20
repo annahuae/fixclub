@@ -9,7 +9,17 @@ function token(): string {
   return t;
 }
 
-export type InlineButton = { text: string; callback_data: string };
+export type InlineButton =
+  | { text: string; callback_data: string }
+  | {
+      text: string;
+      login_url: {
+        url: string;
+        forward_text?: string;
+        bot_username?: string;
+        request_write_access?: boolean;
+      };
+    };
 export type ReplyMarkup = { inline_keyboard: InlineButton[][] } | undefined;
 
 export async function tgSendMessage(

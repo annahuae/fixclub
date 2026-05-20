@@ -112,7 +112,13 @@ async function handleMessage(msg: TgMessage): Promise<void> {
   const linked = await getLinkedUser(from.id);
 
   // Commands always work, but interpretation depends on link status.
-  if (text === '/start') {
+  if (text.startsWith('/start')) {
+    const arg = text.slice('/start'.length).trim();
+    // Web "Continue with Telegram" sends users here with `?start=login`.
+    if (arg === 'login') {
+      await sendLoginButton(chatId);
+      return;
+    }
     if (linked) {
       await resetState(chatId);
       await tgSendMessage(
@@ -128,6 +134,11 @@ async function handleMessage(msg: TgMessage): Promise<void> {
         `Welcome, ${created.name}! You're in.\n\nSend /review to post a review, or /help for the menu.`
       );
     }
+    return;
+  }
+
+  if (text === '/login') {
+    await sendLoginButton(chatId);
     return;
   }
 
@@ -193,6 +204,28 @@ async function handleMessage(msg: TgMessage): Promise<void> {
     return;
   }
   await tgSendMessage(chatId, 'I didn’t catch that. Use /review or /help.');
+}
+
+async function sendLoginButton(chatId: number): Promise<void> {
+  await tgSendMessage(
+    chatId,
+    'Tap below to log in to the Fixclub UAE website. You’ll be signed in instantly.',
+    {
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: '🔑 Log in to Fixclub',
+              login_url: {
+                url: 'https://fixclub.vercel.app/api/auth/telegram',
+                request_write_access: true
+              }
+            }
+          ]
+        ]
+      }
+    }
+  );
 }
 
 async function autoRegister(from: TgUser): Promise<LinkedUser> {

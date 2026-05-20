@@ -8,7 +8,6 @@ import type { TelegramAuthData } from '@/lib/telegram';
 
 type Mode = 'login' | 'signup' | 'telegram';
 
-const TELEGRAM_BOT_ID = 8971737639;
 
 export default async function AccessPage({
   searchParams
@@ -128,7 +127,7 @@ function LoginView({ error }: { error?: string }) {
       </form>
 
       <Divider label="or" />
-      <TelegramLogin botId={TELEGRAM_BOT_ID} />
+      <TelegramLogin botUsername="fixclubuae_bot" />
 
       <div className="mt-5 pt-5 border-t border-border text-center">
         <p className="text-sm text-ink-mid">
@@ -251,7 +250,7 @@ function SignupView({
       </form>
 
       <Divider label="or" />
-      <TelegramLogin botId={TELEGRAM_BOT_ID} />
+      <TelegramLogin botUsername="fixclubuae_bot" />
 
       <div className="mt-5 pt-5 border-t border-border text-center text-sm">
         <p className="text-ink-mid">
