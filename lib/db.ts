@@ -188,4 +188,14 @@ export async function initSchema() {
   await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS telegram_id BIGINT UNIQUE`;
   await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS telegram_username TEXT`;
   await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS telegram_photo TEXT`;
+
+  // v13: Telegram bot conversation state
+  await sql`
+    CREATE TABLE IF NOT EXISTS telegram_chat_state (
+      chat_id BIGINT PRIMARY KEY,
+      state TEXT NOT NULL DEFAULT 'idle',
+      data JSONB NOT NULL DEFAULT '{}'::jsonb,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `;
 }
