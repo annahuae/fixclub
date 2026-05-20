@@ -35,28 +35,47 @@ export default async function NewShopPage() {
             />
           </div>
 
-          <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <label className="label">Category</label>
-              <select name="category" required className="input">
+          <div>
+            <label className="label">
+              Categories{' '}
+              <span className="text-ink-dim font-normal">
+                (pick one or more)
+              </span>
+            </label>
+            <div className="rounded-xl border border-border bg-surface p-4">
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                 {SHOP_CATEGORIES.map((c) => (
-                  <option key={c.value} value={c.value}>
+                  <label
+                    key={c.value}
+                    className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-surface-2"
+                  >
+                    <input
+                      type="checkbox"
+                      name="categories"
+                      value={c.value}
+                      className="h-4 w-4 accent-accent"
+                    />
                     {c.label}
-                  </option>
+                  </label>
                 ))}
-              </select>
+              </div>
             </div>
-            <div>
-              <label className="label">Emirate</label>
-              <select name="emirate" className="input" defaultValue="dubai">
-                <option value="">— Not specified —</option>
-                {EMIRATES.map((e) => (
-                  <option key={e.value} value={e.value}>
-                    {e.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+          </div>
+
+          <div>
+            <label className="label">Emirate</label>
+            <select
+              name="emirate"
+              className="input md:w-1/2"
+              defaultValue="dubai"
+            >
+              <option value="">— Not specified —</option>
+              {EMIRATES.map((e) => (
+                <option key={e.value} value={e.value}>
+                  {e.label}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="grid md:grid-cols-2 gap-4">

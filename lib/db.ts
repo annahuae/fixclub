@@ -179,4 +179,8 @@ export async function initSchema() {
   // v10: multi-profile specialists — array of specialties on masters
   await sql`ALTER TABLE masters ADD COLUMN IF NOT EXISTS specialties TEXT[] NOT NULL DEFAULT '{}'`;
   await sql`CREATE INDEX IF NOT EXISTS idx_masters_specialties ON masters USING GIN (specialties)`;
+
+  // v11: multi-category shops
+  await sql`ALTER TABLE shops ADD COLUMN IF NOT EXISTS categories TEXT[] NOT NULL DEFAULT '{}'`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_shops_categories ON shops USING GIN (categories)`;
 }

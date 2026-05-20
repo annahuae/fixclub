@@ -17,6 +17,7 @@ type ShopRow = {
   id: string;
   name: string;
   category: string;
+  categories: string[];
   emirate: string | null;
   area: string | null;
   phone: string | null;
@@ -64,7 +65,7 @@ export default async function ShopsPage({
   const [unsortedRaw, previewsRaw] = await Promise.all([
     sql`
       SELECT
-        s.id, s.name, s.category, s.emirate, s.area, s.phone,
+        s.id, s.name, s.category, s.categories, s.emirate, s.area, s.phone,
         AVG(r.rating)::numeric(10,2) AS avg_rating,
         COUNT(r.id) AS review_count,
         MAX(r.created_at) AS last_review_at,
@@ -72,7 +73,7 @@ export default async function ShopsPage({
       FROM shops s
       LEFT JOIN shop_reviews r ON r.shop_id = s.id
       WHERE
-        (${category}::text IS NULL OR s.category = ${category})
+        (${category}::text IS NULL OR ${category} = ANY(s.categories))
         AND (${emirate}::text IS NULL OR s.emirate = ${emirate})
         AND (${q}::text IS NULL OR s.name ILIKE ${likeQ} OR s.area ILIKE ${likeQ} OR s.address ILIKE ${likeQ})
       GROUP BY s.id
@@ -89,7 +90,7 @@ export default async function ShopsPage({
         WHERE r.shop_id IN (
           SELECT id FROM shops
           WHERE
-            (${category}::text IS NULL OR category = ${category})
+            (${category}::text IS NULL OR ${category} = ANY(categories))
             AND (${emirate}::text IS NULL OR emirate = ${emirate})
             AND (${q}::text IS NULL OR name ILIKE ${likeQ} OR area ILIKE ${likeQ} OR address ILIKE ${likeQ})
         )
@@ -255,7 +256,12 @@ export default async function ShopsPage({
                             {shop.name}
                           </h2>
                           <div className="mt-1 text-sm text-ink-mid">
-                            {shopCategoryLabel(shop.category)}
+                            {(shop.categories && shop.categories.length > 0
+                              ? shop.categories
+                              : [shop.category]
+                            )
+                              .map((c) => shopCategoryLabel(c))
+                              .join(' · ')}
                             {shop.emirate && (
                               <> · {emirateLabel(shop.emirate)}</>
                             )}

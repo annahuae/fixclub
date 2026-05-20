@@ -14,6 +14,7 @@ type Shop = {
   id: string;
   name: string;
   category: string;
+  categories: string[];
   emirate: string | null;
   area: string | null;
   address: string | null;
@@ -90,7 +91,12 @@ export default async function ShopPage({
             <div className="flex-1 min-w-0">
               <h1 className="text-3xl font-bold text-ink">{shop.name}</h1>
               <div className="text-sm text-ink-mid mt-1">
-                {shopCategoryLabel(shop.category)}
+                {(shop.categories && shop.categories.length > 0
+                  ? shop.categories
+                  : [shop.category]
+                )
+                  .map((c) => shopCategoryLabel(c))
+                  .join(' · ')}
                 {shop.emirate && (
                   <>
                     {' '}

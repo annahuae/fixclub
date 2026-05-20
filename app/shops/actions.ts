@@ -8,7 +8,10 @@ import { requireUser, isAdmin } from '@/lib/auth';
 export async function addShop(formData: FormData) {
   const user = await requireUser();
   const name = String(formData.get('name') || '').trim();
-  const category = String(formData.get('category') || '').trim();
+  const categories = formData
+    .getAll('categories')
+    .map((v) => String(v).trim())
+    .filter(Boolean);
   const emirate = String(formData.get('emirate') || '').trim() || null;
   const area = String(formData.get('area') || '').trim() || null;
   const address = String(formData.get('address') || '').trim() || null;
@@ -19,13 +22,14 @@ export async function addShop(formData: FormData) {
   const description =
     String(formData.get('description') || '').trim() || null;
 
-  if (!name || !category) {
+  if (!name || categories.length === 0) {
     redirect('/shops/new');
   }
+  const primary = categories[0];
 
   const rows = (await sql`
-    INSERT INTO shops (name, category, emirate, area, address, phone, whatsapp_phone, maps_url, description, added_by)
-    VALUES (${name}, ${category}, ${emirate}, ${area}, ${address}, ${phone}, ${whatsappPhone}, ${mapsUrl}, ${description}, ${user.userId})
+    INSERT INTO shops (name, category, categories, emirate, area, address, phone, whatsapp_phone, maps_url, description, added_by)
+    VALUES (${name}, ${primary}, ${categories}, ${emirate}, ${area}, ${address}, ${phone}, ${whatsappPhone}, ${mapsUrl}, ${description}, ${user.userId})
     RETURNING id
   `) as { id: string }[];
 
@@ -66,7 +70,10 @@ export async function updateShop(formData: FormData) {
   if (!id) redirect('/shops');
 
   const name = String(formData.get('name') || '').trim();
-  const category = String(formData.get('category') || '').trim();
+  const categories = formData
+    .getAll('categories')
+    .map((v) => String(v).trim())
+    .filter(Boolean);
   const emirate = String(formData.get('emirate') || '').trim() || null;
   const area = String(formData.get('area') || '').trim() || null;
   const address = String(formData.get('address') || '').trim() || null;
@@ -77,15 +84,17 @@ export async function updateShop(formData: FormData) {
   const description =
     String(formData.get('description') || '').trim() || null;
 
-  if (!name || !category) {
+  if (!name || categories.length === 0) {
     redirect(`/shops/${id}/edit`);
   }
+  const primary = categories[0];
 
   const admin = await isAdmin();
   const result = (await sql`
     UPDATE shops SET
       name = ${name},
-      category = ${category},
+      category = ${primary},
+      categories = ${categories},
       emirate = ${emirate},
       area = ${area},
       address = ${address},
