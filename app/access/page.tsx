@@ -195,18 +195,6 @@ function TelegramSignupView({
             autoComplete="email"
           />
         </div>
-        <div>
-          <label className="label">
-            Invite code{' '}
-            <span className="font-normal text-ink-dim">(optional)</span>
-          </label>
-          <input
-            name="code"
-            placeholder="ABCD-EFGH-JKLM"
-            className="input font-mono uppercase tracking-wider"
-            autoComplete="off"
-          />
-        </div>
         <button type="submit" className="btn-primary w-full">
           Finish sign-up
         </button>
@@ -228,12 +216,9 @@ function SignupView({
   error?: string;
   prefilledInvite?: string;
 }) {
-  const hasInvite = !!prefilledInvite;
   return (
     <>
-      <h1 className="text-2xl font-bold mb-5">
-        {hasInvite ? 'Register with invite' : 'Register'}
-      </h1>
+      <h1 className="text-2xl font-bold mb-5">Register</h1>
       <ErrorBox msg={error} />
       <form action={submitSignup} className="space-y-4">
         <div>
@@ -257,19 +242,9 @@ function SignupView({
           />
         </div>
         <PasswordField hint="Save it — this is your sign-in password." />
-        <div>
-          <label className="label">
-            Invite code{' '}
-            <span className="font-normal text-ink-dim">(optional)</span>
-          </label>
-          <input
-            name="code"
-            defaultValue={prefilledInvite}
-            placeholder="ABCD-EFGH-JKLM"
-            className="input font-mono uppercase tracking-wider"
-            autoComplete="off"
-          />
-        </div>
+        {prefilledInvite && (
+          <input type="hidden" name="code" value={prefilledInvite} />
+        )}
         <button type="submit" className="btn-primary w-full">
           Register
         </button>
