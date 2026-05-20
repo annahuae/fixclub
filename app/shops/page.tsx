@@ -444,11 +444,13 @@ export default async function ShopsPage({
                           )}
                         </div>
                       </div>
-                      <StarRating
-                        rating={parseFloat(s.avg_rating || '0')}
-                        size="sm"
-                        showNumber
-                      />
+                      <span
+                        className="inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-ink"
+                        title="Average rating"
+                      >
+                        <span style={{ color: 'var(--star)' }}>★</span>
+                        {parseFloat(s.avg_rating || '0').toFixed(1)}
+                      </span>
                     </Link>
                   ))}
                 </div>

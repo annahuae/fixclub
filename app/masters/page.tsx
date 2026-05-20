@@ -521,11 +521,13 @@ export default async function MastersPage({
                           )}
                         </div>
                       </div>
-                      <StarRating
-                        rating={parseFloat(m.avg_rating || '0')}
-                        size="sm"
-                        showNumber
-                      />
+                      <span
+                        className="inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-ink"
+                        title="Average rating"
+                      >
+                        <span style={{ color: 'var(--star)' }}>★</span>
+                        {parseFloat(m.avg_rating || '0').toFixed(1)}
+                      </span>
                     </Link>
                   ))}
                 </div>
