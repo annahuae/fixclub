@@ -6,7 +6,7 @@ import {
   type InlineButton
 } from '@/lib/telegram-api';
 import {
-  SHOP_CATEGORIES,
+  emirateLabel,
   shopCategoryLabel,
   SPECIALTIES,
   specialtyLabel
@@ -354,9 +354,7 @@ function inferSpecialty(text: string | undefined | null): string | null {
     ремонт: 'renovation',
     реновация: 'renovation',
     turnkey: 'renovation',
-    'под ключ': 'renovation',
-    дизайнер: 'interior_designer',
-    дизайн: 'interior_designer'
+    'под ключ': 'renovation'
   };
   for (const t of tokens) {
     for (const [ru, val] of Object.entries(aliases)) {
@@ -522,7 +520,7 @@ async function finishQuickReview(
       : null;
 
   if (existingMasterId) {
-    await saveQuickReview(chatId, userId, existingMasterId, rating, comment);
+    await showSpecialistConfirm(chatId, { ...data, comment });
     return;
   }
 
@@ -533,15 +531,67 @@ async function finishQuickReview(
   );
 }
 
+const confirmKeyboard = (prefix: 'qrev' | 'qshop') => ({
+  reply_markup: {
+    inline_keyboard: [
+      [
+        { text: '✅ Save', callback_data: `${prefix}:save` },
+        { text: '❌ Cancel', callback_data: `${prefix}:cancel` }
+      ]
+    ]
+  }
+});
+
+async function showSpecialistConfirm(
+  chatId: number,
+  data: Record<string, unknown>
+): Promise<void> {
+  const name = String(data.name || 'Unknown');
+  const phone = String(data.phone || '');
+  const rating = Number(data.rating || 0);
+  const comment =
+    typeof data.comment === 'string' ? (data.comment as string) : null;
+  const specialty = String(data.specialty || 'other');
+  const isExisting = !!data.existingMasterId;
+  const emirate = String(data.emirate || 'dubai');
+  const area = typeof data.area === 'string' ? (data.area as string) : null;
+
+  const lines: string[] = [];
+  lines.push(isExisting ? 'Add this review?' : 'Save this review?');
+  lines.push('');
+  lines.push(`📛 ${name}`);
+  lines.push(`📱 ${phone}`);
+  if (!isExisting) {
+    lines.push(`🔧 ${specialtyLabel(specialty)}`);
+    lines.push(
+      `📍 ${emirateLabel(emirate)}${area ? ` · ${area}` : ' · (city-wide)'}`
+    );
+  }
+  lines.push(`⭐ ${'★'.repeat(rating)}${'☆'.repeat(5 - rating)}`);
+  lines.push(`💬 ${comment ? comment : '(no comment)'}`);
+
+  await setState(chatId, 'quick_confirm_specialist', data);
+  await tgSendMessage(chatId, lines.join('\n'), confirmKeyboard('qrev'));
+}
+
 async function finalizeQuickReviewWithLocation(
   chatId: number,
   data: Record<string, unknown>,
   locationText: string | null
 ): Promise<void> {
+  const { emirate, area } = locationText
+    ? parseLocation(locationText)
+    : { emirate: 'dubai', area: null };
+
+  await showSpecialistConfirm(chatId, { ...data, emirate, area });
+}
+
+async function commitSpecialistReview(
+  chatId: number,
+  data: Record<string, unknown>
+): Promise<void> {
   const userId = String(data.userId || '');
   const phone = String(data.phone || '');
-  const name = String(data.name || 'Unknown');
-  const specialty = String(data.specialty || 'other');
   const rating = Number(data.rating || 0);
   const comment =
     typeof data.comment === 'string' ? (data.comment as string) : null;
@@ -551,20 +601,25 @@ async function finalizeQuickReviewWithLocation(
     return;
   }
 
-  const { emirate, area } = locationText
-    ? parseLocation(locationText)
-    : { emirate: 'dubai', area: null };
+  let masterId = String(data.existingMasterId || '');
+  if (!masterId) {
+    const name = String(data.name || 'Unknown');
+    const specialty = String(data.specialty || 'other');
+    const emirate = String(data.emirate || 'dubai');
+    const area =
+      typeof data.area === 'string' ? (data.area as string) : null;
+    const inserted = (await sql`
+      INSERT INTO masters (name, whatsapp_phone, specialty, specialties, kind, emirate, area, added_by)
+      VALUES (
+        ${name}, ${phone}, ${specialty}, ${[specialty]}::text[],
+        'individual', ${emirate}, ${area}, ${userId}
+      )
+      RETURNING id
+    `) as { id: string }[];
+    masterId = inserted[0].id;
+  }
 
-  const inserted = (await sql`
-    INSERT INTO masters (name, whatsapp_phone, specialty, specialties, kind, emirate, area, added_by)
-    VALUES (
-      ${name}, ${phone}, ${specialty}, ${[specialty]}::text[],
-      'individual', ${emirate}, ${area}, ${userId}
-    )
-    RETURNING id
-  `) as { id: string }[];
-
-  await saveQuickReview(chatId, userId, inserted[0].id, rating, comment);
+  await saveQuickReview(chatId, userId, masterId, rating, comment);
 }
 
 async function saveQuickReview(
@@ -642,16 +697,51 @@ async function finalizeQuickShop(
   data: Record<string, unknown>,
   comment: string | null
 ): Promise<void> {
+  await showShopConfirm(chatId, { ...data, comment });
+}
+
+async function showShopConfirm(
+  chatId: number,
+  data: Record<string, unknown>
+): Promise<void> {
+  const name = String(data.name || '').trim();
+  const category = String(data.category || 'other');
+  const rating = Number(data.rating || 0);
+  const mapsUrl =
+    typeof data.mapsUrl === 'string' ? (data.mapsUrl as string) : null;
+  const address =
+    typeof data.address === 'string' ? (data.address as string) : null;
+  const comment =
+    typeof data.comment === 'string' ? (data.comment as string) : null;
+
+  const lines: string[] = [];
+  lines.push('Save this shop review?');
+  lines.push('');
+  lines.push(`🏪 ${name}`);
+  lines.push(`🏷 ${shopCategoryLabel(category)}`);
+  lines.push(`📍 Dubai${address ? ` · ${address}` : ''}`);
+  lines.push(`🗺 ${mapsUrl ? mapsUrl : '(no maps link)'}`);
+  lines.push(`⭐ ${'★'.repeat(rating)}${'☆'.repeat(5 - rating)}`);
+  lines.push(`💬 ${comment ? comment : '(no comment)'}`);
+
+  await setState(chatId, 'quick_confirm_shop', data);
+  await tgSendMessage(chatId, lines.join('\n'), confirmKeyboard('qshop'));
+}
+
+async function commitShopReview(
+  chatId: number,
+  data: Record<string, unknown>
+): Promise<void> {
   const userId = String(data.userId || '');
   const name = String(data.name || '').trim();
   const category = String(data.category || 'other');
   const rating = Number(data.rating || 0);
   const mapsUrl =
     typeof data.mapsUrl === 'string' ? (data.mapsUrl as string) : null;
-  const area =
-    typeof data.area === 'string' ? (data.area as string) : null;
   const address =
     typeof data.address === 'string' ? (data.address as string) : null;
+  const comment =
+    typeof data.comment === 'string' ? (data.comment as string) : null;
   if (!userId || !name || rating < 1 || rating > 5) {
     await tgSendMessage(chatId, 'Something fell off — try again.');
     await resetState(chatId);
@@ -659,10 +749,10 @@ async function finalizeQuickShop(
   }
 
   const inserted = (await sql`
-    INSERT INTO shops (name, category, categories, emirate, area, address, maps_url, added_by)
+    INSERT INTO shops (name, category, categories, emirate, address, maps_url, added_by)
     VALUES (
       ${name}, ${category}, ${[category]}::text[],
-      'dubai', ${area}, ${address}, ${mapsUrl}, ${userId}
+      'dubai', ${address}, ${mapsUrl}, ${userId}
     )
     RETURNING id
   `) as { id: string }[];
@@ -936,6 +1026,15 @@ async function handleCallback(cb: TgCallback): Promise<void> {
   // Quick-shop flow callbacks
   if (parts[0] === 'qshop') {
     const cur = await getState(chatId);
+    if (parts[1] === 'save') {
+      await commitShopReview(chatId, cur.data);
+      return;
+    }
+    if (parts[1] === 'cancel') {
+      await resetState(chatId);
+      await tgSendMessage(chatId, 'Cancelled.');
+      return;
+    }
     if (parts[1] === 'start') {
       const pendingName =
         typeof cur.data.pendingShopName === 'string'
@@ -977,6 +1076,15 @@ async function handleCallback(cb: TgCallback): Promise<void> {
   // Quick-review (contact-driven) flow callbacks
   if (parts[0] === 'qrev') {
     const cur = await getState(chatId);
+    if (parts[1] === 'save') {
+      await commitSpecialistReview(chatId, cur.data);
+      return;
+    }
+    if (parts[1] === 'cancel') {
+      await resetState(chatId);
+      await tgSendMessage(chatId, 'Cancelled.');
+      return;
+    }
     if (parts[1] === 'sp') {
       const sp = parts[2] || 'other';
       await setState(chatId, 'quick_pick_rating', { ...cur.data, specialty: sp });
