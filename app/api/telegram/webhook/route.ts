@@ -226,6 +226,12 @@ async function handleMessage(msg: TgMessage): Promise<void> {
     return;
   }
 
+  if (linked && state === 'quick_pick_location' && text) {
+    const locText = text === '/skip' ? null : text;
+    await finalizeQuickReviewWithLocation(chatId, data, locText);
+    return;
+  }
+
   // Fallback — auto-register and remember the text so a contact arriving
   // right after can use it as a hint for specialty + comment.
   const actor = linked || (await autoRegister(from));
@@ -329,12 +335,21 @@ async function startQuickReview(
       : null;
   const guessedSpecialty = inferSpecialty(hint);
 
+  // If we already know this master (any phone column matches), we won't ask
+  // for location later — they already have one.
+  const existing = (await sql`
+    SELECT id FROM masters
+    WHERE phone = ${phone} OR whatsapp_phone = ${phone}
+    LIMIT 1
+  `) as { id: string }[];
+
   const data: Record<string, unknown> = {
     userId,
     phone,
     name,
     hint,
-    specialty: guessedSpecialty
+    specialty: guessedSpecialty,
+    existingMasterId: existing[0]?.id || null
   };
 
   if (guessedSpecialty) {
@@ -367,6 +382,47 @@ function chunk<T>(arr: T[], size: number): T[][] {
   return out;
 }
 
+/**
+ * Parses a freeform location string like "Marina", "Sharjah Industrial 5",
+ * "Abu Dhabi" into { emirate, area }. If no emirate token is found, the
+ * whole string is treated as area in Dubai (the default).
+ */
+function parseLocation(input: string): { emirate: string; area: string | null } {
+  const text = input.trim();
+  if (!text) return { emirate: 'dubai', area: null };
+  const aliases: Record<string, string> = {
+    dubai: 'dubai',
+    дубай: 'dubai',
+    sharjah: 'sharjah',
+    шарджа: 'sharjah',
+    'abu dhabi': 'abu_dhabi',
+    abudhabi: 'abu_dhabi',
+    'абу-даби': 'abu_dhabi',
+    'абу даби': 'abu_dhabi',
+    ajman: 'ajman',
+    аджман: 'ajman',
+    rak: 'rak',
+    ras: 'rak',
+    'ras al khaimah': 'rak',
+    'рас-эль-хайма': 'rak',
+    fujairah: 'fujairah',
+    фуджейра: 'fujairah',
+    uaq: 'uaq',
+    'umm al quwain': 'uaq',
+    'умм-аль-кувайн': 'uaq'
+  };
+  const lower = text.toLowerCase();
+  // Match longest alias first
+  const sorted = Object.entries(aliases).sort((a, b) => b[0].length - a[0].length);
+  for (const [alias, value] of sorted) {
+    if (lower.startsWith(alias)) {
+      const rest = text.slice(alias.length).trim().replace(/^[,\-:·]\s*/, '');
+      return { emirate: value, area: rest || null };
+    }
+  }
+  return { emirate: 'dubai', area: text };
+}
+
 function ratingKeyboard() {
   return {
     reply_markup: {
@@ -387,8 +443,6 @@ async function finishQuickReview(
 ): Promise<void> {
   const userId = String(data.userId || '');
   const phone = String(data.phone || '');
-  const name = String(data.name || 'Unknown');
-  const specialty = String(data.specialty || 'other');
   const rating = Number(data.rating || 0);
   if (!userId || !phone || rating < 1 || rating > 5) {
     await tgSendMessage(chatId, 'Something fell off — try again.');
@@ -396,25 +450,64 @@ async function finishQuickReview(
     return;
   }
 
-  // Reuse existing master if same phone is already in DB
-  const existing = (await sql`
-    SELECT id, name FROM masters
-    WHERE phone = ${phone} OR whatsapp_phone = ${phone}
-    LIMIT 1
-  `) as { id: string; name: string }[];
+  const existingMasterId =
+    typeof data.existingMasterId === 'string' && data.existingMasterId
+      ? (data.existingMasterId as string)
+      : null;
 
-  let masterId: string;
-  if (existing.length > 0) {
-    masterId = existing[0].id;
-  } else {
-    const inserted = (await sql`
-      INSERT INTO masters (name, whatsapp_phone, specialty, specialties, kind, emirate, added_by)
-      VALUES (${name}, ${phone}, ${specialty}, ${[specialty]}::text[], 'individual', 'dubai', ${userId})
-      RETURNING id
-    `) as { id: string }[];
-    masterId = inserted[0].id;
+  if (existingMasterId) {
+    await saveQuickReview(chatId, userId, existingMasterId, rating, comment);
+    return;
   }
 
+  await setState(chatId, 'quick_pick_location', { ...data, comment });
+  await tgSendMessage(
+    chatId,
+    'Where in UAE do they work? Send the area (e.g. "Marina" or "Sharjah Industrial 5") — or /skip for Dubai.'
+  );
+}
+
+async function finalizeQuickReviewWithLocation(
+  chatId: number,
+  data: Record<string, unknown>,
+  locationText: string | null
+): Promise<void> {
+  const userId = String(data.userId || '');
+  const phone = String(data.phone || '');
+  const name = String(data.name || 'Unknown');
+  const specialty = String(data.specialty || 'other');
+  const rating = Number(data.rating || 0);
+  const comment =
+    typeof data.comment === 'string' ? (data.comment as string) : null;
+  if (!userId || !phone || rating < 1 || rating > 5) {
+    await tgSendMessage(chatId, 'Something fell off — try again.');
+    await resetState(chatId);
+    return;
+  }
+
+  const { emirate, area } = locationText
+    ? parseLocation(locationText)
+    : { emirate: 'dubai', area: null };
+
+  const inserted = (await sql`
+    INSERT INTO masters (name, whatsapp_phone, specialty, specialties, kind, emirate, area, added_by)
+    VALUES (
+      ${name}, ${phone}, ${specialty}, ${[specialty]}::text[],
+      'individual', ${emirate}, ${area}, ${userId}
+    )
+    RETURNING id
+  `) as { id: string }[];
+
+  await saveQuickReview(chatId, userId, inserted[0].id, rating, comment);
+}
+
+async function saveQuickReview(
+  chatId: number,
+  userId: string,
+  masterId: string,
+  rating: number,
+  comment: string | null
+): Promise<void> {
   const dup = (await sql`
     SELECT id FROM reviews
     WHERE master_id = ${masterId} AND user_id = ${userId} LIMIT 1
