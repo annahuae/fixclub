@@ -402,11 +402,13 @@ export default async function MastersPage({
                                   <StarRating
                                     rating={parseFloat(m.avg_price)}
                                     glyph="dollar"
+                                    levels={3}
                                   />
                                 )}
                                 {m.avg_speed && parseFloat(m.avg_speed) > 0 && (
                                   <StarRating
                                     rating={parseFloat(m.avg_speed)}
+                                    levels={3}
                                     size="sm"
                                   />
                                 )}

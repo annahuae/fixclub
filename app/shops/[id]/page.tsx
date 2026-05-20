@@ -140,7 +140,12 @@ export default async function ShopPage({
                         <span className="text-xs font-medium uppercase tracking-wider text-ink-dim">
                           Price
                         </span>
-                        <StarRating rating={priceAvg} glyph="dollar" showNumber />
+                        <StarRating
+                          rating={priceAvg}
+                          glyph="dollar"
+                          levels={3}
+                          showNumber
+                        />
                       </span>
                     )}
                     {speedAvg > 0 && (
@@ -148,7 +153,7 @@ export default async function ShopPage({
                         <span className="text-xs font-medium uppercase tracking-wider text-ink-dim">
                           Speed
                         </span>
-                        <StarRating rating={speedAvg} showNumber />
+                        <StarRating rating={speedAvg} levels={3} showNumber />
                       </span>
                     )}
                     <span className="text-ink-mid text-sm">
@@ -231,7 +236,8 @@ export default async function ShopPage({
                       name="price_rating"
                       glyph="dollar"
                       required={false}
-                      defaultValue={3}
+                      defaultValue={2}
+                      levels={3}
                     />
                   </div>
                   <div>
@@ -239,7 +245,8 @@ export default async function ShopPage({
                     <StarInput
                       name="speed_rating"
                       required={false}
-                      defaultValue={5}
+                      defaultValue={3}
+                      levels={3}
                     />
                   </div>
                 </div>

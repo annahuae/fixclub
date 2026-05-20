@@ -314,12 +314,14 @@ export default async function ShopsPage({
                                     <StarRating
                                       rating={parseFloat(shop.avg_price)}
                                       glyph="dollar"
+                                      levels={3}
                                     />
                                   )}
                                 {shop.avg_speed &&
                                   parseFloat(shop.avg_speed) > 0 && (
                                     <StarRating
                                       rating={parseFloat(shop.avg_speed)}
+                                      levels={3}
                                       size="sm"
                                     />
                                   )}
