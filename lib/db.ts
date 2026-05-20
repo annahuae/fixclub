@@ -183,4 +183,9 @@ export async function initSchema() {
   // v11: multi-category shops
   await sql`ALTER TABLE shops ADD COLUMN IF NOT EXISTS categories TEXT[] NOT NULL DEFAULT '{}'`;
   await sql`CREATE INDEX IF NOT EXISTS idx_shops_categories ON shops USING GIN (categories)`;
+
+  // v12: Telegram login
+  await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS telegram_id BIGINT UNIQUE`;
+  await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS telegram_username TEXT`;
+  await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS telegram_photo TEXT`;
 }
