@@ -8,7 +8,10 @@ import { requireUser } from '@/lib/auth';
 export async function addMaster(formData: FormData) {
   const user = await requireUser();
   const name = String(formData.get('name') || '').trim();
-  const specialty = String(formData.get('specialty') || '').trim();
+  const specialties = formData
+    .getAll('specialties')
+    .map((v) => String(v).trim())
+    .filter(Boolean);
   const kindRaw = String(formData.get('kind') || 'individual').trim();
   const kind = kindRaw === 'company' ? 'company' : 'individual';
   const emirate = String(formData.get('emirate') || '').trim() || null;
@@ -20,13 +23,14 @@ export async function addMaster(formData: FormData) {
   const description =
     String(formData.get('description') || '').trim() || null;
 
-  if (!name || !specialty) {
+  if (!name || specialties.length === 0) {
     redirect('/masters/new');
   }
+  const primary = specialties[0];
 
   const rows = (await sql`
-    INSERT INTO masters (name, phone, whatsapp_phone, specialty, kind, emirate, area, maps_url, description, added_by)
-    VALUES (${name}, ${phone}, ${whatsappPhone}, ${specialty}, ${kind}, ${emirate}, ${area}, ${mapsUrl}, ${description}, ${user.userId})
+    INSERT INTO masters (name, phone, whatsapp_phone, specialty, specialties, kind, emirate, area, maps_url, description, added_by)
+    VALUES (${name}, ${phone}, ${whatsappPhone}, ${primary}, ${specialties}, ${kind}, ${emirate}, ${area}, ${mapsUrl}, ${description}, ${user.userId})
     RETURNING id
   `) as { id: string }[];
 

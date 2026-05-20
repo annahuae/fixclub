@@ -17,6 +17,7 @@ type MasterRow = {
   id: string;
   name: string;
   specialty: string;
+  specialties: string[];
   kind: string;
   area: string | null;
   phone: string | null;
@@ -65,7 +66,7 @@ export default async function MastersPage({
   const [rowsUnsortedRaw, previewsRaw] = await Promise.all([
     sql`
       SELECT
-        m.id, m.name, m.specialty, m.kind, m.area, m.phone,
+        m.id, m.name, m.specialty, m.specialties, m.kind, m.area, m.phone,
         AVG(r.rating)::numeric(10,2) AS avg_rating,
         COUNT(r.id) AS review_count,
         MAX(r.created_at) AS last_review_at,
@@ -73,7 +74,7 @@ export default async function MastersPage({
       FROM masters m
       LEFT JOIN reviews r ON r.master_id = m.id
       WHERE
-        (${specialty}::text IS NULL OR m.specialty = ${specialty})
+        (${specialty}::text IS NULL OR ${specialty} = ANY(m.specialties))
         AND (${emirate}::text IS NULL OR m.emirate = ${emirate})
         AND (${kind}::text IS NULL OR m.kind = ${kind})
         AND (${q}::text IS NULL OR m.name ILIKE ${likeQ} OR m.area ILIKE ${likeQ})
@@ -90,7 +91,7 @@ export default async function MastersPage({
         WHERE r.master_id IN (
           SELECT id FROM masters
           WHERE
-            (${specialty}::text IS NULL OR specialty = ${specialty})
+            (${specialty}::text IS NULL OR ${specialty} = ANY(specialties))
             AND (${emirate}::text IS NULL OR emirate = ${emirate})
             AND (${kind}::text IS NULL OR kind = ${kind})
             AND (${q}::text IS NULL OR name ILIKE ${likeQ} OR area ILIKE ${likeQ})
@@ -309,7 +310,12 @@ export default async function MastersPage({
                             </span>
                           </div>
                           <div className="mt-1 text-sm text-ink-mid">
-                            {specialtyLabel(m.specialty)}
+                            {(m.specialties && m.specialties.length > 0
+                              ? m.specialties
+                              : [m.specialty]
+                            )
+                              .map((s) => specialtyLabel(s))
+                              .join(' · ')}
                             {m.area && <> · {m.area}</>}
                           </div>
                           <div className="mt-3 flex items-center gap-2">

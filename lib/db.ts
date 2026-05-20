@@ -175,4 +175,8 @@ export async function initSchema() {
   // v9: split phone into WhatsApp number + call number (no more flag)
   await sql`ALTER TABLE masters ADD COLUMN IF NOT EXISTS whatsapp_phone TEXT`;
   await sql`ALTER TABLE shops ADD COLUMN IF NOT EXISTS whatsapp_phone TEXT`;
+
+  // v10: multi-profile specialists — array of specialties on masters
+  await sql`ALTER TABLE masters ADD COLUMN IF NOT EXISTS specialties TEXT[] NOT NULL DEFAULT '{}'`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_masters_specialties ON masters USING GIN (specialties)`;
 }

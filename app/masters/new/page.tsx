@@ -63,32 +63,50 @@ export default async function NewMasterPage() {
             </div>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <label className="label">Specialty</label>
-              <select name="specialty" required className="input">
-                {SPECIALTY_GROUPS.map((g) => (
-                  <optgroup key={g.title} label={g.title}>
+          <div>
+            <label className="label">
+              Specialties{' '}
+              <span className="text-ink-dim font-normal">
+                (pick one or more)
+              </span>
+            </label>
+            <div className="rounded-xl border border-border bg-surface p-4">
+              {SPECIALTY_GROUPS.map((g) => (
+                <div key={g.title} className="mt-3 first:mt-0">
+                  <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-ink-dim">
+                    {g.title}
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                     {g.items.map((s) => (
-                      <option key={s.value} value={s.value}>
+                      <label
+                        key={s.value}
+                        className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-surface-2"
+                      >
+                        <input
+                          type="checkbox"
+                          name="specialties"
+                          value={s.value}
+                          className="h-4 w-4 accent-accent"
+                        />
                         {s.label}
-                      </option>
+                      </label>
                     ))}
-                  </optgroup>
-                ))}
-              </select>
+                  </div>
+                </div>
+              ))}
             </div>
-            <div>
-              <label className="label">Emirate</label>
-              <select name="emirate" className="input" defaultValue="dubai">
-                <option value="">— Not specified —</option>
-                {EMIRATES.map((e) => (
-                  <option key={e.value} value={e.value}>
-                    {e.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+          </div>
+
+          <div>
+            <label className="label">Emirate</label>
+            <select name="emirate" className="input md:w-1/2" defaultValue="dubai">
+              <option value="">— Not specified —</option>
+              {EMIRATES.map((e) => (
+                <option key={e.value} value={e.value}>
+                  {e.label}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="grid md:grid-cols-2 gap-4">

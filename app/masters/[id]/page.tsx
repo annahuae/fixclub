@@ -14,6 +14,7 @@ type Master = {
   id: string;
   name: string;
   specialty: string;
+  specialties: string[];
   kind: string;
   emirate: string | null;
   area: string | null;
@@ -110,7 +111,12 @@ export default async function MasterPage({
                 </span>
               </div>
               <div className="text-sm text-ink-mid mt-1">
-                {specialtyLabel(master.specialty)}
+                {(master.specialties && master.specialties.length > 0
+                  ? master.specialties
+                  : [master.specialty]
+                )
+                  .map((s) => specialtyLabel(s))
+                  .join(' · ')}
                 {master.emirate && (
                   <>
                     {' '}
