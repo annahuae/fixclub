@@ -75,7 +75,16 @@ export default async function ShopsPage({
       WHERE
         (${category}::text IS NULL OR ${category} = ANY(s.categories))
         AND (${emirate}::text IS NULL OR s.emirate = ${emirate})
-        AND (${q}::text IS NULL OR s.name ILIKE ${likeQ} OR s.area ILIKE ${likeQ} OR s.address ILIKE ${likeQ})
+        AND (
+          ${q}::text IS NULL
+          OR s.name ILIKE ${likeQ}
+          OR s.area ILIKE ${likeQ}
+          OR s.address ILIKE ${likeQ}
+          OR s.description ILIKE ${likeQ}
+          OR EXISTS (
+            SELECT 1 FROM unnest(s.categories) c WHERE c ILIKE ${likeQ}
+          )
+        )
       GROUP BY s.id
       HAVING (${minRating}::numeric IS NULL OR AVG(r.rating) >= ${minRating})
     `,
@@ -92,7 +101,16 @@ export default async function ShopsPage({
           WHERE
             (${category}::text IS NULL OR ${category} = ANY(categories))
             AND (${emirate}::text IS NULL OR emirate = ${emirate})
-            AND (${q}::text IS NULL OR name ILIKE ${likeQ} OR area ILIKE ${likeQ} OR address ILIKE ${likeQ})
+            AND (
+              ${q}::text IS NULL
+              OR name ILIKE ${likeQ}
+              OR area ILIKE ${likeQ}
+              OR address ILIKE ${likeQ}
+              OR description ILIKE ${likeQ}
+              OR EXISTS (
+                SELECT 1 FROM unnest(categories) c WHERE c ILIKE ${likeQ}
+              )
+            )
         )
       ) t
       WHERE rn <= 2

@@ -77,7 +77,15 @@ export default async function MastersPage({
         (${specialty}::text IS NULL OR ${specialty} = ANY(m.specialties))
         AND (${emirate}::text IS NULL OR m.emirate = ${emirate})
         AND (${kind}::text IS NULL OR m.kind = ${kind})
-        AND (${q}::text IS NULL OR m.name ILIKE ${likeQ} OR m.area ILIKE ${likeQ})
+        AND (
+          ${q}::text IS NULL
+          OR m.name ILIKE ${likeQ}
+          OR m.area ILIKE ${likeQ}
+          OR m.description ILIKE ${likeQ}
+          OR EXISTS (
+            SELECT 1 FROM unnest(m.specialties) sp WHERE sp ILIKE ${likeQ}
+          )
+        )
       GROUP BY m.id
     `,
     sql`
@@ -94,7 +102,15 @@ export default async function MastersPage({
             (${specialty}::text IS NULL OR ${specialty} = ANY(specialties))
             AND (${emirate}::text IS NULL OR emirate = ${emirate})
             AND (${kind}::text IS NULL OR kind = ${kind})
-            AND (${q}::text IS NULL OR name ILIKE ${likeQ} OR area ILIKE ${likeQ})
+            AND (
+              ${q}::text IS NULL
+              OR name ILIKE ${likeQ}
+              OR area ILIKE ${likeQ}
+              OR description ILIKE ${likeQ}
+              OR EXISTS (
+                SELECT 1 FROM unnest(specialties) sp WHERE sp ILIKE ${likeQ}
+              )
+            )
         )
       ) t
       WHERE rn <= 2
