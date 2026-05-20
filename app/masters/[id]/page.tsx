@@ -6,7 +6,8 @@ import {
   specialtyLabel,
   emirateLabel,
   formatDate,
-  languageLabel
+  languageLabel,
+  priceTierLabel
 } from '@/lib/utils';
 import { StarRating, StarInput } from '@/components/star-rating';
 import { Avatar } from '@/components/avatar';
@@ -28,6 +29,7 @@ type Master = {
   whatsapp_phone: string | null;
   languages: string[];
   pace: string | null;
+  instagram: string | null;
   maps_url: string | null;
   description: string | null;
   added_by: string | null;
@@ -173,16 +175,10 @@ export default async function MasterPage({
                           rating={priceAvg}
                           glyph="dollar"
                           levels={3}
-                          showNumber
                         />
-                      </span>
-                    )}
-                    {speedAvg > 0 && (
-                      <span className="inline-flex items-center gap-1.5">
-                        <span className="text-xs font-medium uppercase tracking-wider text-ink-dim">
-                          Speed
+                        <span className="text-sm text-ink-mid">
+                          {priceTierLabel(priceAvg)}
                         </span>
-                        <StarRating rating={speedAvg} levels={3} showNumber />
                       </span>
                     )}
                     <span className="text-ink-mid text-sm">
@@ -200,13 +196,37 @@ export default async function MasterPage({
                 )}
               </div>
 
-              {(master.whatsapp_phone || master.phone) && (
+              {(master.whatsapp_phone || master.phone || master.instagram) && (
                 <div className="mt-3 flex flex-wrap items-center gap-2">
                   {master.whatsapp_phone && (
                     <PhoneLink phone={master.whatsapp_phone} kind="whatsapp" />
                   )}
                   {master.phone && (
                     <PhoneLink phone={master.phone} kind="call" />
+                  )}
+                  {master.instagram && (
+                    <a
+                      href={`https://instagram.com/${master.instagram}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-3 py-1.5 text-sm font-medium text-ink hover:border-accent hover:text-accent"
+                    >
+                      <svg
+                        className="h-4 w-4"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden
+                      >
+                        <rect x="2" y="2" width="20" height="20" rx="5" />
+                        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                        <line x1="17.5" y1="6.5" x2="17.5" y2="6.5" />
+                      </svg>
+                      @{master.instagram}
+                    </a>
                   )}
                 </div>
               )}
@@ -260,7 +280,7 @@ export default async function MasterPage({
                 </p>
                 <form action={addReview} className="space-y-4">
                   <input type="hidden" name="master_id" value={master.id} />
-                  <div className="grid gap-4 sm:grid-cols-3">
+                  <div className="grid gap-4 sm:grid-cols-2">
                     <div>
                       <label className="label">Quality</label>
                       <StarInput name="rating" />
@@ -272,15 +292,6 @@ export default async function MasterPage({
                         glyph="dollar"
                         required={false}
                         defaultValue={2}
-                        levels={3}
-                      />
-                    </div>
-                    <div>
-                      <label className="label">Speed</label>
-                      <StarInput
-                        name="speed_rating"
-                        required={false}
-                        defaultValue={3}
                         levels={3}
                       />
                     </div>

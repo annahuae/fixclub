@@ -8,7 +8,8 @@ import {
   specialtyLabel,
   languageLabel,
   emirateLabel,
-  formatDate
+  formatDate,
+  priceTierLabel
 } from '@/lib/utils';
 import { StarRating } from '@/components/star-rating';
 import { Avatar } from '@/components/avatar';
@@ -240,6 +241,31 @@ export default async function MastersPage({
                 </Link>
               </div>
 
+              <FilterSection title="Specialty">
+                <CheckLink
+                  href={buildHref({ specialty: null })}
+                  active={!specialty}
+                  label="All specialties"
+                />
+                {SPECIALTY_GROUPS.map((group) => (
+                  <div key={group.title} className="mt-4 first:mt-3">
+                    <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-ink-dim">
+                      {group.title}
+                    </div>
+                    <div className="space-y-2">
+                      {group.items.map((s) => (
+                        <CheckLink
+                          key={s.value}
+                          href={buildHref({ specialty: s.value })}
+                          active={specialty === s.value}
+                          label={s.label}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </FilterSection>
+
               <FilterSection title="Type">
                 <CheckLink
                   href={buildHref({ kind: null })}
@@ -276,32 +302,6 @@ export default async function MastersPage({
                     label={l.label}
                     radio
                   />
-                ))}
-              </FilterSection>
-
-
-              <FilterSection title="Specialty">
-                <CheckLink
-                  href={buildHref({ specialty: null })}
-                  active={!specialty}
-                  label="All specialties"
-                />
-                {SPECIALTY_GROUPS.map((group) => (
-                  <div key={group.title} className="mt-4 first:mt-3">
-                    <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-ink-dim">
-                      {group.title}
-                    </div>
-                    <div className="space-y-2">
-                      {group.items.map((s) => (
-                        <CheckLink
-                          key={s.value}
-                          href={buildHref({ specialty: s.value })}
-                          active={specialty === s.value}
-                          label={s.label}
-                        />
-                      ))}
-                    </div>
-                  </div>
                 ))}
               </FilterSection>
             </div>
@@ -399,18 +399,16 @@ export default async function MastersPage({
                               <>
                                 <StarRating rating={avg} showNumber />
                                 {m.avg_price && parseFloat(m.avg_price) > 0 && (
-                                  <StarRating
-                                    rating={parseFloat(m.avg_price)}
-                                    glyph="dollar"
-                                    levels={3}
-                                  />
-                                )}
-                                {m.avg_speed && parseFloat(m.avg_speed) > 0 && (
-                                  <StarRating
-                                    rating={parseFloat(m.avg_speed)}
-                                    levels={3}
-                                    size="sm"
-                                  />
+                                  <span className="inline-flex items-center gap-1.5 text-sm">
+                                    <StarRating
+                                      rating={parseFloat(m.avg_price)}
+                                      glyph="dollar"
+                                      levels={3}
+                                    />
+                                    <span className="text-ink-mid">
+                                      {priceTierLabel(parseFloat(m.avg_price))}
+                                    </span>
+                                  </span>
                                 )}
                                 <span className="text-sm text-accent">
                                   ({count}{' '}

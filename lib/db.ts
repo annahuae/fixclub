@@ -194,6 +194,9 @@ export async function initSchema() {
   await sql`ALTER TABLE masters ADD COLUMN IF NOT EXISTS pace TEXT`;
   await sql`CREATE INDEX IF NOT EXISTS idx_masters_languages ON masters USING GIN (languages)`;
 
+  // v16: instagram handle on masters (mostly for companies)
+  await sql`ALTER TABLE masters ADD COLUMN IF NOT EXISTS instagram TEXT`;
+
   // v15: per-review price + speed ratings (in addition to overall quality)
   await sql`ALTER TABLE reviews ADD COLUMN IF NOT EXISTS price_rating SMALLINT CHECK (price_rating BETWEEN 1 AND 5)`;
   await sql`ALTER TABLE reviews ADD COLUMN IF NOT EXISTS speed_rating SMALLINT CHECK (speed_rating BETWEEN 1 AND 5)`;

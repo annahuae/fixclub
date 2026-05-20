@@ -2,7 +2,12 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { requireUser, isAdmin } from '@/lib/auth';
 import { sql } from '@/lib/db';
-import { shopCategoryLabel, emirateLabel, formatDate } from '@/lib/utils';
+import {
+  shopCategoryLabel,
+  emirateLabel,
+  formatDate,
+  priceTierLabel
+} from '@/lib/utils';
 import { StarRating, StarInput } from '@/components/star-rating';
 import { Avatar } from '@/components/avatar';
 import { MapEmbed } from '@/components/map-embed';
@@ -144,16 +149,10 @@ export default async function ShopPage({
                           rating={priceAvg}
                           glyph="dollar"
                           levels={3}
-                          showNumber
                         />
-                      </span>
-                    )}
-                    {speedAvg > 0 && (
-                      <span className="inline-flex items-center gap-1.5">
-                        <span className="text-xs font-medium uppercase tracking-wider text-ink-dim">
-                          Speed
+                        <span className="text-sm text-ink-mid">
+                          {priceTierLabel(priceAvg)}
                         </span>
-                        <StarRating rating={speedAvg} levels={3} showNumber />
                       </span>
                     )}
                     <span className="text-ink-mid text-sm">
@@ -225,7 +224,7 @@ export default async function ShopPage({
               </p>
               <form action={addShopReview} className="space-y-4">
                 <input type="hidden" name="shop_id" value={shop.id} />
-                <div className="grid gap-4 sm:grid-cols-3">
+                <div className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <label className="label">Quality</label>
                     <StarInput name="rating" />
@@ -237,15 +236,6 @@ export default async function ShopPage({
                       glyph="dollar"
                       required={false}
                       defaultValue={2}
-                      levels={3}
-                    />
-                  </div>
-                  <div>
-                    <label className="label">Speed</label>
-                    <StarInput
-                      name="speed_rating"
-                      required={false}
-                      defaultValue={3}
                       levels={3}
                     />
                   </div>

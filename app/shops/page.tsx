@@ -5,7 +5,8 @@ import {
   SHOP_CATEGORIES,
   shopCategoryLabel,
   emirateLabel,
-  formatDate
+  formatDate,
+  priceTierLabel
 } from '@/lib/utils';
 import { StarRating } from '@/components/star-rating';
 import { Avatar } from '@/components/avatar';
@@ -311,19 +312,18 @@ export default async function ShopsPage({
                                 <StarRating rating={avg} showNumber />
                                 {shop.avg_price &&
                                   parseFloat(shop.avg_price) > 0 && (
-                                    <StarRating
-                                      rating={parseFloat(shop.avg_price)}
-                                      glyph="dollar"
-                                      levels={3}
-                                    />
-                                  )}
-                                {shop.avg_speed &&
-                                  parseFloat(shop.avg_speed) > 0 && (
-                                    <StarRating
-                                      rating={parseFloat(shop.avg_speed)}
-                                      levels={3}
-                                      size="sm"
-                                    />
+                                    <span className="inline-flex items-center gap-1.5 text-sm">
+                                      <StarRating
+                                        rating={parseFloat(shop.avg_price)}
+                                        glyph="dollar"
+                                        levels={3}
+                                      />
+                                      <span className="text-ink-mid">
+                                        {priceTierLabel(
+                                          parseFloat(shop.avg_price)
+                                        )}
+                                      </span>
+                                    </span>
                                   )}
                                 <span className="text-sm text-accent">
                                   ({count}{' '}

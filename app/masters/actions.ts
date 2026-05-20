@@ -25,6 +25,9 @@ export async function addMaster(formData: FormData) {
     .filter(Boolean);
   const paceRaw = String(formData.get('pace') || '').trim();
   const pace = ['fast', 'average', 'slow'].includes(paceRaw) ? paceRaw : null;
+  const instagram = normalizeInstagram(
+    String(formData.get('instagram') || '').trim() || null
+  );
   const mapsUrl = String(formData.get('maps_url') || '').trim() || null;
   const description =
     String(formData.get('description') || '').trim() || null;
@@ -35,13 +38,26 @@ export async function addMaster(formData: FormData) {
   const primary = specialties[0];
 
   const rows = (await sql`
-    INSERT INTO masters (name, phone, whatsapp_phone, specialty, specialties, kind, emirate, area, languages, pace, maps_url, description, added_by)
-    VALUES (${name}, ${phone}, ${whatsappPhone}, ${primary}, ${specialties}, ${kind}, ${emirate}, ${area}, ${languages}, ${pace}, ${mapsUrl}, ${description}, ${user.userId})
+    INSERT INTO masters (name, phone, whatsapp_phone, specialty, specialties, kind, emirate, area, languages, pace, instagram, maps_url, description, added_by)
+    VALUES (${name}, ${phone}, ${whatsappPhone}, ${primary}, ${specialties}, ${kind}, ${emirate}, ${area}, ${languages}, ${pace}, ${instagram}, ${mapsUrl}, ${description}, ${user.userId})
     RETURNING id
   `) as { id: string }[];
 
   revalidatePath('/masters');
   redirect(`/masters/${rows[0].id}?created=1`);
+}
+
+function normalizeInstagram(input: string | null): string | null {
+  if (!input) return null;
+  const trimmed = input.trim();
+  if (!trimmed) return null;
+  // Strip protocol/host/leading @ and slashes — keep just the handle.
+  const handle = trimmed
+    .replace(/^https?:\/\/(www\.)?instagram\.com\//i, '')
+    .replace(/^@/, '')
+    .replace(/\/+$/, '')
+    .split(/[\s?#]/)[0];
+  return handle || null;
 }
 
 function clampRating(raw: FormDataEntryValue | null): number {

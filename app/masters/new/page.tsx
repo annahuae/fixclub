@@ -188,6 +188,20 @@ export default async function NewMasterPage() {
 
           <div>
             <label className="label">
+              Instagram{' '}
+              <span className="font-normal text-ink-dim">
+                (mostly for companies — handle or full URL)
+              </span>
+            </label>
+            <input
+              name="instagram"
+              placeholder="@fixclub_uae or https://instagram.com/fixclub_uae"
+              className="input"
+            />
+          </div>
+
+          <div>
+            <label className="label">
               Google Maps link (optional)
             </label>
             <input

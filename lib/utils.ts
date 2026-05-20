@@ -62,6 +62,13 @@ export const PACES = [
   { value: 'slow', label: 'Slow', emoji: '🐢' }
 ] as const;
 
+export function priceTierLabel(avg: number): string {
+  const n = Math.round(avg);
+  if (n <= 1) return 'Budget';
+  if (n === 2) return 'Moderate';
+  return 'Premium';
+}
+
 export function paceLabel(value: string | null | undefined): string {
   if (!value) return '';
   return PACES.find((p) => p.value === value)?.label ?? value;
