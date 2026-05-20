@@ -5,7 +5,12 @@ import {
   tgSendMessage,
   type InlineButton
 } from '@/lib/telegram-api';
-import { SPECIALTIES, specialtyLabel } from '@/lib/utils';
+import {
+  SHOP_CATEGORIES,
+  shopCategoryLabel,
+  SPECIALTIES,
+  specialtyLabel
+} from '@/lib/utils';
 
 // === Webhook plumbing ============================================
 
@@ -23,12 +28,22 @@ type TgContact = {
   user_id?: number;
 };
 
+type TgLocation = { longitude: number; latitude: number };
+type TgVenue = {
+  location: TgLocation;
+  title: string;
+  address?: string;
+  google_place_id?: string;
+};
+
 type TgMessage = {
   message_id: number;
   chat: { id: number };
   from?: TgUser;
   text?: string;
   contact?: TgContact;
+  location?: TgLocation;
+  venue?: TgVenue;
 };
 
 type TgCallback = {
@@ -123,6 +138,26 @@ async function handleMessage(msg: TgMessage): Promise<void> {
     const actor = linked || (await autoRegister(from));
     await startQuickReview(chatId, actor.id, msg.contact);
     return;
+  }
+
+  // Telegram location / venue → if we're mid quick-shop, treat as the shop's location
+  if (msg.location || msg.venue) {
+    const { state, data } = await getState(chatId);
+    if (state === 'qshop_pick_location') {
+      const loc = msg.venue?.location || msg.location!;
+      const mapsUrl = mapsUrlFromLocation(loc);
+      const name =
+        msg.venue?.title ? String(data.name || msg.venue.title) : data.name;
+      const address = msg.venue?.address || null;
+      await setState(chatId, 'qshop_pick_rating', {
+        ...data,
+        name,
+        mapsUrl,
+        address
+      });
+      await tgSendMessage(chatId, 'Got the location. How many stars?', ratingKeyboard('qshop'));
+      return;
+    }
   }
 
   const text = (msg.text || '').trim();
@@ -229,6 +264,31 @@ async function handleMessage(msg: TgMessage): Promise<void> {
   if (linked && state === 'quick_pick_location' && text) {
     const locText = text === '/skip' ? null : text;
     await finalizeQuickReviewWithLocation(chatId, data, locText);
+    return;
+  }
+
+  if (linked && state === 'qshop_pick_location' && text) {
+    if (text === '/skip') {
+      await setState(chatId, 'qshop_pick_rating', { ...data, mapsUrl: null });
+      await tgSendMessage(chatId, 'OK, no location. How many stars?', ratingKeyboard('qshop'));
+      return;
+    }
+    const url = extractMapsUrlFromText(text);
+    if (!url) {
+      await tgSendMessage(
+        chatId,
+        'I need a Google Maps link (or share a Telegram location via 📎 → Location). Or send /skip.'
+      );
+      return;
+    }
+    await setState(chatId, 'qshop_pick_rating', { ...data, mapsUrl: url });
+    await tgSendMessage(chatId, 'Got the link. How many stars?', ratingKeyboard('qshop'));
+    return;
+  }
+
+  if (linked && state === 'qshop_add_comment' && text) {
+    const comment = text === '/skip' ? null : text;
+    await finalizeQuickShop(chatId, data, comment);
     return;
   }
 
@@ -423,13 +483,13 @@ function parseLocation(input: string): { emirate: string; area: string | null } 
   return { emirate: 'dubai', area: text };
 }
 
-function ratingKeyboard() {
+function ratingKeyboard(prefix: 'qrev' | 'qshop' = 'qrev') {
   return {
     reply_markup: {
       inline_keyboard: [
         [1, 2, 3, 4, 5].map((n) => ({
           text: '★'.repeat(n),
-          callback_data: `qrev:r:${n}`
+          callback_data: `${prefix}:r:${n}`
         }))
       ]
     }
@@ -522,6 +582,94 @@ async function saveQuickReview(
   await tgSendMessage(
     chatId,
     `Saved! View it: https://fixclub.vercel.app/masters/${masterId}`
+  );
+}
+
+// === Quick-shop flow =============================================
+
+const QUICK_SHOP_CATEGORIES = [
+  'hardware',
+  'tools',
+  'plumbing_parts',
+  'sanitary',
+  'electrical_parts',
+  'tiles',
+  'paint',
+  'lumber'
+];
+
+function extractMapsUrlFromText(text: string): string | null {
+  const urlRe = /(https?:\/\/[^\s]+)/i;
+  const match = urlRe.exec(text);
+  if (!match) return null;
+  const url = match[1];
+  if (/(maps\.app\.goo\.gl|google\.[^\/]+\/maps|maps\.google)/i.test(url))
+    return url;
+  return null;
+}
+
+function mapsUrlFromLocation(loc: TgLocation): string {
+  return `https://www.google.com/maps?q=${loc.latitude},${loc.longitude}`;
+}
+
+async function startQuickShopFromName(
+  chatId: number,
+  userId: string,
+  name: string
+): Promise<void> {
+  await setState(chatId, 'qshop_pick_category', { userId, name });
+  await tgSendMessage(chatId, `New shop: ${name}\nWhat do they sell?`, {
+    reply_markup: {
+      inline_keyboard: chunk(
+        QUICK_SHOP_CATEGORIES.map((v) => ({
+          text: shopCategoryLabel(v),
+          callback_data: `qshop:c:${v}`
+        })),
+        2
+      ).concat([[{ text: 'Other', callback_data: 'qshop:c:other' }]])
+    }
+  });
+}
+
+async function finalizeQuickShop(
+  chatId: number,
+  data: Record<string, unknown>,
+  comment: string | null
+): Promise<void> {
+  const userId = String(data.userId || '');
+  const name = String(data.name || '').trim();
+  const category = String(data.category || 'other');
+  const rating = Number(data.rating || 0);
+  const mapsUrl =
+    typeof data.mapsUrl === 'string' ? (data.mapsUrl as string) : null;
+  const area =
+    typeof data.area === 'string' ? (data.area as string) : null;
+  const address =
+    typeof data.address === 'string' ? (data.address as string) : null;
+  if (!userId || !name || rating < 1 || rating > 5) {
+    await tgSendMessage(chatId, 'Something fell off — try again.');
+    await resetState(chatId);
+    return;
+  }
+
+  const inserted = (await sql`
+    INSERT INTO shops (name, category, categories, emirate, area, address, maps_url, added_by)
+    VALUES (
+      ${name}, ${category}, ${[category]}::text[],
+      'dubai', ${area}, ${address}, ${mapsUrl}, ${userId}
+    )
+    RETURNING id
+  `) as { id: string }[];
+  const shopId = inserted[0].id;
+
+  await sql`
+    INSERT INTO shop_reviews (shop_id, user_id, rating, comment)
+    VALUES (${shopId}, ${userId}, ${rating}, ${comment})
+  `;
+  await resetState(chatId);
+  await tgSendMessage(
+    chatId,
+    `Saved! View it: https://fixclub.vercel.app/shops/${shopId}`
   );
 }
 
@@ -653,9 +801,35 @@ async function searchAndOffer(
         `) as { id: string; name: string }[]);
 
   if (rows.length === 0) {
+    if (kind === 'shop') {
+      // Offer to create a new shop right here in chat
+      const cur = await getState(chatId);
+      await setState(chatId, 'review_search', {
+        ...cur.data,
+        pendingShopName: query
+      });
+      await tgSendMessage(
+        chatId,
+        `No shop matched "${query}". Want to add it?`,
+        {
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: `➕ Create "${query.slice(0, 40)}"`,
+                  callback_data: 'qshop:start'
+                },
+                { text: '🔍 Search again', callback_data: 'rev:cancel' }
+              ]
+            ]
+          }
+        }
+      );
+      return;
+    }
     await tgSendMessage(
       chatId,
-      `No ${kind === 'specialist' ? 'specialists' : 'shops'} matched "${query}". Add them on https://fixclub.vercel.app first, or send another search.`
+      `No specialists matched "${query}". Add them on https://fixclub.vercel.app first, or send another search.`
     );
     return;
   }
@@ -752,6 +926,47 @@ async function handleCallback(cb: TgCallback): Promise<void> {
   }
 
   const parts = data.split(':');
+
+  // Quick-shop flow callbacks
+  if (parts[0] === 'qshop') {
+    const cur = await getState(chatId);
+    if (parts[1] === 'start') {
+      const pendingName =
+        typeof cur.data.pendingShopName === 'string'
+          ? (cur.data.pendingShopName as string)
+          : '';
+      if (!pendingName) {
+        await tgSendMessage(chatId, 'Lost the name — start with /review again.');
+        await resetState(chatId);
+        return;
+      }
+      await startQuickShopFromName(chatId, linked.id, pendingName);
+      return;
+    }
+    if (parts[1] === 'c') {
+      const cat = parts[2] || 'other';
+      await setState(chatId, 'qshop_pick_location', {
+        ...cur.data,
+        category: cat
+      });
+      await tgSendMessage(
+        chatId,
+        'Paste a Google Maps link, or share location via 📎 → Location. Send /skip to leave blank.'
+      );
+      return;
+    }
+    if (parts[1] === 'r') {
+      const rating = parseInt(parts[2] || '0', 10);
+      if (rating < 1 || rating > 5) return;
+      await setState(chatId, 'qshop_add_comment', { ...cur.data, rating });
+      await tgSendMessage(
+        chatId,
+        `Got ${rating} ★. Add a short comment, or send /skip.`
+      );
+      return;
+    }
+    return;
+  }
 
   // Quick-review (contact-driven) flow callbacks
   if (parts[0] === 'qrev') {
