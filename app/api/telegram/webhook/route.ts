@@ -5,6 +5,7 @@ import {
   tgSendMessage,
   type InlineButton
 } from '@/lib/telegram-api';
+import { SPECIALTIES, specialtyLabel } from '@/lib/utils';
 
 // === Webhook plumbing ============================================
 
@@ -15,11 +16,19 @@ type TgUser = {
   username?: string;
 };
 
+type TgContact = {
+  phone_number: string;
+  first_name: string;
+  last_name?: string;
+  user_id?: number;
+};
+
 type TgMessage = {
   message_id: number;
   chat: { id: number };
   from?: TgUser;
   text?: string;
+  contact?: TgContact;
 };
 
 type TgCallback = {
@@ -108,6 +117,14 @@ async function handleMessage(msg: TgMessage): Promise<void> {
   const from = msg.from;
   if (!from) return;
 
+  // Shared contact attachment → quick-review flow
+  if (msg.contact) {
+    const linked = await getLinkedUser(from.id);
+    const actor = linked || (await autoRegister(from));
+    await startQuickReview(chatId, actor.id, msg.contact);
+    return;
+  }
+
   const text = (msg.text || '').trim();
   const linked = await getLinkedUser(from.id);
 
@@ -145,9 +162,15 @@ async function handleMessage(msg: TgMessage): Promise<void> {
   if (text === '/help') {
     await tgSendMessage(
       chatId,
-      linked
-        ? '/review — post a review\n/cancel — reset current step\n/help — this menu'
-        : 'Send your invite code to join, then /help will show all commands.'
+      [
+        'Quick review — share a contact (📎 → Contact) and I’ll guide you through 2 taps.',
+        'Tip: write a line first (e.g. "great electrician") and then share the contact — I’ll pre-fill the specialty and comment.',
+        '',
+        '/review — step-by-step flow for a specialist or shop already on the site',
+        '/login — get a one-tap login link to the website',
+        '/cancel — reset current step',
+        '/help — this menu'
+      ].join('\n')
     );
     return;
   }
@@ -194,16 +217,219 @@ async function handleMessage(msg: TgMessage): Promise<void> {
     return;
   }
 
-  // Fallback — auto-register on any first message instead of nagging for code
-  if (!linked) {
-    const created = await autoRegister(from);
+  if (linked && state === 'quick_add_comment' && text) {
+    if (text === '/skip') {
+      await finishQuickReview(chatId, data, null);
+    } else {
+      await finishQuickReview(chatId, data, text);
+    }
+    return;
+  }
+
+  // Fallback — auto-register and remember the text so a contact arriving
+  // right after can use it as a hint for specialty + comment.
+  const actor = linked || (await autoRegister(from));
+  if (text) {
+    await setState(chatId, 'idle_with_hint', {
+      userId: actor.id,
+      hint: text
+    });
     await tgSendMessage(
       chatId,
-      `You're in, ${created.name}. Use /review or /help.`
+      'Got it. Now share the contact (📎 → Contact) and I’ll save the review.'
     );
     return;
   }
+
   await tgSendMessage(chatId, 'I didn’t catch that. Use /review or /help.');
+}
+
+// === Quick-review flow ===========================================
+
+function normalizePhone(p: string): string {
+  const trimmed = p.trim();
+  return trimmed.startsWith('+') ? trimmed : `+${trimmed}`;
+}
+
+function inferSpecialty(text: string | undefined | null): string | null {
+  if (!text) return null;
+  const tokens = text
+    .toLowerCase()
+    .split(/[\s,!.?;:()\-]+/)
+    .filter((t) => t.length >= 3);
+  if (tokens.length === 0) return null;
+  // Russian/casual aliases → canonical values
+  const aliases: Record<string, string> = {
+    электрик: 'electrician',
+    сантехник: 'plumber',
+    пламбер: 'plumber',
+    кондиционер: 'ac',
+    кондей: 'ac',
+    хендимен: 'handyman',
+    разнорабочий: 'handyman',
+    плиточник: 'tiler',
+    мрамор: 'tiler',
+    маляр: 'painter',
+    покрасить: 'painter',
+    плотник: 'carpenter',
+    столяр: 'carpenter',
+    дверь: 'locksmith',
+    замок: 'locksmith',
+    окна: 'windows',
+    стекло: 'windows',
+    клининг: 'cleaner',
+    уборщ: 'cleaner',
+    садовник: 'gardener',
+    тараканы: 'pest',
+    дезинсекция: 'pest',
+    грузчик: 'mover',
+    переезд: 'mover',
+    хранение: 'storage'
+  };
+  for (const t of tokens) {
+    for (const [ru, val] of Object.entries(aliases)) {
+      if (t.startsWith(ru)) return val;
+    }
+    const hit = SPECIALTIES.find(
+      (s) =>
+        s.value.toLowerCase().includes(t) ||
+        s.label.toLowerCase().includes(t)
+    );
+    if (hit) return hit.value;
+  }
+  return null;
+}
+
+const QUICK_SPECIALTY_OPTIONS = [
+  'plumber',
+  'electrician',
+  'ac',
+  'handyman',
+  'painter',
+  'tiler',
+  'carpenter',
+  'cleaner'
+];
+
+async function startQuickReview(
+  chatId: number,
+  userId: string,
+  contact: TgContact
+): Promise<void> {
+  const phone = normalizePhone(contact.phone_number);
+  const name =
+    [contact.first_name, contact.last_name].filter(Boolean).join(' ').trim() ||
+    'Unknown';
+
+  // Pick up a hint from the previous text message, if any.
+  const prev = await getState(chatId);
+  const hint =
+    prev.state === 'idle_with_hint' && typeof prev.data.hint === 'string'
+      ? (prev.data.hint as string)
+      : null;
+  const guessedSpecialty = inferSpecialty(hint);
+
+  const data: Record<string, unknown> = {
+    userId,
+    phone,
+    name,
+    hint,
+    specialty: guessedSpecialty
+  };
+
+  if (guessedSpecialty) {
+    await setState(chatId, 'quick_pick_rating', data);
+    await tgSendMessage(
+      chatId,
+      `Got it: ${name} · ${phone}\nLooks like ${specialtyLabel(guessedSpecialty)}. How many stars?`,
+      ratingKeyboard()
+    );
+    return;
+  }
+
+  await setState(chatId, 'quick_pick_specialty', data);
+  await tgSendMessage(chatId, `Got it: ${name} · ${phone}\nWhat do they do?`, {
+    reply_markup: {
+      inline_keyboard: chunk(
+        QUICK_SPECIALTY_OPTIONS.map((v) => ({
+          text: specialtyLabel(v),
+          callback_data: `qrev:sp:${v}`
+        })),
+        2
+      ).concat([[{ text: 'Other / skip', callback_data: 'qrev:sp:other' }]])
+    }
+  });
+}
+
+function chunk<T>(arr: T[], size: number): T[][] {
+  const out: T[][] = [];
+  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+  return out;
+}
+
+function ratingKeyboard() {
+  return {
+    reply_markup: {
+      inline_keyboard: [
+        [1, 2, 3, 4, 5].map((n) => ({
+          text: '★'.repeat(n),
+          callback_data: `qrev:r:${n}`
+        }))
+      ]
+    }
+  };
+}
+
+async function finishQuickReview(
+  chatId: number,
+  data: Record<string, unknown>,
+  comment: string | null
+): Promise<void> {
+  const userId = String(data.userId || '');
+  const phone = String(data.phone || '');
+  const name = String(data.name || 'Unknown');
+  const specialty = String(data.specialty || 'other');
+  const rating = Number(data.rating || 0);
+  if (!userId || !phone || rating < 1 || rating > 5) {
+    await tgSendMessage(chatId, 'Something fell off — try again.');
+    await resetState(chatId);
+    return;
+  }
+
+  // Reuse existing master if same phone is already in DB
+  const existing = (await sql`
+    SELECT id, name FROM masters
+    WHERE phone = ${phone} OR whatsapp_phone = ${phone}
+    LIMIT 1
+  `) as { id: string; name: string }[];
+
+  let masterId: string;
+  if (existing.length > 0) {
+    masterId = existing[0].id;
+  } else {
+    const inserted = (await sql`
+      INSERT INTO masters (name, whatsapp_phone, specialty, specialties, kind, emirate, added_by)
+      VALUES (${name}, ${phone}, ${specialty}, ${[specialty]}::text[], 'individual', 'dubai', ${userId})
+      RETURNING id
+    `) as { id: string }[];
+    masterId = inserted[0].id;
+  }
+
+  const dup = (await sql`
+    SELECT id FROM reviews
+    WHERE master_id = ${masterId} AND user_id = ${userId} LIMIT 1
+  `) as { id: string }[];
+  if (dup.length === 0) {
+    await sql`
+      INSERT INTO reviews (master_id, user_id, rating, comment)
+      VALUES (${masterId}, ${userId}, ${rating}, ${comment})
+    `;
+  }
+  await resetState(chatId);
+  await tgSendMessage(
+    chatId,
+    `Saved! View it: https://fixclub.vercel.app/masters/${masterId}`
+  );
 }
 
 async function sendLoginButton(chatId: number): Promise<void> {
@@ -433,6 +659,37 @@ async function handleCallback(cb: TgCallback): Promise<void> {
   }
 
   const parts = data.split(':');
+
+  // Quick-review (contact-driven) flow callbacks
+  if (parts[0] === 'qrev') {
+    const cur = await getState(chatId);
+    if (parts[1] === 'sp') {
+      const sp = parts[2] || 'other';
+      await setState(chatId, 'quick_pick_rating', { ...cur.data, specialty: sp });
+      await tgSendMessage(chatId, 'How many stars?', ratingKeyboard());
+      return;
+    }
+    if (parts[1] === 'r') {
+      const rating = parseInt(parts[2] || '0', 10);
+      if (rating < 1 || rating > 5) return;
+      const dataNext = { ...cur.data, rating };
+      // If user already sent a hint text earlier, use it as the comment and
+      // finish in one shot. Otherwise ask for an optional comment.
+      const hint = typeof cur.data.hint === 'string' ? cur.data.hint : null;
+      if (hint) {
+        await finishQuickReview(chatId, dataNext, hint);
+        return;
+      }
+      await setState(chatId, 'quick_add_comment', dataNext);
+      await tgSendMessage(
+        chatId,
+        `Got ${rating} ★. Add a comment in one message, or send /skip.`
+      );
+      return;
+    }
+    return;
+  }
+
   if (parts[0] !== 'rev') return;
 
   if (parts[1] === 'kind') {
