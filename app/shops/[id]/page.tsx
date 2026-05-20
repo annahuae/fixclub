@@ -31,6 +31,8 @@ type Shop = {
 type Review = {
   id: string;
   rating: number;
+  price_rating: number | null;
+  speed_rating: number | null;
   comment: string | null;
   created_at: string;
   user_id: string | null;
@@ -57,7 +59,7 @@ export default async function ShopPage({
       LIMIT 1
     `,
     sql`
-      SELECT r.id, r.rating, r.comment, r.created_at, r.user_id, u.name AS user_name
+      SELECT r.id, r.rating, r.price_rating, r.speed_rating, r.comment, r.created_at, r.user_id, u.name AS user_name
       FROM shop_reviews r
       LEFT JOIN users u ON u.id = r.user_id
       WHERE r.shop_id = ${id}
@@ -70,10 +72,17 @@ export default async function ShopPage({
   const shop = shopRows[0];
   const reviewRows = reviewRowsRaw as unknown as Review[];
 
-  const avg =
-    reviewRows.length > 0
-      ? reviewRows.reduce((s, r) => s + r.rating, 0) / reviewRows.length
+  function avgOf(get: (r: Review) => number | null | undefined) {
+    const vals = reviewRows
+      .map((r) => get(r))
+      .filter((v): v is number => typeof v === 'number' && v > 0);
+    return vals.length > 0
+      ? vals.reduce((s, v) => s + v, 0) / vals.length
       : 0;
+  }
+  const avg = avgOf((r) => r.rating);
+  const priceAvg = avgOf((r) => r.price_rating);
+  const speedAvg = avgOf((r) => r.speed_rating);
 
   const userHasReviewed = reviewRows.some((r) => r.user_id === user.userId);
   const admin = await isAdmin();
@@ -117,10 +126,31 @@ export default async function ShopPage({
                   </>
                 )}
               </div>
-              <div className="flex items-center gap-3 mt-3 flex-wrap">
+              <div className="flex items-center gap-4 mt-3 flex-wrap">
                 {reviewRows.length > 0 ? (
                   <>
-                    <StarRating rating={avg} size="lg" showNumber />
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className="text-xs font-medium uppercase tracking-wider text-ink-dim">
+                        Quality
+                      </span>
+                      <StarRating rating={avg} size="lg" showNumber />
+                    </span>
+                    {priceAvg > 0 && (
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className="text-xs font-medium uppercase tracking-wider text-ink-dim">
+                          Price
+                        </span>
+                        <StarRating rating={priceAvg} glyph="dollar" showNumber />
+                      </span>
+                    )}
+                    {speedAvg > 0 && (
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className="text-xs font-medium uppercase tracking-wider text-ink-dim">
+                          Speed
+                        </span>
+                        <StarRating rating={speedAvg} showNumber />
+                      </span>
+                    )}
                     <span className="text-ink-mid text-sm">
                       ({reviewRows.length})
                     </span>
@@ -190,9 +220,28 @@ export default async function ShopPage({
               </p>
               <form action={addShopReview} className="space-y-4">
                 <input type="hidden" name="shop_id" value={shop.id} />
-                <div>
-                  <label className="label">Rating</label>
-                  <StarInput />
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <div>
+                    <label className="label">Quality</label>
+                    <StarInput name="rating" />
+                  </div>
+                  <div>
+                    <label className="label">Price</label>
+                    <StarInput
+                      name="price_rating"
+                      glyph="dollar"
+                      required={false}
+                      defaultValue={3}
+                    />
+                  </div>
+                  <div>
+                    <label className="label">Speed</label>
+                    <StarInput
+                      name="speed_rating"
+                      required={false}
+                      defaultValue={5}
+                    />
+                  </div>
                 </div>
                 <div>
                   <label className="label">Comment</label>

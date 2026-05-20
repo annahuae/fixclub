@@ -44,25 +44,32 @@ export async function addMaster(formData: FormData) {
   redirect(`/masters/${rows[0].id}?created=1`);
 }
 
+function clampRating(raw: FormDataEntryValue | null): number {
+  const n = parseInt(String(raw || '0'));
+  if (!Number.isFinite(n) || n < 1 || n > 5) return 0;
+  return n;
+}
+
 export async function addReview(formData: FormData) {
   const user = await requireUser();
   const masterId = String(formData.get('master_id') || '');
-  const rating = parseInt(String(formData.get('rating') || '0'));
+  const rating = clampRating(formData.get('rating'));
+  const priceRating = clampRating(formData.get('price_rating')) || null;
+  const speedRating = clampRating(formData.get('speed_rating')) || null;
   const comment = String(formData.get('comment') || '').trim() || null;
 
-  if (!masterId || rating < 1 || rating > 5) {
+  if (!masterId || !rating) {
     redirect(`/masters/${masterId}`);
   }
 
-  // one review per user per master
   const existing = (await sql`
     SELECT id FROM reviews WHERE master_id = ${masterId} AND user_id = ${user.userId} LIMIT 1
   `) as { id: string }[];
 
   if (existing.length === 0) {
     await sql`
-      INSERT INTO reviews (master_id, user_id, rating, comment)
-      VALUES (${masterId}, ${user.userId}, ${rating}, ${comment})
+      INSERT INTO reviews (master_id, user_id, rating, price_rating, speed_rating, comment)
+      VALUES (${masterId}, ${user.userId}, ${rating}, ${priceRating}, ${speedRating}, ${comment})
     `;
   }
 

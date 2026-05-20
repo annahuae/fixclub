@@ -6,9 +6,7 @@ import {
   specialtyLabel,
   emirateLabel,
   formatDate,
-  languageLabel,
-  paceLabel,
-  PACES
+  languageLabel
 } from '@/lib/utils';
 import { StarRating, StarInput } from '@/components/star-rating';
 import { Avatar } from '@/components/avatar';
@@ -40,6 +38,8 @@ type Master = {
 type Review = {
   id: string;
   rating: number;
+  price_rating: number | null;
+  speed_rating: number | null;
   comment: string | null;
   created_at: string;
   user_id: string | null;
@@ -66,7 +66,7 @@ export default async function MasterPage({
       LIMIT 1
     `,
     sql`
-      SELECT r.id, r.rating, r.comment, r.created_at, r.user_id, u.name AS user_name
+      SELECT r.id, r.rating, r.price_rating, r.speed_rating, r.comment, r.created_at, r.user_id, u.name AS user_name
       FROM reviews r
       LEFT JOIN users u ON u.id = r.user_id
       WHERE r.master_id = ${id}
@@ -79,10 +79,17 @@ export default async function MasterPage({
   const master = masterRows[0];
   const reviewRows = reviewRowsRaw as unknown as Review[];
 
-  const avg =
-    reviewRows.length > 0
-      ? reviewRows.reduce((s, r) => s + r.rating, 0) / reviewRows.length
+  function avgOf(get: (r: Review) => number | null | undefined) {
+    const vals = reviewRows
+      .map((r) => get(r))
+      .filter((v): v is number => typeof v === 'number' && v > 0);
+    return vals.length > 0
+      ? vals.reduce((s, v) => s + v, 0) / vals.length
       : 0;
+  }
+  const avg = avgOf((r) => r.rating);
+  const priceAvg = avgOf((r) => r.price_rating);
+  const speedAvg = avgOf((r) => r.speed_rating);
 
   const userHasReviewed = reviewRows.some((r) => r.user_id === user.userId);
   const userAddedMaster = master.added_by === user.userId;
@@ -148,10 +155,31 @@ export default async function MasterPage({
                   </>
                 )}
               </div>
-              <div className="flex items-center gap-3 mt-3 flex-wrap">
+              <div className="flex items-center gap-4 mt-3 flex-wrap">
                 {reviewRows.length > 0 ? (
                   <>
-                    <StarRating rating={avg} size="lg" showNumber />
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className="text-xs font-medium uppercase tracking-wider text-ink-dim">
+                        Quality
+                      </span>
+                      <StarRating rating={avg} size="lg" showNumber />
+                    </span>
+                    {priceAvg > 0 && (
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className="text-xs font-medium uppercase tracking-wider text-ink-dim">
+                          Price
+                        </span>
+                        <StarRating rating={priceAvg} glyph="dollar" showNumber />
+                      </span>
+                    )}
+                    {speedAvg > 0 && (
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className="text-xs font-medium uppercase tracking-wider text-ink-dim">
+                          Speed
+                        </span>
+                        <StarRating rating={speedAvg} showNumber />
+                      </span>
+                    )}
                     <span className="text-ink-mid text-sm">
                       ({reviewRows.length}{' '}
                       {labelCount(reviewRows.length, [
@@ -178,20 +206,12 @@ export default async function MasterPage({
                 </div>
               )}
 
-              {(master.languages?.length > 0 || master.pace) && (
+              {master.languages?.length > 0 && (
                 <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
-                  {master.languages?.length > 0 && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-surface-2 px-3 py-1 text-ink-mid">
-                      <span className="text-ink-dim">Speaks:</span>{' '}
-                      {master.languages.map((l) => languageLabel(l)).join(', ')}
-                    </span>
-                  )}
-                  {master.pace && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-surface-2 px-3 py-1 text-ink-mid">
-                      {PACES.find((p) => p.value === master.pace)?.emoji}{' '}
-                      {paceLabel(master.pace)} pace
-                    </span>
-                  )}
+                  <span className="inline-flex items-center gap-1 rounded-full bg-surface-2 px-3 py-1 text-ink-mid">
+                    <span className="text-ink-dim">Speaks:</span>{' '}
+                    {master.languages.map((l) => languageLabel(l)).join(', ')}
+                  </span>
                 </div>
               )}
 
@@ -235,9 +255,28 @@ export default async function MasterPage({
                 </p>
                 <form action={addReview} className="space-y-4">
                   <input type="hidden" name="master_id" value={master.id} />
-                  <div>
-                    <label className="label">Rating</label>
-                    <StarInput />
+                  <div className="grid gap-4 sm:grid-cols-3">
+                    <div>
+                      <label className="label">Quality</label>
+                      <StarInput name="rating" />
+                    </div>
+                    <div>
+                      <label className="label">Price</label>
+                      <StarInput
+                        name="price_rating"
+                        glyph="dollar"
+                        required={false}
+                        defaultValue={3}
+                      />
+                    </div>
+                    <div>
+                      <label className="label">Speed</label>
+                      <StarInput
+                        name="speed_rating"
+                        required={false}
+                        defaultValue={5}
+                      />
+                    </div>
                   </div>
                   <div>
                     <label className="label">Comment</label>

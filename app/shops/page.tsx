@@ -18,6 +18,8 @@ type ShopRow = {
   name: string;
   category: string;
   categories: string[];
+  avg_price: string | null;
+  avg_speed: string | null;
   emirate: string | null;
   area: string | null;
   phone: string | null;
@@ -85,6 +87,8 @@ export default async function ShopsPage({
       SELECT
         s.id, s.name, s.category, s.categories, s.emirate, s.area, s.phone,
         AVG(r.rating)::numeric(10,2) AS avg_rating,
+        AVG(r.price_rating)::numeric(10,2) AS avg_price,
+        AVG(r.speed_rating)::numeric(10,2) AS avg_speed,
         COUNT(r.id) AS review_count,
         MAX(r.created_at) AS last_review_at,
         s.created_at AS shop_created_at
@@ -301,10 +305,24 @@ export default async function ShopsPage({
                             )}
                             {shop.area && <> · {shop.area}</>}
                           </div>
-                          <div className="mt-3 flex items-center gap-2">
+                          <div className="mt-3 flex items-center flex-wrap gap-x-4 gap-y-1">
                             {count > 0 ? (
                               <>
                                 <StarRating rating={avg} showNumber />
+                                {shop.avg_price &&
+                                  parseFloat(shop.avg_price) > 0 && (
+                                    <StarRating
+                                      rating={parseFloat(shop.avg_price)}
+                                      glyph="dollar"
+                                    />
+                                  )}
+                                {shop.avg_speed &&
+                                  parseFloat(shop.avg_speed) > 0 && (
+                                    <StarRating
+                                      rating={parseFloat(shop.avg_speed)}
+                                      size="sm"
+                                    />
+                                  )}
                                 <span className="text-sm text-accent">
                                   ({count}{' '}
                                   {labelCount(count, [

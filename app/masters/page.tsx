@@ -5,10 +5,8 @@ import {
   SPECIALTIES,
   SPECIALTY_GROUPS,
   LANGUAGES,
-  PACES,
   specialtyLabel,
   languageLabel,
-  paceLabel,
   emirateLabel,
   formatDate
 } from '@/lib/utils';
@@ -29,6 +27,8 @@ type MasterRow = {
   languages: string[];
   pace: string | null;
   avg_rating: string | null;
+  avg_price: string | null;
+  avg_speed: string | null;
   review_count: string;
 };
 
@@ -56,7 +56,6 @@ export default async function MastersPage({
     sort?: string;
     kind?: string;
     lang?: string;
-    pace?: string;
   }>;
 }) {
   await requireUser();
@@ -69,12 +68,6 @@ export default async function MastersPage({
       ? params.kind
       : null;
   const lang = LANGUAGES.find((l) => l.value === params.lang)?.value || null;
-  const pace =
-    params.pace === 'fast' ||
-    params.pace === 'average' ||
-    params.pace === 'slow'
-      ? params.pace
-      : null;
   const sort = (params.sort as (typeof SORTS)[number]['value']) || 'reviewed';
 
   const likeQ = '%' + (q || '') + '%';
@@ -104,6 +97,8 @@ export default async function MastersPage({
       SELECT
         m.id, m.name, m.specialty, m.specialties, m.kind, m.area, m.phone, m.languages, m.pace,
         AVG(r.rating)::numeric(10,2) AS avg_rating,
+        AVG(r.price_rating)::numeric(10,2) AS avg_price,
+        AVG(r.speed_rating)::numeric(10,2) AS avg_speed,
         COUNT(r.id) AS review_count,
         MAX(r.created_at) AS last_review_at,
         m.created_at AS master_created_at
@@ -114,7 +109,6 @@ export default async function MastersPage({
         AND (${emirate}::text IS NULL OR m.emirate = ${emirate})
         AND (${kind}::text IS NULL OR m.kind = ${kind})
         AND (${lang}::text IS NULL OR ${lang} = ANY(m.languages))
-        AND (${pace}::text IS NULL OR m.pace = ${pace})
         AND (
           ${q}::text IS NULL
           OR m.name ILIKE ${likeQ}
@@ -140,7 +134,6 @@ export default async function MastersPage({
             AND (${emirate}::text IS NULL OR emirate = ${emirate})
             AND (${kind}::text IS NULL OR kind = ${kind})
             AND (${lang}::text IS NULL OR ${lang} = ANY(languages))
-            AND (${pace}::text IS NULL OR pace = ${pace})
             AND (
               ${q}::text IS NULL
               OR name ILIKE ${likeQ}
@@ -224,7 +217,6 @@ export default async function MastersPage({
       sort,
       kind,
       lang,
-      pace,
       ...over
     };
     Object.entries(merged).forEach(([k, v]) => {
@@ -287,23 +279,6 @@ export default async function MastersPage({
                 ))}
               </FilterSection>
 
-              <FilterSection title="Pace">
-                <CheckLink
-                  href={buildHref({ pace: null })}
-                  active={!pace}
-                  label="Any pace"
-                  radio
-                />
-                {PACES.map((p) => (
-                  <CheckLink
-                    key={p.value}
-                    href={buildHref({ pace: p.value })}
-                    active={pace === p.value}
-                    label={`${p.emoji} ${p.label}`}
-                    radio
-                  />
-                ))}
-              </FilterSection>
 
               <FilterSection title="Specialty">
                 <CheckLink
@@ -410,27 +385,31 @@ export default async function MastersPage({
                               .join(' · ')}
                             {m.area && <> · {m.area}</>}
                           </div>
-                          {(m.languages?.length || m.pace) && (
+                          {m.languages?.length > 0 && (
                             <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
-                              {m.languages?.length > 0 && (
-                                <span className="inline-flex items-center rounded-full bg-surface-2 px-2 py-0.5 text-ink-mid">
-                                  {m.languages
-                                    .map((l) => languageLabel(l))
-                                    .join(' · ')}
-                                </span>
-                              )}
-                              {m.pace && (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-surface-2 px-2 py-0.5 text-ink-mid">
-                                  {PACES.find((p) => p.value === m.pace)?.emoji}
-                                  {paceLabel(m.pace)}
-                                </span>
-                              )}
+                              <span className="inline-flex items-center rounded-full bg-surface-2 px-2 py-0.5 text-ink-mid">
+                                {m.languages
+                                  .map((l) => languageLabel(l))
+                                  .join(' · ')}
+                              </span>
                             </div>
                           )}
-                          <div className="mt-3 flex items-center gap-2">
+                          <div className="mt-3 flex items-center flex-wrap gap-x-4 gap-y-1">
                             {count > 0 ? (
                               <>
                                 <StarRating rating={avg} showNumber />
+                                {m.avg_price && parseFloat(m.avg_price) > 0 && (
+                                  <StarRating
+                                    rating={parseFloat(m.avg_price)}
+                                    glyph="dollar"
+                                  />
+                                )}
+                                {m.avg_speed && parseFloat(m.avg_speed) > 0 && (
+                                  <StarRating
+                                    rating={parseFloat(m.avg_speed)}
+                                    size="sm"
+                                  />
+                                )}
                                 <span className="text-sm text-accent">
                                   ({count}{' '}
                                   {labelCount(count, [

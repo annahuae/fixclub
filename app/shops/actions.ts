@@ -37,13 +37,21 @@ export async function addShop(formData: FormData) {
   redirect(`/shops/${rows[0].id}?created=1`);
 }
 
+function clampShopRating(raw: FormDataEntryValue | null): number {
+  const n = parseInt(String(raw || '0'));
+  if (!Number.isFinite(n) || n < 1 || n > 5) return 0;
+  return n;
+}
+
 export async function addShopReview(formData: FormData) {
   const user = await requireUser();
   const shopId = String(formData.get('shop_id') || '');
-  const rating = parseInt(String(formData.get('rating') || '0'));
+  const rating = clampShopRating(formData.get('rating'));
+  const priceRating = clampShopRating(formData.get('price_rating')) || null;
+  const speedRating = clampShopRating(formData.get('speed_rating')) || null;
   const comment = String(formData.get('comment') || '').trim() || null;
 
-  if (!shopId || rating < 1 || rating > 5) {
+  if (!shopId || !rating) {
     redirect(`/shops/${shopId}`);
   }
 
@@ -54,8 +62,8 @@ export async function addShopReview(formData: FormData) {
 
   if (existing.length === 0) {
     await sql`
-      INSERT INTO shop_reviews (shop_id, user_id, rating, comment)
-      VALUES (${shopId}, ${user.userId}, ${rating}, ${comment})
+      INSERT INTO shop_reviews (shop_id, user_id, rating, price_rating, speed_rating, comment)
+      VALUES (${shopId}, ${user.userId}, ${rating}, ${priceRating}, ${speedRating}, ${comment})
     `;
   }
 
