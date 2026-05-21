@@ -402,7 +402,7 @@ export default async function ShopsPage({
                 {t('share_help_shops')}
               </p>
               <Link
-                href="/new"
+                href="/shops/new"
                 className="mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border-2 border-accent bg-surface px-5 text-sm font-semibold text-accent transition hover:bg-accent-soft"
               >
                 <svg
