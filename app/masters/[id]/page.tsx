@@ -46,6 +46,8 @@ type Review = {
   created_at: string;
   user_id: string | null;
   user_name: string | null;
+  source: string | null;
+  imported_recommender_name: string | null;
 };
 
 export default async function MasterPage({
@@ -68,7 +70,7 @@ export default async function MasterPage({
       LIMIT 1
     `,
     sql`
-      SELECT r.id, r.rating, r.price_rating, r.speed_rating, r.comment, r.created_at, r.user_id, u.name AS user_name
+      SELECT r.id, r.rating, r.price_rating, r.speed_rating, r.comment, r.created_at, r.user_id, u.name AS user_name, r.source, r.imported_recommender_name
       FROM reviews r
       LEFT JOIN users u ON u.id = r.user_id
       WHERE r.master_id = ${id}
@@ -336,14 +338,14 @@ export default async function MasterPage({
                     <div key={r.id} className="card">
                       <div className="flex items-start gap-3">
                         <Avatar
-                          name={r.user_name || '?'}
+                          name={r.user_name || r.imported_recommender_name || '?'}
                           size="sm"
-                          seed={r.user_name || ''}
+                          seed={r.user_name || r.imported_recommender_name || ''}
                         />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-2 flex-wrap">
                             <span className="font-semibold text-ink text-sm">
-                              {r.user_name || '—'}
+                              {r.user_name || r.imported_recommender_name || '—'}
                             </span>
                             <span className="text-xs text-ink-dim">
                               {formatDate(r.created_at)}

@@ -203,6 +203,16 @@ export async function initSchema() {
   await sql`ALTER TABLE shop_reviews ADD COLUMN IF NOT EXISTS price_rating SMALLINT CHECK (price_rating BETWEEN 1 AND 5)`;
   await sql`ALTER TABLE shop_reviews ADD COLUMN IF NOT EXISTS speed_rating SMALLINT CHECK (speed_rating BETWEEN 1 AND 5)`;
 
+  // v18: imported records — provenance + recommender name for non-user reviews
+  await sql`ALTER TABLE masters ADD COLUMN IF NOT EXISTS source TEXT`;
+  await sql`ALTER TABLE shops ADD COLUMN IF NOT EXISTS source TEXT`;
+  await sql`ALTER TABLE reviews ADD COLUMN IF NOT EXISTS source TEXT`;
+  await sql`ALTER TABLE reviews ADD COLUMN IF NOT EXISTS imported_recommender_name TEXT`;
+  await sql`ALTER TABLE shop_reviews ADD COLUMN IF NOT EXISTS source TEXT`;
+  await sql`ALTER TABLE shop_reviews ADD COLUMN IF NOT EXISTS imported_recommender_name TEXT`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_masters_source ON masters(source)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_shops_source ON shops(source)`;
+
   // v17: free-form tags (sub-specialties) on masters + shops
   await sql`ALTER TABLE masters ADD COLUMN IF NOT EXISTS tags TEXT[] NOT NULL DEFAULT '{}'`;
   await sql`ALTER TABLE shops ADD COLUMN IF NOT EXISTS tags TEXT[] NOT NULL DEFAULT '{}'`;
