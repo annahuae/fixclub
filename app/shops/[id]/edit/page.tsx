@@ -18,6 +18,7 @@ type Shop = {
   phone: string | null;
   whatsapp_phone: string | null;
   maps_url: string | null;
+  website: string | null;
   description: string | null;
   tags: string[] | null;
   added_by: string | null;
@@ -170,6 +171,16 @@ export default async function EditShopPage({
               <input
                 name="address"
                 defaultValue={shop.address || ''}
+                className="input"
+              />
+            </div>
+
+            <div>
+              <label className="label">Website</label>
+              <input
+                name="website"
+                defaultValue={shop.website || ''}
+                placeholder="https://example.ae"
                 className="input"
               />
             </div>

@@ -203,6 +203,10 @@ export async function initSchema() {
   await sql`ALTER TABLE shop_reviews ADD COLUMN IF NOT EXISTS price_rating SMALLINT CHECK (price_rating BETWEEN 1 AND 5)`;
   await sql`ALTER TABLE shop_reviews ADD COLUMN IF NOT EXISTS speed_rating SMALLINT CHECK (speed_rating BETWEEN 1 AND 5)`;
 
+  // v19: website link on masters + shops
+  await sql`ALTER TABLE masters ADD COLUMN IF NOT EXISTS website TEXT`;
+  await sql`ALTER TABLE shops ADD COLUMN IF NOT EXISTS website TEXT`;
+
   // v18: imported records — provenance + recommender name for non-user reviews
   await sql`ALTER TABLE masters ADD COLUMN IF NOT EXISTS source TEXT`;
   await sql`ALTER TABLE shops ADD COLUMN IF NOT EXISTS source TEXT`;

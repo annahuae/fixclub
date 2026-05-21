@@ -30,6 +30,7 @@ export async function addMaster(formData: FormData) {
     String(formData.get('instagram') || '').trim() || null
   );
   const mapsUrl = String(formData.get('maps_url') || '').trim() || null;
+  const website = normalizeUrl(String(formData.get('website') || '').trim()) || null;
   const description =
     String(formData.get('description') || '').trim() || null;
   const tags = normalizeTags(formData.getAll('tags'));
@@ -40,13 +41,22 @@ export async function addMaster(formData: FormData) {
   const primary = specialties[0];
 
   const rows = (await sql`
-    INSERT INTO masters (name, phone, whatsapp_phone, specialty, specialties, kind, emirate, area, languages, pace, instagram, maps_url, description, tags, added_by)
-    VALUES (${name}, ${phone}, ${whatsappPhone}, ${primary}, ${specialties}, ${kind}, ${emirate}, ${area}, ${languages}, ${pace}, ${instagram}, ${mapsUrl}, ${description}, ${tags}, ${user.userId})
+    INSERT INTO masters (name, phone, whatsapp_phone, specialty, specialties, kind, emirate, area, languages, pace, instagram, website, maps_url, description, tags, added_by)
+    VALUES (${name}, ${phone}, ${whatsappPhone}, ${primary}, ${specialties}, ${kind}, ${emirate}, ${area}, ${languages}, ${pace}, ${instagram}, ${website}, ${mapsUrl}, ${description}, ${tags}, ${user.userId})
     RETURNING id
   `) as { id: string }[];
 
   revalidatePath('/masters');
   redirect(`/masters/${rows[0].id}?created=1`);
+}
+
+function normalizeUrl(input: string): string | null {
+  const s = input.trim();
+  if (!s) return null;
+  if (/^https?:\/\//i.test(s)) return s;
+  // bare domain like "example.ae" — prefix https://
+  if (/^[a-z0-9-]+\.[a-z]{2,}/i.test(s)) return 'https://' + s;
+  return s;
 }
 
 function normalizeInstagram(input: string | null): string | null {

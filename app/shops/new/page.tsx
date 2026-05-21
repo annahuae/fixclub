@@ -133,6 +133,15 @@ export default async function NewShopPage() {
           </div>
 
           <div>
+            <label className="label">Website (optional)</label>
+            <input
+              name="website"
+              placeholder="https://example.ae"
+              className="input"
+            />
+          </div>
+
+          <div>
             <label className="label">Google Maps link</label>
             <input
               name="maps_url"

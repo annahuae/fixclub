@@ -22,6 +22,7 @@ type Shop = {
   phone: string | null;
   whatsapp_phone: string | null;
   maps_url: string | null;
+  website: string | null;
   description: string | null;
   tags: string[] | null;
   added_by: string | null;
@@ -157,13 +158,23 @@ export default async function ShopPage({
                 )}
               </div>
 
-              {(shop.whatsapp_phone || shop.phone) && (
+              {(shop.whatsapp_phone || shop.phone || shop.website) && (
                 <div className="mt-3 flex flex-wrap items-center gap-2">
                   {shop.whatsapp_phone && (
                     <PhoneLink phone={shop.whatsapp_phone} kind="whatsapp" />
                   )}
                   {shop.phone && (
                     <PhoneLink phone={shop.phone} kind="call" />
+                  )}
+                  {shop.website && (
+                    <a
+                      href={shop.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-3 py-1.5 text-sm font-medium text-ink hover:border-accent hover:text-accent"
+                    >
+                      🌐 {shop.website.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')}
+                    </a>
                   )}
                 </div>
               )}

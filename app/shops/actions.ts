@@ -20,6 +20,7 @@ export async function addShop(formData: FormData) {
   const whatsappPhone =
     String(formData.get('whatsapp_phone') || '').trim() || null;
   const mapsUrl = String(formData.get('maps_url') || '').trim() || null;
+  const website = normalizeUrl(String(formData.get('website') || '').trim()) || null;
   const description =
     String(formData.get('description') || '').trim() || null;
   const tags = normalizeTags(formData.getAll('tags'));
@@ -30,13 +31,21 @@ export async function addShop(formData: FormData) {
   const primary = categories[0];
 
   const rows = (await sql`
-    INSERT INTO shops (name, category, categories, emirate, area, address, phone, whatsapp_phone, maps_url, description, tags, added_by)
-    VALUES (${name}, ${primary}, ${categories}, ${emirate}, ${area}, ${address}, ${phone}, ${whatsappPhone}, ${mapsUrl}, ${description}, ${tags}, ${user.userId})
+    INSERT INTO shops (name, category, categories, emirate, area, address, phone, whatsapp_phone, maps_url, website, description, tags, added_by)
+    VALUES (${name}, ${primary}, ${categories}, ${emirate}, ${area}, ${address}, ${phone}, ${whatsappPhone}, ${mapsUrl}, ${website}, ${description}, ${tags}, ${user.userId})
     RETURNING id
   `) as { id: string }[];
 
   revalidatePath('/shops');
   redirect(`/shops/${rows[0].id}?created=1`);
+}
+
+function normalizeUrl(input: string): string | null {
+  const s = input.trim();
+  if (!s) return null;
+  if (/^https?:\/\//i.test(s)) return s;
+  if (/^[a-z0-9-]+\.[a-z]{2,}/i.test(s)) return 'https://' + s;
+  return s;
 }
 
 function clampShopRating(raw: FormDataEntryValue | null): number {
@@ -91,6 +100,7 @@ export async function updateShop(formData: FormData) {
   const whatsappPhone =
     String(formData.get('whatsapp_phone') || '').trim() || null;
   const mapsUrl = String(formData.get('maps_url') || '').trim() || null;
+  const website = normalizeUrl(String(formData.get('website') || '').trim()) || null;
   const description =
     String(formData.get('description') || '').trim() || null;
   const tags = normalizeTags(formData.getAll('tags'));
@@ -112,6 +122,7 @@ export async function updateShop(formData: FormData) {
       phone = ${phone},
       whatsapp_phone = ${whatsappPhone},
       maps_url = ${mapsUrl},
+      website = ${website},
       description = ${description},
       tags = ${tags}
     WHERE id = ${id} AND (${admin}::boolean OR added_by = ${user.userId})

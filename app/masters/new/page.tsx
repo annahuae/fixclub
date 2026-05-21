@@ -198,6 +198,15 @@ export default async function NewMasterPage() {
               />
             </div>
             <div>
+              <label className="label">Website (optional)</label>
+              <input
+                name="website"
+                placeholder="https://example.ae"
+                className="input"
+              />
+            </div>
+
+            <div>
               <label className="label">
                 Google Maps link (optional)
               </label>

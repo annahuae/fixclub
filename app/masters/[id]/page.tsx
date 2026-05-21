@@ -29,6 +29,7 @@ type Master = {
   languages: string[];
   pace: string | null;
   instagram: string | null;
+  website: string | null;
   maps_url: string | null;
   description: string | null;
   tags: string[] | null;
@@ -195,13 +196,23 @@ export default async function MasterPage({
                 )}
               </div>
 
-              {(master.whatsapp_phone || master.phone || master.instagram) && (
+              {(master.whatsapp_phone || master.phone || master.instagram || master.website) && (
                 <div className="mt-3 flex flex-wrap items-center gap-2">
                   {master.whatsapp_phone && (
                     <PhoneLink phone={master.whatsapp_phone} kind="whatsapp" />
                   )}
                   {master.phone && (
                     <PhoneLink phone={master.phone} kind="call" />
+                  )}
+                  {master.website && (
+                    <a
+                      href={master.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-3 py-1.5 text-sm font-medium text-ink hover:border-accent hover:text-accent"
+                    >
+                      🌐 {master.website.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')}
+                    </a>
                   )}
                   {master.instagram && (
                     <a
