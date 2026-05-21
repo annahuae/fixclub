@@ -68,7 +68,7 @@ const SPECIALTY_LABELS_RU: Record<string, string> = {
   glass: 'Стекло / зеркала',
   renovation: 'Ремонт под ключ',
   interior_designer: 'Дизайнер интерьеров',
-  appliance: 'Бытовая техника',
+  appliance: 'Ремонт техники',
   furniture_assembly: 'Сборка мебели',
   furniture_repair: 'Ремонт мебели',
   cleaner: 'Клининг',

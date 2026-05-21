@@ -1,8 +1,13 @@
 import Link from 'next/link';
 import { requireUser } from '@/lib/auth';
-import { SPECIALTY_GROUPS, EMIRATES, LANGUAGES, PACES, TAG_SUGGESTIONS, ALL_TAG_SUGGESTIONS } from '@/lib/utils';
+import { SPECIALTY_GROUPS, EMIRATES, LANGUAGES, TAG_SUGGESTIONS, ALL_TAG_SUGGESTIONS } from '@/lib/utils';
 import { Nav } from '@/components/nav';
 import { TagInput } from '@/components/tag-input';
+import { CompanyOnlyField } from '@/components/company-only-field';
+import {
+  KindAwareInput,
+  KindAwareTextarea
+} from '@/components/kind-aware-input';
 import { addMaster } from '../actions';
 
 export default async function NewMasterPage() {
@@ -30,12 +35,12 @@ export default async function NewMasterPage() {
 
         <form action={addMaster} className="panel space-y-5 p-6">
           <div>
-            <label className="label">Name / company</label>
-            <input
+            <label className="label">Name</label>
+            <KindAwareInput
               name="name"
               required
-              placeholder="Ahmed / SwiftFix Plumbing"
-              className="input"
+              individual="Ahmed"
+              company="SwiftFix Plumbing"
             />
           </div>
 
@@ -178,62 +183,39 @@ export default async function NewMasterPage() {
             </div>
           </div>
 
-          <div>
-            <label className="label">
-              Pace{' '}
-              <span className="font-normal text-ink-dim">(optional)</span>
-            </label>
-            <div className="grid grid-cols-3 gap-2">
-              {PACES.map((p) => (
-                <label
-                  key={p.value}
-                  className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-border px-3 py-2 text-sm hover:border-accent has-[:checked]:border-accent has-[:checked]:bg-accent-soft"
-                >
-                  <input
-                    type="radio"
-                    name="pace"
-                    value={p.value}
-                    className="h-4 w-4 accent-accent"
-                  />
-                  <span>{p.emoji}</span>
-                  {p.label}
-                </label>
-              ))}
+          <CompanyOnlyField>
+            <div>
+              <label className="label">
+                Instagram{' '}
+                <span className="font-normal text-ink-dim">
+                  (handle or full URL)
+                </span>
+              </label>
+              <input
+                name="instagram"
+                placeholder="@fixclub_uae or https://instagram.com/fixclub_uae"
+                className="input"
+              />
             </div>
-          </div>
-
-          <div>
-            <label className="label">
-              Instagram{' '}
-              <span className="font-normal text-ink-dim">
-                (mostly for companies — handle or full URL)
-              </span>
-            </label>
-            <input
-              name="instagram"
-              placeholder="@fixclub_uae or https://instagram.com/fixclub_uae"
-              className="input"
-            />
-          </div>
-
-          <div>
-            <label className="label">
-              Google Maps link (optional)
-            </label>
-            <input
-              name="maps_url"
-              placeholder="https://maps.app.goo.gl/... or address"
-              className="input"
-            />
-          </div>
+            <div>
+              <label className="label">
+                Google Maps link (optional)
+              </label>
+              <input
+                name="maps_url"
+                placeholder="https://maps.app.goo.gl/... or address"
+                className="input"
+              />
+            </div>
+          </CompanyOnlyField>
 
           <div>
             <label className="label">Description / context</label>
-            <textarea
+            <KindAwareTextarea
               name="description"
               rows={4}
-              placeholder="What they do, what they are good at, language, pricing, details"
-              className="input resize-none"
+              individual="What they do well, pricing, working hours, anything important to know"
+              company="What they specialise in, pricing tier, response time, anything important to know"
             />
           </div>
 
