@@ -6,6 +6,7 @@ import {
   SPECIALTY_GROUPS,
   LANGUAGES,
   specialtyLabel,
+  specialtyGroupTitle,
   languageLabel,
   emirateLabel,
   formatDate
@@ -15,6 +16,7 @@ import { Avatar } from '@/components/avatar';
 import { Nav } from '@/components/nav';
 import { InstantLink } from '@/components/instant-link';
 import { CatalogTabs } from '@/components/catalog-tabs';
+import { getT, pluralKey } from '@/lib/i18n';
 
 type MasterRow = {
   id: string;
@@ -41,9 +43,9 @@ type ReviewPreview = {
 };
 
 const SORTS = [
-  { value: 'reviewed', label: 'Most reviewed' },
-  { value: 'rated', label: 'Highest rated' },
-  { value: 'newest', label: 'Newest reviews' }
+  { value: 'reviewed', tKey: 'sort_most_reviewed' },
+  { value: 'rated', tKey: 'sort_highest_rated' },
+  { value: 'newest', tKey: 'sort_newest' }
 ] as const;
 
 export default async function MastersPage({
@@ -60,6 +62,7 @@ export default async function MastersPage({
 }) {
   await requireUser();
   const params = await searchParams;
+  const { t, locale } = await getT();
   const specialty = params.specialty || null;
   const emirate = params.emirate || null;
   const q = params.q?.trim() || null;
@@ -240,22 +243,24 @@ export default async function MastersPage({
           <aside className="hidden lg:block">
             <div className="panel sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto p-5">
               <div className="mb-5 flex items-center justify-between">
-                <h2 className="font-semibold text-ink">Filters</h2>
+                <h2 className="font-semibold text-ink">
+                  {t('filters_title')}
+                </h2>
                 <Link href="/masters" className="text-sm text-accent">
-                  Clear all
+                  {t('filters_clear')}
                 </Link>
               </div>
 
-              <FilterSection title="Specialty">
+              <FilterSection title={t('filter_specialty')}>
                 <CheckLink
                   href={buildHref({ specialty: null })}
                   active={!specialty}
-                  label="All specialties"
+                  label={t('filter_all_specialties')}
                 />
                 {SPECIALTY_GROUPS.map((group) => (
                   <div key={group.title} className="mt-4 first:mt-3">
                     <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-ink-dim">
-                      {group.title}
+                      {specialtyGroupTitle(group, locale)}
                     </div>
                     <div className="space-y-2">
                       {group.items.map((s) => (
@@ -263,7 +268,7 @@ export default async function MastersPage({
                           key={s.value}
                           href={buildHref({ specialty: s.value })}
                           active={specialty === s.value}
-                          label={s.label}
+                          label={specialtyLabel(s.value, locale)}
                         />
                       ))}
                     </div>
@@ -271,32 +276,32 @@ export default async function MastersPage({
                 ))}
               </FilterSection>
 
-              <FilterSection title="Type">
+              <FilterSection title={t('filter_type')}>
                 <CheckLink
                   href={buildHref({ kind: null })}
                   active={!kind}
-                  label="Anyone"
+                  label={t('filter_type_anyone')}
                   radio
                 />
                 <CheckLink
                   href={buildHref({ kind: 'individual' })}
                   active={kind === 'individual'}
-                  label="Individuals"
+                  label={t('filter_type_individuals')}
                   radio
                 />
                 <CheckLink
                   href={buildHref({ kind: 'company' })}
                   active={kind === 'company'}
-                  label="Companies"
+                  label={t('filter_type_companies')}
                   radio
                 />
               </FilterSection>
 
-              <FilterSection title="Language">
+              <FilterSection title={t('filter_language')}>
                 <CheckLink
                   href={buildHref({ lang: null })}
                   active={!lang}
-                  label="Any language"
+                  label={t('filter_any_language')}
                   radio
                 />
                 {LANGUAGES.map((l) => (
@@ -304,7 +309,7 @@ export default async function MastersPage({
                     key={l.value}
                     href={buildHref({ lang: l.value })}
                     active={lang === l.value}
-                    label={l.label}
+                    label={languageLabel(l.value, locale)}
                     radio
                   />
                 ))}
@@ -317,17 +322,21 @@ export default async function MastersPage({
             <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <h1 className="font-semibold text-ink">
                 {rows.length}{' '}
-                {labelCount(rows.length, [
-                  'specialist found',
-                  'specialists found',
-                  'specialists found'
-                ])}{' '}
+                {t(
+                  pluralKey(locale, rows.length, {
+                    one: 'masters_specialist_one',
+                    few: 'masters_specialist_few',
+                    many: 'masters_specialist_many'
+                  })
+                )}{' '}
                 <span className="text-accent">
-                  {emirate ? `in ${emirateLabel(emirate)}` : 'in the UAE'}
+                  {emirate
+                    ? t('listing_in', { name: emirateLabel(emirate, locale) })
+                    : t('listing_in_uae')}
                 </span>
               </h1>
               <Link href="/masters/new" className="btn-outline lg:hidden">
-                Write a review
+                {t('listing_write_a_review')}
               </Link>
             </div>
 
@@ -340,17 +349,17 @@ export default async function MastersPage({
                   className="border-r border-border px-5 py-3 text-sm text-ink-mid last:border-r-0 hover:text-ink"
                   activeClassName="border-r border-accent/30 bg-accent-soft px-5 py-3 text-sm font-semibold text-accent last:border-r-0"
                 >
-                  {s.label}
+                  {t(s.tKey)}
                 </InstantLink>
               ))}
             </div>
 
             {rows.length === 0 ? (
               <div className="card py-16 text-center">
-                <h2 className="text-2xl font-semibold">Nothing found</h2>
-                <p className="mt-2 text-ink-mid">
-                  Try clearing some filters or add the first specialist.
-                </p>
+                <h2 className="text-2xl font-semibold">
+                  {t('listing_nothing_found')}
+                </h2>
+                <p className="mt-2 text-ink-mid">{t('listing_try_clearing')}</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -378,7 +387,9 @@ export default async function MastersPage({
                                   : 'inline-flex items-center rounded-full bg-surface-2 px-2 py-0.5 text-[11px] font-medium text-ink-mid'
                               }
                             >
-                              {m.kind === 'company' ? 'Company' : 'Individual'}
+                              {m.kind === 'company'
+                                ? t('kind_company')
+                                : t('kind_individual')}
                             </span>
                           </div>
                           <div className="mt-1 text-sm text-ink-mid">
@@ -386,7 +397,7 @@ export default async function MastersPage({
                               ? m.specialties
                               : [m.specialty]
                             )
-                              .map((s) => specialtyLabel(s))
+                              .map((s) => specialtyLabel(s, locale))
                               .join(' · ')}
                             {m.area && <> · {m.area}</>}
                           </div>
@@ -394,7 +405,7 @@ export default async function MastersPage({
                             <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
                               <span className="inline-flex items-center rounded-full bg-surface-2 px-2 py-0.5 text-ink-mid">
                                 {m.languages
-                                  .map((l) => languageLabel(l))
+                                  .map((l) => languageLabel(l, locale))
                                   .join(' · ')}
                               </span>
                             </div>
@@ -412,17 +423,19 @@ export default async function MastersPage({
                                 )}
                                 <span className="text-sm text-accent">
                                   ({count}{' '}
-                                  {labelCount(count, [
-                                    'review',
-                                    'reviews',
-                                    'reviews'
-                                  ])}
+                                  {t(
+                                    pluralKey(locale, count, {
+                                      one: 'review_one',
+                                      few: 'review_few',
+                                      many: 'review_many'
+                                    })
+                                  )}
                                   )
                                 </span>
                               </>
                             ) : (
                               <span className="text-sm text-ink-mid">
-                                No reviews yet
+                                {t('listing_no_reviews')}
                               </span>
                             )}
                           </div>
@@ -442,14 +455,14 @@ export default async function MastersPage({
                                   <div className="min-w-0">
                                     <div className="flex flex-wrap items-center gap-2 text-sm">
                                       <span className="font-semibold">
-                                        {review.user_name || 'Member'}
+                                        {review.user_name || t('review_member')}
                                       </span>
                                       <StarRating
                                         rating={review.rating}
                                         size="sm"
                                       />
                                       <span className="text-xs text-ink-dim">
-                                        {formatDate(review.created_at)}
+                                        {formatDate(review.created_at, locale)}
                                       </span>
                                     </div>
                                     {review.comment && (
@@ -477,9 +490,9 @@ export default async function MastersPage({
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-accent text-accent">
                 ✎
               </div>
-              <h2 className="font-semibold">Share your experience</h2>
+              <h2 className="font-semibold">{t('share_experience')}</h2>
               <p className="mt-2 text-sm leading-6 text-ink-mid">
-                Help others find trusted specialists.
+                {t('share_help_specialists')}
               </p>
               <Link
                 href="/new"
@@ -498,10 +511,10 @@ export default async function MastersPage({
                   <path d="M12 20h9" />
                   <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
                 </svg>
-                Write a review
+                {t('listing_write_a_review')}
               </Link>
               <p className="mt-3 text-xs text-ink-mid">
-                or post a quick review via{' '}
+                {t('share_quick_via')}{' '}
                 <a
                   href="https://t.me/fixclubuae_bot"
                   target="_blank"
@@ -515,7 +528,7 @@ export default async function MastersPage({
 
             {topRated.length > 0 && (
               <div className="panel p-5">
-                <h2 className="font-semibold">Top rated</h2>
+                <h2 className="font-semibold">{t('top_rated')}</h2>
                 <div className="mt-4 space-y-3">
                   {topRated.map((m) => (
                     <Link
@@ -535,7 +548,8 @@ export default async function MastersPage({
                         </div>
                         <div className="truncate text-xs text-ink-mid">
                           {specialtyLabel(
-                            m.specialties?.[0] || m.specialty
+                            m.specialties?.[0] || m.specialty,
+                            locale
                           )}
                         </div>
                       </div>
@@ -608,10 +622,3 @@ function CheckLink({
   );
 }
 
-function labelCount(n: number, forms: [string, string, string]): string {
-  const mod10 = n % 10;
-  const mod100 = n % 100;
-  if (mod10 === 1 && mod100 !== 11) return forms[0];
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return forms[1];
-  return forms[2];
-}

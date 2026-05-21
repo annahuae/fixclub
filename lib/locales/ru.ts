@@ -43,14 +43,40 @@ export const ru: typeof en = {
   profile_specialists_added: 'Добавлено мастеров',
   profile_saved: 'Сохранено.',
 
-  listing_specialists_found: '{count} мастеров найдено',
-  listing_shops_found: '{count} магазинов найдено',
   listing_in_uae: 'в ОАЭ',
+  listing_in: 'в {name}',
   listing_no_results_specialists:
     'Никого не нашли. Будь первым — добавь мастера.',
   listing_no_results_shops: 'Ничего не нашли. Добавь первым.',
   listing_write_a_review: 'Оставить отзыв',
   listing_no_reviews: 'Пока без отзывов',
+  listing_nothing_found: 'Ничего не нашли',
+  listing_try_clearing: 'Сбрось фильтры или добавь первого.',
+
+  masters_specialist_one: 'мастер найден',
+  masters_specialist_few: 'мастера найдено',
+  masters_specialist_many: 'мастеров найдено',
+
+  shops_shop_one: 'магазин найден',
+  shops_shop_few: 'магазина найдено',
+  shops_shop_many: 'магазинов найдено',
+
+  review_one: 'отзыв',
+  review_few: 'отзыва',
+  review_many: 'отзывов',
+
+  filters_title: 'Фильтры',
+  filters_clear: 'Сбросить',
+  filter_specialty: 'Специальность',
+  filter_all_specialties: 'Все специальности',
+  filter_type: 'Тип',
+  filter_type_anyone: 'Все',
+  filter_type_individuals: 'Частники',
+  filter_type_companies: 'Компании',
+  filter_language: 'Язык',
+  filter_any_language: 'Любой язык',
+  filter_category: 'Категория',
+  filter_all_categories: 'Все категории',
 
   sort_most_reviewed: 'Больше отзывов',
   sort_highest_rated: 'Выше рейтинг',
@@ -62,6 +88,16 @@ export const ru: typeof en = {
   review_rating: 'Оценка',
   review_comment: 'Комментарий',
   review_publish: 'Опубликовать',
+  review_member: 'Участник',
+
+  share_experience: 'Поделись опытом',
+  share_help_specialists: 'Помоги найти проверенных мастеров.',
+  share_help_shops: 'Помоги другим найти хорошие магазины.',
+  share_quick_via: 'или быстрый отзыв через',
+  top_rated: 'Топ по рейтингу',
+
+  kind_individual: 'Частник',
+  kind_company: 'Компания',
 
   pending_title: 'Заявка отправлена',
   pending_body:

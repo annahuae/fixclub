@@ -69,3 +69,20 @@ export function pluralRu(
 export function pluralEn(n: number, one: string, many: string): string {
   return n === 1 ? one : many;
 }
+
+/** Pick the right dictionary key for a count, by locale. */
+export function pluralKey(
+  locale: Locale,
+  n: number,
+  keys: { one: TKey; few: TKey; many: TKey }
+): TKey {
+  if (locale === 'ru') {
+    const mod10 = n % 10;
+    const mod100 = n % 100;
+    if (mod10 === 1 && mod100 !== 11) return keys.one;
+    if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20))
+      return keys.few;
+    return keys.many;
+  }
+  return n === 1 ? keys.one : keys.many;
+}

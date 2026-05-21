@@ -39,8 +39,7 @@ export const en = {
   access_invite_code: 'Invite code',
   access_no_account: 'No account?',
   access_have_account: 'Already have an account?',
-  access_password_hint:
-    'Save this — it is your password for signing in later.',
+  access_password_hint: 'Save this — it is your password for signing in later.',
 
   // Profile
   profile_title: 'Profile',
@@ -48,15 +47,45 @@ export const en = {
   profile_specialists_added: 'Specialists added',
   profile_saved: 'Saved.',
 
-  // Listing
-  listing_specialists_found: '{count} specialists found',
-  listing_shops_found: '{count} shops found',
+  // Listing common
   listing_in_uae: 'in the UAE',
+  listing_in: 'in {name}',
   listing_no_results_specialists:
     'Nothing found. Be the first — add a specialist.',
   listing_no_results_shops: 'Nothing found. Add one first.',
   listing_write_a_review: 'Write a review',
   listing_no_reviews: 'No reviews yet',
+  listing_nothing_found: 'Nothing found',
+  listing_try_clearing: 'Try clearing some filters or add the first one.',
+
+  // Specialists (masters)
+  masters_specialist_one: 'specialist found',
+  masters_specialist_few: 'specialists found',
+  masters_specialist_many: 'specialists found',
+
+  // Shops
+  shops_shop_one: 'shop found',
+  shops_shop_few: 'shops found',
+  shops_shop_many: 'shops found',
+
+  // Reviews count
+  review_one: 'review',
+  review_few: 'reviews',
+  review_many: 'reviews',
+
+  // Filters
+  filters_title: 'Filters',
+  filters_clear: 'Clear all',
+  filter_specialty: 'Specialty',
+  filter_all_specialties: 'All specialties',
+  filter_type: 'Type',
+  filter_type_anyone: 'Anyone',
+  filter_type_individuals: 'Individuals',
+  filter_type_companies: 'Companies',
+  filter_language: 'Language',
+  filter_any_language: 'Any language',
+  filter_category: 'Category',
+  filter_all_categories: 'All categories',
 
   // Sort tabs
   sort_most_reviewed: 'Most reviewed',
@@ -70,6 +99,18 @@ export const en = {
   review_rating: 'Rating',
   review_comment: 'Comment',
   review_publish: 'Publish',
+  review_member: 'Member',
+
+  // Right rail
+  share_experience: 'Share your experience',
+  share_help_specialists: 'Help others find trusted specialists.',
+  share_help_shops: 'Help others find good shops.',
+  share_quick_via: 'or post a quick review via',
+  top_rated: 'Top rated',
+
+  // Kind labels
+  kind_individual: 'Individual',
+  kind_company: 'Company',
 
   // Pending
   pending_title: 'Request sent',

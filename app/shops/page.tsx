@@ -12,6 +12,7 @@ import { Avatar } from '@/components/avatar';
 import { Nav } from '@/components/nav';
 import { CatalogTabs } from '@/components/catalog-tabs';
 import { InstantLink } from '@/components/instant-link';
+import { getT, pluralKey } from '@/lib/i18n';
 
 type ShopRow = {
   id: string;
@@ -38,9 +39,9 @@ type ReviewPreview = {
 };
 
 const SORTS = [
-  { value: 'reviewed', label: 'Most reviewed' },
-  { value: 'rated', label: 'Highest rated' },
-  { value: 'newest', label: 'Newest reviews' }
+  { value: 'reviewed', tKey: 'sort_most_reviewed' },
+  { value: 'rated', tKey: 'sort_highest_rated' },
+  { value: 'newest', tKey: 'sort_newest' }
 ] as const;
 
 export default async function ShopsPage({
@@ -56,6 +57,7 @@ export default async function ShopsPage({
 }) {
   await requireUser();
   const params = await searchParams;
+  const { t, locale } = await getT();
   const category = params.category || null;
   const emirate = params.emirate || null;
   const q = params.q?.trim() || null;
@@ -211,24 +213,24 @@ export default async function ShopsPage({
           <aside className="hidden lg:block">
             <div className="panel sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto p-5">
               <div className="mb-5 flex items-center justify-between">
-                <h2 className="font-semibold text-ink">Filters</h2>
+                <h2 className="font-semibold text-ink">{t('filters_title')}</h2>
                 <Link href="/shops" className="text-sm text-accent">
-                  Clear all
+                  {t('filters_clear')}
                 </Link>
               </div>
 
-              <FilterSection title="Category">
+              <FilterSection title={t('filter_category')}>
                 <CheckLink
                   href={buildHref({ category: null })}
                   active={!category}
-                  label="All categories"
+                  label={t('filter_all_categories')}
                 />
                 {SHOP_CATEGORIES.map((c) => (
                   <CheckLink
                     key={c.value}
                     href={buildHref({ category: c.value })}
                     active={category === c.value}
-                    label={c.label}
+                    label={shopCategoryLabel(c.value, locale)}
                   />
                 ))}
               </FilterSection>
@@ -240,13 +242,21 @@ export default async function ShopsPage({
             <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <h1 className="font-semibold text-ink">
                 {rows.length}{' '}
-                {labelCount(rows.length, ['shop', 'shops', 'shops'])}{' '}
+                {t(
+                  pluralKey(locale, rows.length, {
+                    one: 'shops_shop_one',
+                    few: 'shops_shop_few',
+                    many: 'shops_shop_many'
+                  })
+                )}{' '}
                 <span className="text-accent">
-                  {emirate ? `in ${emirateLabel(emirate)}` : 'in the UAE'}
+                  {emirate
+                    ? t('listing_in', { name: emirateLabel(emirate, locale) })
+                    : t('listing_in_uae')}
                 </span>
               </h1>
               <Link href="/shops/new" className="btn-outline lg:hidden">
-                Add shop
+                {t('nav_add')}
               </Link>
             </div>
 
@@ -259,17 +269,17 @@ export default async function ShopsPage({
                   className="border-r border-border px-5 py-3 text-sm text-ink-mid last:border-r-0 hover:text-ink"
                   activeClassName="border-r border-accent/30 bg-accent-soft px-5 py-3 text-sm font-semibold text-accent last:border-r-0"
                 >
-                  {s.label}
+                  {t(s.tKey)}
                 </InstantLink>
               ))}
             </div>
 
             {rows.length === 0 ? (
               <div className="card py-16 text-center">
-                <h2 className="text-2xl font-semibold">Nothing found</h2>
-                <p className="mt-2 text-ink-mid">
-                  Try clearing some filters or add a shop.
-                </p>
+                <h2 className="text-2xl font-semibold">
+                  {t('listing_nothing_found')}
+                </h2>
+                <p className="mt-2 text-ink-mid">{t('listing_try_clearing')}</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -296,10 +306,10 @@ export default async function ShopsPage({
                               ? shop.categories
                               : [shop.category]
                             )
-                              .map((c) => shopCategoryLabel(c))
+                              .map((c) => shopCategoryLabel(c, locale))
                               .join(' · ')}
                             {shop.emirate && (
-                              <> · {emirateLabel(shop.emirate)}</>
+                              <> · {emirateLabel(shop.emirate, locale)}</>
                             )}
                             {shop.area && <> · {shop.area}</>}
                           </div>
@@ -317,17 +327,19 @@ export default async function ShopsPage({
                                   )}
                                 <span className="text-sm text-accent">
                                   ({count}{' '}
-                                  {labelCount(count, [
-                                    'review',
-                                    'reviews',
-                                    'reviews'
-                                  ])}
+                                  {t(
+                                    pluralKey(locale, count, {
+                                      one: 'review_one',
+                                      few: 'review_few',
+                                      many: 'review_many'
+                                    })
+                                  )}
                                   )
                                 </span>
                               </>
                             ) : (
                               <span className="text-sm text-ink-mid">
-                                No reviews yet
+                                {t('listing_no_reviews')}
                               </span>
                             )}
                           </div>
@@ -347,14 +359,14 @@ export default async function ShopsPage({
                                   <div className="min-w-0">
                                     <div className="flex flex-wrap items-center gap-2 text-sm">
                                       <span className="font-semibold">
-                                        {review.user_name || 'Member'}
+                                        {review.user_name || t('review_member')}
                                       </span>
                                       <StarRating
                                         rating={review.rating}
                                         size="sm"
                                       />
                                       <span className="text-xs text-ink-dim">
-                                        {formatDate(review.created_at)}
+                                        {formatDate(review.created_at, locale)}
                                       </span>
                                     </div>
                                     {review.comment && (
@@ -382,9 +394,9 @@ export default async function ShopsPage({
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-accent text-accent">
                 ✎
               </div>
-              <h2 className="font-semibold">Share your experience</h2>
+              <h2 className="font-semibold">{t('share_experience')}</h2>
               <p className="mt-2 text-sm leading-6 text-ink-mid">
-                Help others find trusted specialists.
+                {t('share_help_shops')}
               </p>
               <Link
                 href="/new"
@@ -403,10 +415,10 @@ export default async function ShopsPage({
                   <path d="M12 20h9" />
                   <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
                 </svg>
-                Write a review
+                {t('listing_write_a_review')}
               </Link>
               <p className="mt-3 text-xs text-ink-mid">
-                or post a quick review via{' '}
+                {t('share_quick_via')}{' '}
                 <a
                   href="https://t.me/fixclubuae_bot"
                   target="_blank"
@@ -420,7 +432,7 @@ export default async function ShopsPage({
 
             {topRated.length > 0 && (
               <div className="panel p-5">
-                <h2 className="font-semibold">Top rated</h2>
+                <h2 className="font-semibold">{t('top_rated')}</h2>
                 <div className="mt-4 space-y-3">
                   {topRated.map((s) => (
                     <Link
@@ -440,7 +452,8 @@ export default async function ShopsPage({
                         </div>
                         <div className="truncate text-xs text-ink-mid">
                           {shopCategoryLabel(
-                            s.categories?.[0] || s.category
+                            s.categories?.[0] || s.category,
+                            locale
                           )}
                         </div>
                       </div>
@@ -509,10 +522,3 @@ function CheckLink({
   );
 }
 
-function labelCount(n: number, forms: [string, string, string]): string {
-  const mod10 = n % 10;
-  const mod100 = n % 100;
-  if (mod10 === 1 && mod100 !== 11) return forms[0];
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return forms[1];
-  return forms[2];
-}

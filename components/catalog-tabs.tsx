@@ -1,10 +1,16 @@
 import Link from 'next/link';
+import { getT } from '@/lib/i18n';
 
-export function CatalogTabs({ active }: { active: 'masters' | 'shops' }) {
+export async function CatalogTabs({
+  active
+}: {
+  active: 'masters' | 'shops';
+}) {
+  const { t } = await getT();
   const tabs = [
     {
-      value: 'masters',
-      label: 'Specialists',
+      value: 'masters' as const,
+      label: t('nav_specialists'),
       href: '/masters',
       icon: (
         <svg
@@ -23,8 +29,8 @@ export function CatalogTabs({ active }: { active: 'masters' | 'shops' }) {
       )
     },
     {
-      value: 'shops',
-      label: 'Shops',
+      value: 'shops' as const,
+      label: t('nav_shops'),
       href: '/shops',
       icon: (
         <svg
@@ -43,24 +49,24 @@ export function CatalogTabs({ active }: { active: 'masters' | 'shops' }) {
         </svg>
       )
     }
-  ] as const;
+  ];
 
   return (
     <div className="mb-6 flex gap-6 border-b border-border">
-      {tabs.map((t) => {
-        const isActive = active === t.value;
+      {tabs.map((tab) => {
+        const isActive = active === tab.value;
         return (
           <Link
-            key={t.value}
-            href={t.href}
+            key={tab.value}
+            href={tab.href}
             className={
               isActive
                 ? 'relative flex items-center gap-2 pb-3 text-base font-semibold text-accent after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[3px] after:rounded-t after:bg-accent'
                 : 'flex items-center gap-2 pb-3 text-base font-medium text-ink-mid hover:text-ink'
             }
           >
-            {t.icon}
-            {t.label}
+            {tab.icon}
+            {tab.label}
           </Link>
         );
       })}
