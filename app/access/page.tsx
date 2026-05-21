@@ -5,7 +5,9 @@ import { submitLogin, submitSignup, submitTelegramSignup } from './actions';
 import { PasswordField } from '@/components/password-field';
 import { TelegramLogin } from '@/components/telegram-login';
 import type { TelegramAuthData } from '@/lib/telegram';
+import { getT, tFor } from '@/lib/i18n';
 
+type T = ReturnType<typeof tFor>;
 type Mode = 'login' | 'signup' | 'telegram';
 
 
@@ -22,6 +24,7 @@ export default async function AccessPage({
   const params = await searchParams;
   const error = params.error;
   const invite = params.invite?.trim().toUpperCase() || '';
+  const { t } = await getT();
 
   let pendingTg: TelegramAuthData | null = null;
   if (params.tg === '1') {
@@ -70,11 +73,11 @@ export default async function AccessPage({
 
         <div className="bg-surface border border-border rounded-2xl p-6 shadow-sm">
           {mode === 'telegram' && pendingTg ? (
-            <TelegramSignupView tg={pendingTg} error={error} />
+            <TelegramSignupView tg={pendingTg} error={error} t={t} />
           ) : mode === 'login' ? (
-            <LoginView error={error} />
+            <LoginView error={error} t={t} />
           ) : (
-            <SignupView error={error} prefilledInvite={invite} />
+            <SignupView error={error} prefilledInvite={invite} t={t} />
           )}
         </div>
       </div>
@@ -91,17 +94,17 @@ function ErrorBox({ msg }: { msg?: string }) {
   );
 }
 
-function LoginView({ error }: { error?: string }) {
+function LoginView({ error, t }: { error?: string; t: T }) {
   return (
     <>
-      <h1 className="text-2xl font-bold mb-1">Sign in</h1>
+      <h1 className="text-2xl font-bold mb-1">{t('access_sign_in')}</h1>
       <p className="text-sm text-ink-mid mb-5">
-        Use the email and password you set during registration.
+        {t('access_password_hint')}
       </p>
       <ErrorBox msg={error} />
       <form action={submitLogin} className="space-y-4">
         <div>
-          <label className="label">Email</label>
+          <label className="label">{t('access_email')}</label>
           <input
             name="email"
             type="email"
@@ -112,7 +115,7 @@ function LoginView({ error }: { error?: string }) {
           />
         </div>
         <div>
-          <label className="label">Password</label>
+          <label className="label">{t('access_password')}</label>
           <input
             name="password"
             type="password"
@@ -122,7 +125,7 @@ function LoginView({ error }: { error?: string }) {
           />
         </div>
         <button type="submit" className="btn-primary w-full">
-          Sign in
+          {t('access_sign_in')}
         </button>
       </form>
 
@@ -131,12 +134,12 @@ function LoginView({ error }: { error?: string }) {
 
       <div className="mt-5 pt-5 border-t border-border text-center">
         <p className="text-sm text-ink-mid">
-          No account yet?{' '}
+          {t('access_no_account')}{' '}
           <Link
             href="/access?mode=signup"
             className="text-accent font-medium hover:underline"
           >
-            Register →
+            {t('access_sign_up')} →
           </Link>
         </p>
       </div>
@@ -158,10 +161,12 @@ function Divider({ label }: { label: string }) {
 
 function TelegramSignupView({
   tg,
-  error
+  error,
+  t
 }: {
   tg: TelegramAuthData;
   error?: string;
+  t: T;
 }) {
   const fullName = [tg.first_name, tg.last_name].filter(Boolean).join(' ');
   return (
@@ -172,20 +177,16 @@ function TelegramSignupView({
         <span className="font-medium text-ink">
           {fullName || tg.username || `id ${tg.id}`}
         </span>
-        . One more step and you’re in.
+        .
       </p>
       <ErrorBox msg={error} />
       <form action={submitTelegramSignup} className="space-y-4">
         <div>
-          <label className="label">Name</label>
-          <input
-            name="name"
-            defaultValue={fullName}
-            className="input"
-          />
+          <label className="label">{t('access_name')}</label>
+          <input name="name" defaultValue={fullName} className="input" />
         </div>
         <div>
-          <label className="label">Email (optional)</label>
+          <label className="label">{t('access_email')}</label>
           <input
             name="email"
             type="email"
@@ -195,13 +196,13 @@ function TelegramSignupView({
           />
         </div>
         <button type="submit" className="btn-primary w-full">
-          Finish sign-up
+          {t('action_continue')}
         </button>
       </form>
 
       <div className="mt-5 pt-5 border-t border-border text-center text-sm">
         <Link href="/access" className="text-ink-mid hover:text-accent">
-          Cancel
+          {t('action_cancel')}
         </Link>
       </div>
     </>
@@ -210,18 +211,20 @@ function TelegramSignupView({
 
 function SignupView({
   error,
-  prefilledInvite
+  prefilledInvite,
+  t
 }: {
   error?: string;
   prefilledInvite?: string;
+  t: T;
 }) {
   return (
     <>
-      <h1 className="text-2xl font-bold mb-5">Register</h1>
+      <h1 className="text-2xl font-bold mb-5">{t('access_sign_up')}</h1>
       <ErrorBox msg={error} />
       <form action={submitSignup} className="space-y-4">
         <div>
-          <label className="label">Name</label>
+          <label className="label">{t('access_name')}</label>
           <input
             name="name"
             required
@@ -230,7 +233,7 @@ function SignupView({
           />
         </div>
         <div>
-          <label className="label">Email</label>
+          <label className="label">{t('access_email')}</label>
           <input
             name="email"
             type="email"
@@ -240,12 +243,12 @@ function SignupView({
             autoComplete="email"
           />
         </div>
-        <PasswordField hint="Save it — this is your sign-in password." />
+        <PasswordField hint={t('access_password_hint')} />
         {prefilledInvite && (
           <input type="hidden" name="code" value={prefilledInvite} />
         )}
         <button type="submit" className="btn-primary w-full">
-          Register
+          {t('access_sign_up')}
         </button>
       </form>
 
@@ -254,9 +257,9 @@ function SignupView({
 
       <div className="mt-5 pt-5 border-t border-border text-center text-sm">
         <p className="text-ink-mid">
-          Already have an account?{' '}
+          {t('access_have_account')}{' '}
           <Link href="/access" className="text-accent hover:underline">
-            Sign in
+            {t('access_sign_in')}
           </Link>
         </p>
       </div>

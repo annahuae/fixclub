@@ -3,7 +3,15 @@
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { EMIRATES } from '@/lib/utils';
 
-export function EmirateSelect({ value }: { value?: string }) {
+export function EmirateSelect({
+  value,
+  allLabel = 'All emirates',
+  labels
+}: {
+  value?: string;
+  allLabel?: string;
+  labels?: Record<string, string>;
+}) {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
@@ -21,10 +29,10 @@ export function EmirateSelect({ value }: { value?: string }) {
         }}
         className="input h-11 pr-8 text-sm appearance-none cursor-pointer min-w-[170px]"
       >
-        <option value="">All emirates</option>
+        <option value="">{allLabel}</option>
         {EMIRATES.map((e) => (
           <option key={e.value} value={e.value}>
-            {e.label}
+            {labels?.[e.value] ?? e.label}
           </option>
         ))}
       </select>

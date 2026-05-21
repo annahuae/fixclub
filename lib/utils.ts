@@ -1,6 +1,9 @@
+import type { Locale } from './i18n';
+
 export const SPECIALTY_GROUPS = [
   {
     title: 'Apartment repair',
+    title_ru: 'Ремонт квартиры',
     items: [
       { value: 'plumber', label: 'Plumber' },
       { value: 'electrician', label: 'Electrician' },
@@ -17,6 +20,7 @@ export const SPECIALTY_GROUPS = [
   },
   {
     title: 'Home and household',
+    title_ru: 'Дом и быт',
     items: [
       { value: 'appliance', label: 'Appliance repair' },
       { value: 'furniture_assembly', label: 'Furniture assembly' },
@@ -28,6 +32,7 @@ export const SPECIALTY_GROUPS = [
   },
   {
     title: 'Moving and storage',
+    title_ru: 'Перевозки и хранение',
     items: [
       { value: 'mover', label: 'Movers' },
       { value: 'storage', label: 'Storage' }
@@ -35,6 +40,7 @@ export const SPECIALTY_GROUPS = [
   },
   {
     title: 'Other',
+    title_ru: 'Прочее',
     items: [{ value: 'other', label: 'Other' }]
   }
 ] as const;
@@ -43,6 +49,29 @@ type Specialty = { value: string; label: string };
 export const SPECIALTIES: Specialty[] = SPECIALTY_GROUPS.flatMap(
   (g) => g.items as readonly Specialty[]
 );
+
+const SPECIALTY_LABELS_RU: Record<string, string> = {
+  plumber: 'Сантехник',
+  electrician: 'Электрик',
+  ac: 'Кондиционеры',
+  handyman: 'Хэндимен',
+  painter: 'Малярка',
+  carpenter: 'Плотник',
+  tiler: 'Плиточник',
+  locksmith: 'Замки / двери',
+  windows: 'Окна / стекло',
+  renovation: 'Капремонт',
+  interior_designer: 'Дизайнер интерьеров',
+  appliance: 'Бытовая техника',
+  furniture_assembly: 'Сборка мебели',
+  furniture_repair: 'Ремонт мебели',
+  cleaner: 'Клининг',
+  gardener: 'Сад / растения',
+  pest: 'Дезинсекция',
+  mover: 'Муверы',
+  storage: 'Стораджи',
+  other: 'Другое'
+};
 
 export const LANGUAGES = [
   { value: 'en', label: 'English' },
@@ -53,65 +82,123 @@ export const LANGUAGES = [
   { value: 'tl', label: 'Tagalog' }
 ] as const;
 
-export function languageLabel(value: string): string {
+const LANGUAGE_LABELS_RU: Record<string, string> = {
+  en: 'Английский',
+  ar: 'Арабский',
+  ru: 'Русский',
+  hi: 'Хинди',
+  ur: 'Урду',
+  tl: 'Тагальский'
+};
+
+export function languageLabel(value: string, locale: Locale = 'en'): string {
+  if (locale === 'ru') {
+    return (
+      LANGUAGE_LABELS_RU[value] ||
+      LANGUAGES.find((l) => l.value === value)?.label ||
+      value
+    );
+  }
   return LANGUAGES.find((l) => l.value === value)?.label ?? value;
 }
 
 export const PACES = [
-  { value: 'fast', label: 'Fast', emoji: '🏎️' },
-  { value: 'average', label: 'Average', emoji: '🚗' },
-  { value: 'slow', label: 'Slow', emoji: '🐢' }
+  { value: 'fast', label: 'Fast', label_ru: 'Быстро', emoji: '🏎️' },
+  { value: 'average', label: 'Average', label_ru: 'Средне', emoji: '🚗' },
+  { value: 'slow', label: 'Slow', label_ru: 'Медленно', emoji: '🐢' }
 ] as const;
 
-export function priceTierLabel(avg: number): string {
+export function priceTierLabel(avg: number, locale: Locale = 'en'): string {
   const n = Math.round(avg);
+  if (locale === 'ru') {
+    if (n <= 1) return 'Бюджетно';
+    if (n === 2) return 'Средне';
+    return 'Премиум';
+  }
   if (n <= 1) return 'Budget';
   if (n === 2) return 'Moderate';
   return 'Premium';
 }
 
-export function paceLabel(value: string | null | undefined): string {
+export function paceLabel(
+  value: string | null | undefined,
+  locale: Locale = 'en'
+): string {
   if (!value) return '';
-  return PACES.find((p) => p.value === value)?.label ?? value;
+  const item = PACES.find((p) => p.value === value);
+  if (!item) return value;
+  return locale === 'ru' ? item.label_ru : item.label;
 }
 
 export const EMIRATES = [
-  { value: 'dubai', label: 'Dubai' },
-  { value: 'sharjah', label: 'Sharjah' },
-  { value: 'abu_dhabi', label: 'Abu Dhabi' },
-  { value: 'ajman', label: 'Ajman' },
-  { value: 'rak', label: 'Ras Al Khaimah' },
-  { value: 'fujairah', label: 'Fujairah' },
-  { value: 'uaq', label: 'Umm Al Quwain' }
+  { value: 'dubai', label: 'Dubai', label_ru: 'Дубай' },
+  { value: 'sharjah', label: 'Sharjah', label_ru: 'Шарджа' },
+  { value: 'abu_dhabi', label: 'Abu Dhabi', label_ru: 'Абу-Даби' },
+  { value: 'ajman', label: 'Ajman', label_ru: 'Аджман' },
+  { value: 'rak', label: 'Ras Al Khaimah', label_ru: 'Рас-эль-Хайма' },
+  { value: 'fujairah', label: 'Fujairah', label_ru: 'Фуджейра' },
+  { value: 'uaq', label: 'Umm Al Quwain', label_ru: 'Умм-эль-Кайвайн' }
 ] as const;
 
 export const SHOP_CATEGORIES = [
-  { value: 'hardware', label: 'Hardware' },
-  { value: 'tiles', label: 'Tiles / finishes' },
-  { value: 'plumbing_parts', label: 'Plumbing parts' },
-  { value: 'sanitary', label: 'Sanitary ware' },
-  { value: 'electrical_parts', label: 'Electrical parts' },
-  { value: 'tools', label: 'Tools' },
-  { value: 'paint', label: 'Paint' },
-  { value: 'lumber', label: 'Lumber / wood' },
-  { value: 'glass', label: 'Glass / mirrors' },
-  { value: 'garden', label: 'Garden / outdoor' },
-  { value: 'furniture', label: 'Furniture' },
-  { value: 'appliance_store', label: 'Appliances' },
-  { value: 'other', label: 'Other' }
+  { value: 'hardware', label: 'Hardware', label_ru: 'Хозтовары' },
+  { value: 'tiles', label: 'Tiles / finishes', label_ru: 'Плитка / отделка' },
+  {
+    value: 'plumbing_parts',
+    label: 'Plumbing parts',
+    label_ru: 'Сантехника'
+  },
+  { value: 'sanitary', label: 'Sanitary ware', label_ru: 'Сантехфаянс' },
+  {
+    value: 'electrical_parts',
+    label: 'Electrical parts',
+    label_ru: 'Электрика'
+  },
+  { value: 'tools', label: 'Tools', label_ru: 'Инструменты' },
+  { value: 'paint', label: 'Paint', label_ru: 'Краски' },
+  { value: 'lumber', label: 'Lumber / wood', label_ru: 'Пиломатериалы' },
+  { value: 'glass', label: 'Glass / mirrors', label_ru: 'Стекло / зеркала' },
+  { value: 'garden', label: 'Garden / outdoor', label_ru: 'Сад / уличное' },
+  { value: 'furniture', label: 'Furniture', label_ru: 'Мебель' },
+  {
+    value: 'appliance_store',
+    label: 'Appliances',
+    label_ru: 'Бытовая техника'
+  },
+  { value: 'other', label: 'Other', label_ru: 'Прочее' }
 ] as const;
 
-export function specialtyLabel(value: string): string {
+export function specialtyLabel(value: string, locale: Locale = 'en'): string {
+  if (locale === 'ru' && SPECIALTY_LABELS_RU[value]) {
+    return SPECIALTY_LABELS_RU[value];
+  }
   return SPECIALTIES.find((s) => s.value === value)?.label ?? value;
 }
 
-export function emirateLabel(value: string | null): string {
+export function emirateLabel(
+  value: string | null,
+  locale: Locale = 'en'
+): string {
   if (!value) return '';
-  return EMIRATES.find((e) => e.value === value)?.label ?? value;
+  const item = EMIRATES.find((e) => e.value === value);
+  if (!item) return value;
+  return locale === 'ru' ? item.label_ru : item.label;
 }
 
-export function shopCategoryLabel(value: string): string {
-  return SHOP_CATEGORIES.find((c) => c.value === value)?.label ?? value;
+export function shopCategoryLabel(
+  value: string,
+  locale: Locale = 'en'
+): string {
+  const item = SHOP_CATEGORIES.find((c) => c.value === value);
+  if (!item) return value;
+  return locale === 'ru' ? item.label_ru : item.label;
+}
+
+export function specialtyGroupTitle(
+  group: { title: string; title_ru: string },
+  locale: Locale = 'en'
+): string {
+  return locale === 'ru' ? group.title_ru : group.title;
 }
 
 export function generateInviteCode(): string {
@@ -126,9 +213,12 @@ export function generateInviteCode(): string {
   return `${part(4)}-${part(4)}-${part(4)}`;
 }
 
-export function formatDate(date: string | Date): string {
+export function formatDate(
+  date: string | Date,
+  locale: Locale = 'en'
+): string {
   const d = typeof date === 'string' ? new Date(date) : date;
-  return d.toLocaleDateString('en-US', {
+  return d.toLocaleDateString(locale === 'ru' ? 'ru-RU' : 'en-US', {
     day: 'numeric',
     month: 'short',
     year: 'numeric'

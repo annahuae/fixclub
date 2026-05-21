@@ -9,6 +9,9 @@ import {
 import { redirect } from 'next/navigation';
 import { EmirateSelect } from './emirate-select';
 import { UserMenu } from './user-menu';
+import { LanguageSwitcher } from './language-switcher';
+import { getT } from '@/lib/i18n';
+import { EMIRATES, emirateLabel } from '@/lib/utils';
 
 async function signOut() {
   'use server';
@@ -27,7 +30,11 @@ export async function Nav({
   showSearch?: boolean;
   searchAction?: string;
 }) {
-  const [user, admin] = await Promise.all([getSessionUser(), isAdmin()]);
+  const [user, admin, { t, locale }] = await Promise.all([
+    getSessionUser(),
+    isAdmin(),
+    getT()
+  ]);
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-white/95 backdrop-blur-xl">
       <div className="shell h-20 flex items-center gap-2 sm:gap-5">
@@ -53,7 +60,7 @@ export async function Nav({
                   type="search"
                   name="q"
                   defaultValue={query || ''}
-                  placeholder="Search for a specialist or company..."
+                  placeholder={t('search_placeholder')}
                   className="input h-11"
                 />
                 {emirate && (
@@ -62,16 +69,23 @@ export async function Nav({
               </div>
             </form>
             <div className="hidden md:block">
-              <EmirateSelect value={emirate} />
+              <EmirateSelect
+                value={emirate}
+                allLabel={t('all_emirates')}
+                labels={Object.fromEntries(
+                  EMIRATES.map((e) => [e.value, emirateLabel(e.value, locale)])
+                )}
+              />
             </div>
           </div>
         )}
 
-        <div className="ml-auto flex items-center gap-3">
+        <div className="ml-auto flex items-center gap-2 sm:gap-3">
+          <LanguageSwitcher value={locale} />
           {user ? (
             <UserMenu name={user.name} signOutAction={signOut} />
           ) : admin ? (
-            <UserMenu name="Admin" isAdmin signOutAction={signOut} />
+            <UserMenu name={t('nav_admin')} isAdmin signOutAction={signOut} />
           ) : null}
         </div>
       </div>
