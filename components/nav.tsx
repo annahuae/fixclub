@@ -30,7 +30,7 @@ export async function Nav({
   const [user, admin] = await Promise.all([getSessionUser(), isAdmin()]);
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-white/95 backdrop-blur-xl">
-      <div className="shell h-20 flex items-center gap-5">
+      <div className="shell h-20 flex items-center gap-2 sm:gap-5">
         <Link href="/masters" className="flex items-center gap-3 shrink-0">
           <Image
             src="/logo.png"
