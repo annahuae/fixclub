@@ -12,7 +12,8 @@ export const SPECIALTY_GROUPS = [
       { value: 'painter', label: 'Painting' },
       { value: 'carpenter', label: 'Carpenter' },
       { value: 'tiler', label: 'Marble & tile works' },
-      { value: 'locksmith', label: 'Locks / doors' },
+      { value: 'locksmith', label: 'Locks / access cards' },
+      { value: 'doors', label: 'Doors' },
       { value: 'windows', label: 'Windows / glass' },
       { value: 'renovation', label: 'Full renovation' },
       { value: 'interior_designer', label: 'Interior designer' }
@@ -35,7 +36,8 @@ export const SPECIALTY_GROUPS = [
     title_ru: 'Перевозки и хранение',
     items: [
       { value: 'mover', label: 'Movers' },
-      { value: 'storage', label: 'Storage' }
+      { value: 'storage', label: 'Storage' },
+      { value: 'tool_rental', label: 'Tool rental' }
     ]
   },
   {
@@ -54,13 +56,14 @@ const SPECIALTY_LABELS_RU: Record<string, string> = {
   plumber: 'Сантехник',
   electrician: 'Электрик',
   ac: 'Кондиционеры',
-  handyman: 'Хэндимен',
+  handyman: 'Разнорабочий',
   painter: 'Малярка',
   carpenter: 'Плотник',
-  tiler: 'Плиточник',
-  locksmith: 'Замки / двери',
+  tiler: 'Плиточник / камень / мрамор',
+  locksmith: 'Замки / карты доступа',
+  doors: 'Двери',
   windows: 'Окна / стекло',
-  renovation: 'Капремонт',
+  renovation: 'Ремонт под ключ',
   interior_designer: 'Дизайнер интерьеров',
   appliance: 'Бытовая техника',
   furniture_assembly: 'Сборка мебели',
@@ -69,7 +72,8 @@ const SPECIALTY_LABELS_RU: Record<string, string> = {
   gardener: 'Сад / растения',
   pest: 'Дезинсекция',
   mover: 'Муверы',
-  storage: 'Стораджи',
+  storage: 'Хранение',
+  tool_rental: 'Аренда оборудования',
   other: 'Другое'
 };
 
