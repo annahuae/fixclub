@@ -25,6 +25,7 @@ type ShopRow = {
   emirate: string | null;
   area: string | null;
   phone: string | null;
+  tags: string[] | null;
   avg_rating: string | null;
   review_count: string;
   last_review_at: string | null;
@@ -89,7 +90,7 @@ export default async function ShopsPage({
   const [unsortedRaw, previewsRaw] = await Promise.all([
     sql`
       SELECT
-        s.id, s.name, s.category, s.categories, s.emirate, s.area, s.phone,
+        s.id, s.name, s.category, s.categories, s.emirate, s.area, s.phone, s.tags,
         AVG(r.rating)::numeric(10,2) AS avg_rating,
         AVG(r.price_rating)::numeric(10,2) AS avg_price,
         AVG(r.speed_rating)::numeric(10,2) AS avg_speed,
@@ -317,6 +318,18 @@ export default async function ShopsPage({
                             )}
                             {shop.area && <> · {shop.area}</>}
                           </div>
+                          {shop.tags && shop.tags.length > 0 && (
+                            <div className="mt-2 flex flex-wrap gap-1.5">
+                              {shop.tags.slice(0, 6).map((tag) => (
+                                <span
+                                  key={tag}
+                                  className="inline-flex items-center rounded-full bg-accent-soft px-2 py-0.5 text-xs text-accent-strong"
+                                >
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          )}
                           <div className="mt-3 flex items-center flex-wrap gap-x-4 gap-y-1">
                             {count > 0 ? (
                               <>

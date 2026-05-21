@@ -29,6 +29,7 @@ type MasterRow = {
   phone: string | null;
   languages: string[];
   pace: string | null;
+  tags: string[] | null;
   avg_rating: string | null;
   avg_price: string | null;
   avg_speed: string | null;
@@ -110,7 +111,7 @@ export default async function MastersPage({
   const [rowsUnsortedRaw, previewsRaw] = await Promise.all([
     sql`
       SELECT
-        m.id, m.name, m.specialty, m.specialties, m.kind, m.area, m.phone, m.languages, m.pace,
+        m.id, m.name, m.specialty, m.specialties, m.kind, m.area, m.phone, m.languages, m.pace, m.tags,
         AVG(r.rating)::numeric(10,2) AS avg_rating,
         AVG(r.price_rating)::numeric(10,2) AS avg_price,
         AVG(r.speed_rating)::numeric(10,2) AS avg_speed,
@@ -405,6 +406,18 @@ export default async function MastersPage({
                               .join(' · ')}
                             {m.area && <> · {m.area}</>}
                           </div>
+                          {m.tags && m.tags.length > 0 && (
+                            <div className="mt-2 flex flex-wrap gap-1.5">
+                              {m.tags.slice(0, 6).map((tag) => (
+                                <span
+                                  key={tag}
+                                  className="inline-flex items-center rounded-full bg-accent-soft px-2 py-0.5 text-xs text-accent-strong"
+                                >
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          )}
                           {m.languages?.length > 0 && (
                             <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
                               <span className="inline-flex items-center rounded-full bg-surface-2 px-2 py-0.5 text-ink-mid">
