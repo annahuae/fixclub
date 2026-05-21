@@ -92,6 +92,16 @@ export default async function MastersPage({
       )
     : [];
 
+  // If the whole query is just a specialty name ("ac", "электрик"), filter
+  // strictly by specialty — skip the fuzzy ILIKE on name/area/description so
+  // "ac" doesn't also pull in "Marcus" or any description containing "ac".
+  const qLower = q?.toLowerCase() || '';
+  const queryIsPureSpecialty =
+    !!q &&
+    SPECIALTIES.some(
+      (s) => s.label.toLowerCase() === qLower || s.value.toLowerCase() === qLower
+    );
+
   const [rowsUnsortedRaw, previewsRaw] = await Promise.all([
     sql`
       SELECT
@@ -111,11 +121,15 @@ export default async function MastersPage({
         AND (${lang}::text IS NULL OR ${lang} = ANY(m.languages))
         AND (
           ${q}::text IS NULL
-          OR m.name ILIKE ${likeQ}
-          OR m.area ILIKE ${likeQ}
-          OR m.description ILIKE ${likeQ}
-          OR (cardinality(${matchedSpecialties}::text[]) > 0
+          OR (${queryIsPureSpecialty}::boolean
               AND m.specialties && ${matchedSpecialties}::text[])
+          OR (NOT ${queryIsPureSpecialty}::boolean AND (
+            m.name ILIKE ${likeQ}
+            OR m.area ILIKE ${likeQ}
+            OR m.description ILIKE ${likeQ}
+            OR (cardinality(${matchedSpecialties}::text[]) > 0
+                AND m.specialties && ${matchedSpecialties}::text[])
+          ))
         )
       GROUP BY m.id
     `,
@@ -136,11 +150,15 @@ export default async function MastersPage({
             AND (${lang}::text IS NULL OR ${lang} = ANY(languages))
             AND (
               ${q}::text IS NULL
-              OR name ILIKE ${likeQ}
-              OR area ILIKE ${likeQ}
-              OR description ILIKE ${likeQ}
-              OR (cardinality(${matchedSpecialties}::text[]) > 0
+              OR (${queryIsPureSpecialty}::boolean
                   AND specialties && ${matchedSpecialties}::text[])
+              OR (NOT ${queryIsPureSpecialty}::boolean AND (
+                name ILIKE ${likeQ}
+                OR area ILIKE ${likeQ}
+                OR description ILIKE ${likeQ}
+                OR (cardinality(${matchedSpecialties}::text[]) > 0
+                    AND specialties && ${matchedSpecialties}::text[])
+              ))
             )
         )
       ) t
