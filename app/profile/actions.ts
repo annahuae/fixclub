@@ -9,7 +9,7 @@ export async function updateName(formData: FormData) {
   const user = await requireUser();
   const name = String(formData.get('name') || '').trim();
   if (!name) redirect('/profile?error=Name+cannot+be+empty');
-  if (name.length > 80) redirect('/profile?error=Name+is+too+long');
+  if (name.length > 15) redirect('/profile?error=Name+is+too+long');
 
   await sql`UPDATE users SET name = ${name} WHERE id = ${user.userId}`;
 

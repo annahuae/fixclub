@@ -27,7 +27,7 @@ export function EditableName({ name }: { name: string }) {
         name="name"
         defaultValue={name}
         required
-        maxLength={80}
+        maxLength={15}
         autoFocus
         className="input h-9 max-w-[16rem] text-sm"
       />
