@@ -41,6 +41,7 @@ type ReviewPreview = {
   comment: string | null;
   created_at: string;
   user_name: string | null;
+  imported_recommender_name: string | null;
 };
 
 const SORTS = [
@@ -139,10 +140,10 @@ export default async function MastersPage({
       GROUP BY m.id
     `,
     sql`
-      SELECT master_id, rating, comment, created_at, user_name
+      SELECT master_id, rating, comment, created_at, user_name, imported_recommender_name
       FROM (
         SELECT
-          r.master_id, r.rating, r.comment, r.created_at, u.name AS user_name,
+          r.master_id, r.rating, r.comment, r.created_at, u.name AS user_name, r.imported_recommender_name,
           ROW_NUMBER() OVER (PARTITION BY r.master_id ORDER BY r.created_at DESC) AS rn
         FROM reviews r
         LEFT JOIN users u ON u.id = r.user_id
@@ -451,14 +452,14 @@ export default async function MastersPage({
                                   className="flex gap-3"
                                 >
                                   <Avatar
-                                    name={review.user_name || '?'}
-                                    seed={review.user_name || review.created_at}
+                                    name={review.user_name || review.imported_recommender_name || '?'}
+                                    seed={review.user_name || review.imported_recommender_name || review.created_at}
                                     size="sm"
                                   />
                                   <div className="min-w-0">
                                     <div className="flex flex-wrap items-center gap-2 text-sm">
                                       <span className="font-semibold">
-                                        {review.user_name || t('review_member')}
+                                        {review.user_name || review.imported_recommender_name || t('review_member')}
                                       </span>
                                       <StarRating
                                         rating={review.rating}
