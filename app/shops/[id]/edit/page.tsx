@@ -4,6 +4,7 @@ import { requireUser, isAdmin } from '@/lib/auth';
 import { sql } from '@/lib/db';
 import { SHOP_CATEGORIES, EMIRATES } from '@/lib/utils';
 import { Nav } from '@/components/nav';
+import { TagInput } from '@/components/tag-input';
 import { updateShop } from '../../actions';
 
 type Shop = {
@@ -18,6 +19,7 @@ type Shop = {
   whatsapp_phone: string | null;
   maps_url: string | null;
   description: string | null;
+  tags: string[] | null;
   added_by: string | null;
 };
 
@@ -98,6 +100,21 @@ export default async function EditShopPage({
                   })}
                 </div>
               </div>
+            </div>
+
+            <div>
+              <label className="label">
+                Tags{' '}
+                <span className="font-normal text-ink-dim">
+                  (what they specialise in, brands, services)
+                </span>
+              </label>
+              <TagInput
+                name="tags"
+                watchInputName="categories"
+                defaultValue={shop.tags || []}
+                placeholder="Type and press Enter — e.g. Delivery, Wholesale"
+              />
             </div>
 
             <div>

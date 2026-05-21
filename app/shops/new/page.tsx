@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { requireUser } from '@/lib/auth';
 import { SHOP_CATEGORIES, EMIRATES } from '@/lib/utils';
 import { Nav } from '@/components/nav';
+import { TagInput } from '@/components/tag-input';
 import { addShop } from '../actions';
 
 export default async function NewShopPage() {
@@ -60,6 +61,20 @@ export default async function NewShopPage() {
                 ))}
               </div>
             </div>
+          </div>
+
+          <div>
+            <label className="label">
+              Tags{' '}
+              <span className="font-normal text-ink-dim">
+                (what they specialise in, brands, services)
+              </span>
+            </label>
+            <TagInput
+              name="tags"
+              watchInputName="categories"
+              placeholder="Type and press Enter — e.g. Delivery, Wholesale"
+            />
           </div>
 
           <div>

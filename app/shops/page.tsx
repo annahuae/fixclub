@@ -106,6 +106,7 @@ export default async function ShopsPage({
           OR s.area ILIKE ${likeQ}
           OR s.address ILIKE ${likeQ}
           OR s.description ILIKE ${likeQ}
+          OR array_to_string(s.tags, ' ') ILIKE ${likeQ}
           OR (cardinality(${matchedCategories}::text[]) > 0
               AND s.categories && ${matchedCategories}::text[])
         )
@@ -131,6 +132,7 @@ export default async function ShopsPage({
               OR area ILIKE ${likeQ}
               OR address ILIKE ${likeQ}
               OR description ILIKE ${likeQ}
+              OR array_to_string(tags, ' ') ILIKE ${likeQ}
               OR (cardinality(${matchedCategories}::text[]) > 0
                   AND categories && ${matchedCategories}::text[])
             )

@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { sql } from '@/lib/db';
 import { requireUser, isAdmin } from '@/lib/auth';
+import { normalizeTags } from '@/lib/utils';
 
 export async function addShop(formData: FormData) {
   const user = await requireUser();
@@ -21,6 +22,7 @@ export async function addShop(formData: FormData) {
   const mapsUrl = String(formData.get('maps_url') || '').trim() || null;
   const description =
     String(formData.get('description') || '').trim() || null;
+  const tags = normalizeTags(formData.getAll('tags'));
 
   if (!name || categories.length === 0) {
     redirect('/shops/new');
@@ -28,8 +30,8 @@ export async function addShop(formData: FormData) {
   const primary = categories[0];
 
   const rows = (await sql`
-    INSERT INTO shops (name, category, categories, emirate, area, address, phone, whatsapp_phone, maps_url, description, added_by)
-    VALUES (${name}, ${primary}, ${categories}, ${emirate}, ${area}, ${address}, ${phone}, ${whatsappPhone}, ${mapsUrl}, ${description}, ${user.userId})
+    INSERT INTO shops (name, category, categories, emirate, area, address, phone, whatsapp_phone, maps_url, description, tags, added_by)
+    VALUES (${name}, ${primary}, ${categories}, ${emirate}, ${area}, ${address}, ${phone}, ${whatsappPhone}, ${mapsUrl}, ${description}, ${tags}, ${user.userId})
     RETURNING id
   `) as { id: string }[];
 
@@ -91,6 +93,7 @@ export async function updateShop(formData: FormData) {
   const mapsUrl = String(formData.get('maps_url') || '').trim() || null;
   const description =
     String(formData.get('description') || '').trim() || null;
+  const tags = normalizeTags(formData.getAll('tags'));
 
   if (!name || categories.length === 0) {
     redirect(`/shops/${id}/edit`);
@@ -109,7 +112,8 @@ export async function updateShop(formData: FormData) {
       phone = ${phone},
       whatsapp_phone = ${whatsappPhone},
       maps_url = ${mapsUrl},
-      description = ${description}
+      description = ${description},
+      tags = ${tags}
     WHERE id = ${id} AND (${admin}::boolean OR added_by = ${user.userId})
     RETURNING id
   `) as { id: string }[];

@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { sql } from '@/lib/db';
 import { requireUser } from '@/lib/auth';
+import { normalizeTags } from '@/lib/utils';
 
 export async function addMaster(formData: FormData) {
   const user = await requireUser();
@@ -31,6 +32,7 @@ export async function addMaster(formData: FormData) {
   const mapsUrl = String(formData.get('maps_url') || '').trim() || null;
   const description =
     String(formData.get('description') || '').trim() || null;
+  const tags = normalizeTags(formData.getAll('tags'));
 
   if (!name || specialties.length === 0) {
     redirect('/masters/new');
@@ -38,8 +40,8 @@ export async function addMaster(formData: FormData) {
   const primary = specialties[0];
 
   const rows = (await sql`
-    INSERT INTO masters (name, phone, whatsapp_phone, specialty, specialties, kind, emirate, area, languages, pace, instagram, maps_url, description, added_by)
-    VALUES (${name}, ${phone}, ${whatsappPhone}, ${primary}, ${specialties}, ${kind}, ${emirate}, ${area}, ${languages}, ${pace}, ${instagram}, ${mapsUrl}, ${description}, ${user.userId})
+    INSERT INTO masters (name, phone, whatsapp_phone, specialty, specialties, kind, emirate, area, languages, pace, instagram, maps_url, description, tags, added_by)
+    VALUES (${name}, ${phone}, ${whatsappPhone}, ${primary}, ${specialties}, ${kind}, ${emirate}, ${area}, ${languages}, ${pace}, ${instagram}, ${mapsUrl}, ${description}, ${tags}, ${user.userId})
     RETURNING id
   `) as { id: string }[];
 

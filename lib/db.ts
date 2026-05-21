@@ -203,6 +203,12 @@ export async function initSchema() {
   await sql`ALTER TABLE shop_reviews ADD COLUMN IF NOT EXISTS price_rating SMALLINT CHECK (price_rating BETWEEN 1 AND 5)`;
   await sql`ALTER TABLE shop_reviews ADD COLUMN IF NOT EXISTS speed_rating SMALLINT CHECK (speed_rating BETWEEN 1 AND 5)`;
 
+  // v17: free-form tags (sub-specialties) on masters + shops
+  await sql`ALTER TABLE masters ADD COLUMN IF NOT EXISTS tags TEXT[] NOT NULL DEFAULT '{}'`;
+  await sql`ALTER TABLE shops ADD COLUMN IF NOT EXISTS tags TEXT[] NOT NULL DEFAULT '{}'`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_masters_tags ON masters USING GIN (tags)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_shops_tags ON shops USING GIN (tags)`;
+
   // v13: Telegram bot conversation state
   await sql`
     CREATE TABLE IF NOT EXISTS telegram_chat_state (

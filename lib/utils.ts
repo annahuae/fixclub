@@ -14,9 +14,11 @@ export const SPECIALTY_GROUPS = [
       { value: 'tiler', label: 'Marble & tile works' },
       { value: 'locksmith', label: 'Locks / access cards' },
       { value: 'doors', label: 'Doors' },
-      { value: 'windows', label: 'Windows / glass' },
+      { value: 'windows', label: 'Windows' },
+      { value: 'glass', label: 'Glass / mirrors' },
       { value: 'renovation', label: 'Full renovation' },
-      { value: 'interior_designer', label: 'Interior designer' }
+      { value: 'interior_designer', label: 'Interior designer' },
+      { value: 'smart_home', label: 'Smart home' }
     ]
   },
   {
@@ -62,7 +64,8 @@ const SPECIALTY_LABELS_RU: Record<string, string> = {
   tiler: 'Плиточник / камень / мрамор',
   locksmith: 'Замки / карты доступа',
   doors: 'Двери',
-  windows: 'Окна / стекло',
+  windows: 'Окна',
+  glass: 'Стекло / зеркала',
   renovation: 'Ремонт под ключ',
   interior_designer: 'Дизайнер интерьеров',
   appliance: 'Бытовая техника',
@@ -74,8 +77,65 @@ const SPECIALTY_LABELS_RU: Record<string, string> = {
   mover: 'Муверы',
   storage: 'Хранение',
   tool_rental: 'Аренда оборудования',
+  smart_home: 'Умный дом',
   other: 'Другое'
 };
+
+// Suggested tags (sub-specialties) shown as autocomplete in the tag input.
+// Users can add any tags they want — these are just hints.
+export const TAG_SUGGESTIONS: Record<string, string[]> = {
+  ac: ['Repair', 'Installation', 'Duct cleaning', 'Smart thermostats', 'Maintenance'],
+  cleaner: [
+    'Apartment / villa cleaning',
+    'Deep clean (sofa / mattress / carpet)',
+    'Curtain cleaning',
+    'Move-in / move-out',
+    'Post-construction'
+  ],
+  smart_home: [
+    'Lighting automation',
+    'Motorised curtains',
+    'Door access systems',
+    'CCTV',
+    'Intercom'
+  ],
+  carpenter: ['Kitchens', 'Wardrobes', 'Joinery', 'Furniture repair', 'Doors'],
+  painter: ['Interior', 'Exterior', 'Lady design']
+};
+
+// Flat list of all suggestion strings — used when no category is selected yet
+// or when a category has no specific suggestions.
+export const ALL_TAG_SUGGESTIONS: string[] = Array.from(
+  new Set(Object.values(TAG_SUGGESTIONS).flat())
+);
+
+export function suggestedTagsFor(categories: string[]): string[] {
+  const set = new Set<string>();
+  for (const c of categories) {
+    for (const t of TAG_SUGGESTIONS[c] || []) set.add(t);
+  }
+  return Array.from(set);
+}
+
+export function normalizeTags(raw: unknown): string[] {
+  const arr = Array.isArray(raw)
+    ? raw.map(String)
+    : String(raw || '')
+        .split(/[\n,]+/)
+        .map((s) => s.trim());
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const r of arr) {
+    const t = r.trim();
+    if (!t) continue;
+    const key = t.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    if (t.length <= 60) out.push(t);
+    if (out.length >= 20) break;
+  }
+  return out;
+}
 
 export const LANGUAGES = [
   { value: 'en', label: 'English' },

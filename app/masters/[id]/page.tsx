@@ -31,6 +31,7 @@ type Master = {
   instagram: string | null;
   maps_url: string | null;
   description: string | null;
+  tags: string[] | null;
   added_by: string | null;
   added_by_name: string | null;
   created_at: string;
@@ -224,6 +225,19 @@ export default async function MasterPage({
                       @{master.instagram}
                     </a>
                   )}
+                </div>
+              )}
+
+              {master.tags && master.tags.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {master.tags.map((t) => (
+                    <span
+                      key={t}
+                      className="inline-flex items-center rounded-full bg-accent-soft px-2.5 py-0.5 text-xs text-accent-strong"
+                    >
+                      {t}
+                    </span>
+                  ))}
                 </div>
               )}
 

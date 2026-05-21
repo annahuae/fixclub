@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { requireUser } from '@/lib/auth';
-import { SPECIALTY_GROUPS, EMIRATES, LANGUAGES, PACES } from '@/lib/utils';
+import { SPECIALTY_GROUPS, EMIRATES, LANGUAGES, PACES, TAG_SUGGESTIONS, ALL_TAG_SUGGESTIONS } from '@/lib/utils';
 import { Nav } from '@/components/nav';
+import { TagInput } from '@/components/tag-input';
 import { addMaster } from '../actions';
 
 export default async function NewMasterPage() {
@@ -95,6 +96,21 @@ export default async function NewMasterPage() {
                 </div>
               ))}
             </div>
+          </div>
+
+          <div>
+            <label className="label">
+              Tags{' '}
+              <span className="font-normal text-ink-dim">
+                (sub-specialties — what exactly they do)
+              </span>
+            </label>
+            <TagInput
+              name="tags"
+              watchInputName="specialties"
+              suggestionsByCategory={TAG_SUGGESTIONS}
+              fallbackSuggestions={ALL_TAG_SUGGESTIONS}
+            />
           </div>
 
           <div>

@@ -131,6 +131,7 @@ export default async function MastersPage({
             m.name ILIKE ${likeQ}
             OR m.area ILIKE ${likeQ}
             OR m.description ILIKE ${likeQ}
+            OR array_to_string(m.tags, ' ') ILIKE ${likeQ}
             OR (cardinality(${matchedSpecialties}::text[]) > 0
                 AND m.specialties && ${matchedSpecialties}::text[])
           ))
@@ -160,6 +161,7 @@ export default async function MastersPage({
                 name ILIKE ${likeQ}
                 OR area ILIKE ${likeQ}
                 OR description ILIKE ${likeQ}
+                OR array_to_string(tags, ' ') ILIKE ${likeQ}
                 OR (cardinality(${matchedSpecialties}::text[]) > 0
                     AND specialties && ${matchedSpecialties}::text[])
               ))
