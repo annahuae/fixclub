@@ -16,7 +16,8 @@ import { Avatar } from '@/components/avatar';
 import { Nav } from '@/components/nav';
 import { InstantLink } from '@/components/instant-link';
 import { CatalogTabs } from '@/components/catalog-tabs';
-import { getT, pluralKey } from '@/lib/i18n';
+import { pluralKey } from '@/lib/i18n';
+import { getT } from '@/lib/i18n-server';
 
 type MasterRow = {
   id: string;

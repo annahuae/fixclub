@@ -5,7 +5,8 @@ import { submitLogin, submitSignup, submitTelegramSignup } from './actions';
 import { PasswordField } from '@/components/password-field';
 import { TelegramLogin } from '@/components/telegram-login';
 import type { TelegramAuthData } from '@/lib/telegram';
-import { getT, tFor } from '@/lib/i18n';
+import { tFor } from '@/lib/i18n';
+import { getT } from '@/lib/i18n-server';
 
 type T = ReturnType<typeof tFor>;
 type Mode = 'login' | 'signup' | 'telegram';

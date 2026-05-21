@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { getT } from '@/lib/i18n';
+import { getT } from '@/lib/i18n-server';
 
 export async function CatalogTabs({
   active

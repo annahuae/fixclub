@@ -1,6 +1,6 @@
 import type { en } from './en';
 
-export const ru: typeof en = {
+export const ru: Record<keyof typeof en, string> = {
   app_name: 'Fixclub',
   app_tagline: 'ОАЭ',
 

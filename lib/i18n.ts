@@ -1,39 +1,15 @@
-import { cookies, headers } from 'next/headers';
+import { en } from './locales/en';
+import { ru } from './locales/ru';
 
 export const LOCALES = ['en', 'ru'] as const;
 export type Locale = (typeof LOCALES)[number];
 export const DEFAULT_LOCALE: Locale = 'en';
 export const LOCALE_COOKIE = 'fixclub_locale';
 
-function isLocale(v: unknown): v is Locale {
-  return typeof v === 'string' && (LOCALES as readonly string[]).includes(v);
-}
-
-/** Read locale from cookie (explicit choice) → Accept-Language → default. */
-export async function getLocale(): Promise<Locale> {
-  const cookieStore = await cookies();
-  const fromCookie = cookieStore.get(LOCALE_COOKIE)?.value;
-  if (isLocale(fromCookie)) return fromCookie;
-
-  const hdrs = await headers();
-  const accept = hdrs.get('accept-language') || '';
-  // Match the first language tag we support, in order of preference
-  const langs = accept
-    .split(',')
-    .map((s) => s.trim().split(';')[0].toLowerCase());
-  for (const tag of langs) {
-    const base = tag.split('-')[0];
-    if (isLocale(base)) return base;
-  }
-  return DEFAULT_LOCALE;
-}
-
-import { en } from './locales/en';
-import { ru } from './locales/ru';
-
-const DICTS: Record<Locale, typeof en> = { en, ru };
-
 export type TKey = keyof typeof en;
+
+type Dict = Record<TKey, string>;
+const DICTS: Record<Locale, Dict> = { en: en as Dict, ru };
 
 /** Translate a key. Falls back to English then to the key itself. */
 export function tFor(locale: Locale) {
@@ -45,11 +21,6 @@ export function tFor(locale: Locale) {
       vars[name] != null ? String(vars[name]) : `{${name}}`
     );
   };
-}
-
-export async function getT() {
-  const locale = await getLocale();
-  return { t: tFor(locale), locale };
 }
 
 /** Russian plural rules: 1 / 2-4 / 5+ */

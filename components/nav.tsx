@@ -10,7 +10,7 @@ import { redirect } from 'next/navigation';
 import { EmirateSelect } from './emirate-select';
 import { UserMenu } from './user-menu';
 import { LanguageSwitcher } from './language-switcher';
-import { getT } from '@/lib/i18n';
+import { getT } from '@/lib/i18n-server';
 import { EMIRATES, emirateLabel } from '@/lib/utils';
 
 async function signOut() {

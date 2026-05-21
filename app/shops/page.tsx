@@ -12,7 +12,8 @@ import { Avatar } from '@/components/avatar';
 import { Nav } from '@/components/nav';
 import { CatalogTabs } from '@/components/catalog-tabs';
 import { InstantLink } from '@/components/instant-link';
-import { getT, pluralKey } from '@/lib/i18n';
+import { pluralKey } from '@/lib/i18n';
+import { getT } from '@/lib/i18n-server';
 
 type ShopRow = {
   id: string;

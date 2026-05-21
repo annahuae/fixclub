@@ -2,7 +2,7 @@ import { requireUser } from '@/lib/auth';
 import { Nav } from '@/components/nav';
 import { sql } from '@/lib/db';
 import { EditableName } from './edit-name';
-import { getT } from '@/lib/i18n';
+import { getT } from '@/lib/i18n-server';
 
 type Stats = { reviews: string; masters: string };
 
